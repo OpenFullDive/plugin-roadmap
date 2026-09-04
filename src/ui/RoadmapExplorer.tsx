@@ -22,6 +22,7 @@ import {
   Flag,
   FolderKanban,
   GitFork,
+  Info,
   Layers3,
   List,
   MessageCircle,
@@ -129,6 +130,161 @@ const MASTER_TIERS = [
   },
 ];
 
+type DisciplineBrief = {
+  question: string;
+  summary: string;
+  prerequisites: string[];
+  keyChallenges: string[];
+  benchmarks: string[];
+};
+
+const DISCIPLINE_BRIEFS: Record<string, DisciplineBrief> = {
+  neuroscience: {
+    question: "What is Neuroscience Fundamentals in Full-Dive?",
+    summary:
+      "Neuroscience Fundamentals establishes how sensory modalities (vision, audition, somatosensation, vestibular balance, olfaction, and proprioception) transduce biological stimulus into cortical spike trains. In full-dive VR, understanding primary cortical maps (V1, A1, S1) and population coding is essential to generate authentic synthetic perception without triggering seizures or sensory conflict.",
+    prerequisites: ["Cellular & Molecular Biology", "Introductory Electrophysiology", "Probability & Statistics"],
+    keyChallenges: [
+      "Retinotopic & Tonotopic cortical preservation",
+      "Dynamic population spike rate decoding",
+      "Avoiding cortical desensitization & kindling",
+    ],
+    benchmarks: ["Hodgkin-Huxley axonal action potential simulation", "Primary sensory cortex receptive field mapping"],
+  },
+  bci: {
+    question: "What are Brain–Computer Interfaces for Full-Dive?",
+    summary:
+      "Brain-Computer Interfaces (BCIs) establish direct bidirectional communication between the central nervous system and digital compute environments. For full-dive systems, BCIs must decode intentional motor commands and internal cognitive states with sub-10ms roundtrip latency while maintaining biological signal fidelity and long-term tissue biocompatibility.",
+    prerequisites: ["Digital Signal Processing (DSP)", "Linear Algebra & Machine Learning", "Neuroanatomy"],
+    keyChallenges: [
+      "High-density channel acquisition & motion artifact rejection",
+      "Sub-10ms end-to-end intent decoding",
+      "Chronic electrode stability & foreign body response",
+    ],
+    benchmarks: ["Closed-loop 6-DoF cursor/limb decoder", "Real-time non-invasive artifact filtering pipeline"],
+  },
+  haptics: {
+    question: "What are Haptic Feedback Systems in Full-Dive?",
+    summary:
+      "Haptics in full-dive systems bridges the gap between purely visual immersion and visceral physical embodiment. This discipline explores tactile actuation (cutaneous vibration, thermal cues, electrotactile stimulation) alongside kinesthetic force resistance (exoskeletons, cable-driven braking, variable stiffness actuators) to replicate mass, texture, compliance, and inertia.",
+    prerequisites: ["Mechanical Engineering & Mechatronics", "Closed-Loop Control Theory", "Embedded Firmware (C/C++)"],
+    keyChallenges: [
+      "High-frequency cutaneous texture rendering (100–300 Hz)",
+      "High-force safe emergency decoupling (safe exit mechanics)",
+      "Low-profile wearable actuator energy density",
+    ],
+    benchmarks: ["Multi-actuator surface texture simulator", "Fail-safe force-feedback joint with compliance control"],
+  },
+  "neural-modulation": {
+    question: "What is Neural Modulation in Full-Dive?",
+    summary:
+      "Neural Modulation investigates techniques for selectively delivering artificial stimulus into targeted brain regions to write synthetic sensory experiences or safely suppress peripheral motor output (sleep paralysis / motor gating). Safety, dose limits, charge density thresholds, and fail-safe shutdown protocols are paramount.",
+    prerequisites: ["Neurophysiology", "Biomedical Ethics & Safety Standards", "Electromagnetic Field Simulation"],
+    keyChallenges: [
+      "Precise spatial targeting of deep subcortical structures",
+      "Reversible motor gating during immersive virtual locomotion",
+      "Strict Shannon-McCormick electrical safety charge limits",
+    ],
+    benchmarks: ["Temporal interference focal depth simulation", "Fail-safe stimulus abort controller"],
+  },
+  "hardware-architecture": {
+    question: "What is Neural Compute & Hardware Architecture?",
+    summary:
+      "Full-dive systems require dedicated low-latency hardware architectures capable of ingesting gigabytes of raw neural sensor streams per second, executing real-time ML decoding inference at sub-millisecond latencies, and outputting deterministic stimulation pulses within strict thermal envelopes.",
+    prerequisites: ["Computer Architecture & FPGA/ASIC Design", "Embedded Systems", "High-Speed Bus Protocols (PCIe/CXL)"],
+    keyChallenges: [
+      "Sub-milliwatt per-channel neural front-end amplifiers",
+      "Deterministic hard real-time latency (<1ms jitter)",
+      "Thermal dissipation constraints adjacent to biological tissue (<1°C rise)",
+    ],
+    benchmarks: ["FPGA-based 256-channel real-time neural filter", "Low-power spike detection accelerator"],
+  },
+  "virtual-environments": {
+    question: "What is Spatial Simulation & Virtual Environments?",
+    summary:
+      "Virtual Environments in full-dive require hard real-time simulation engines that render physics, lighting, spatial acoustics, and relativistic kinematics synchronized to the user's perceptual clock. Any visual or acoustic lag relative to vestibular and proprioceptive cues results in severe motion sickness.",
+    prerequisites: ["Real-Time Computer Graphics (Vulkan/DirectX)", "Rigid & Soft-Body Physics Engines", "Spatial Audio DSP"],
+    keyChallenges: [
+      "Foveated path tracing tied to predictive eye/neural gaze",
+      "Deterministic 120Hz+ synchronized state tick",
+      "Physically accurate HRTF binaural acoustic propagation",
+    ],
+    benchmarks: ["Custom spatial simulation engine benchmark", "Sub-5ms motion-to-photon latency loop"],
+  },
+  "software-frameworks": {
+    question: "What are Real-Time Neural Software Frameworks?",
+    summary:
+      "Software Frameworks provide the operating system primitives, memory management, zero-copy IPC, and hard real-time pipelines needed to connect neural acquisition drivers, physics engines, safety watchdogs, and user-space applications without scheduling delays.",
+    prerequisites: ["Systems Programming (Rust/C++)", "Operating Systems & RTOS Concepts", "Network Protocols (gRPC/WebRTC)"],
+    keyChallenges: [
+      "Zero-copy neural ring buffer streaming",
+      "Hard real-time priority inheritance & thread scheduling",
+      "Cross-platform hardware abstraction layers (HAL)",
+    ],
+    benchmarks: ["Zero-copy high-throughput neural stream multiplexer", "Deterministic RTOS task scheduler benchmark"],
+  },
+  "sensory-substitution": {
+    question: "What is Sensory Substitution & Cross-Modal Interfaces?",
+    summary:
+      "Sensory Substitution leverages the remarkable neuroplasticity of the human brain to encode sensory channels (such as vision or balance) through alternative intact modalities (such as electrotactile tongue displays or audio soundscapes). This enables intermediate non-invasive full-dive immersion and clinical rehabilitation.",
+    prerequisites: ["Cognitive Science & Neuroplasticity", "Psychoacoustics", "Sensory Interface Design"],
+    keyChallenges: [
+      "Bandwidth constraints of secondary sensory pathways",
+      "Cognitive load and perceptual training curves",
+      "Cross-modal synesthetic coherence",
+    ],
+    benchmarks: ["Audio-to-spatial-depth sensory transducer", "Electrotactile spatial orientation matrix"],
+  },
+  "system-integration": {
+    question: "What is Full-Dive System Integration?",
+    summary:
+      "System Integration unifies neural decoding, haptic actuation, spatial simulation, audio-visual rendering, and safety systems into a unified, synchronized cyber-physical stack. It defines the universal latency budget, calibration protocols, and inter-system synchronization.",
+    prerequisites: ["Systems Engineering", "End-to-End Latency Profiling", "Cyber-Physical Test Architecture"],
+    keyChallenges: [
+      "Global latency budget management (<20ms motion-to-sensation)",
+      "Continuous runtime drift calibration",
+      "Fault isolation between subsystems",
+    ],
+    benchmarks: ["End-to-end multi-subsystem latency test bench", "Automated pre-flight sensor calibration routine"],
+  },
+  "ethical-engineering": {
+    question: "What is Safety, Ethics & Neural Integrity?",
+    summary:
+      "Safety and Ethical Engineering establishes the cryptographic protections, neuro-privacy boundaries, fail-safe disconnect protocols, and mental autonomy guarantees necessary before humans engage in bidirectional neural immersion. It ensures systems can never trap or involuntarily influence a participant.",
+    prerequisites: ["Cybersecurity & Cryptography", "Bioethics & Neuroethics", "Safety-Critical Systems Standards (ISO 26262/IEC 62304)"],
+    keyChallenges: [
+      "Cryptographically enforced neural privacy (preventing thought eavesdropping)",
+      "Hardware-enforced emergency logout watchdogs (unconditional abort)",
+      "Cognitive consent and subliminal influence prevention",
+    ],
+    benchmarks: ["Hardware-isolated emergency abort circuit", "Differential privacy engine for neural telemetry"],
+  },
+  "advanced-neural-mapping": {
+    question: "What is High-Density Connectomics & Neural Mapping?",
+    summary:
+      "Advanced Neural Mapping explores the synaptic-level architectural wiring of the central nervous system. Using high-throughput serial section electron microscopy, optical tissue clearing, and automated connectome segmentation, this track investigates the resolution needed for high-fidelity sensory write-in.",
+    prerequisites: ["Neuroanatomy & Histology", "Computer Vision & 3D Segmentation", "Petabyte-Scale Data Processing"],
+    keyChallenges: [
+      "Volumetric EM petabyte-scale image alignment",
+      "Automated synaptic cleft identification",
+      "Statistical modeling of functional connectivity",
+    ],
+    benchmarks: ["Synaptic connectome graph query engine", "Automated neural voxel reconstruction pipeline"],
+  },
+  "future-frontiers": {
+    question: "What are Frontier Paradigms in Full-Dive Research?",
+    summary:
+      "Future Frontiers examines the theoretical horizons of neural immersion: molecular-scale neural dust, quantum biological sensors for ultra-sensitive magnetocardiography, non-invasive focused optical optogenetics, and synthetic neural lace implants for lifelong biocompatible integration.",
+    prerequisites: ["Quantum Mechanics & Nano-engineering", "Synthetic Biology", "Advanced Physics"],
+    keyChallenges: [
+      "Biocompatible nanoscale energy harvesting",
+      "Deep-tissue non-invasive optical penetration",
+      "Long-term chronic foreign-body evasion",
+    ],
+    benchmarks: ["Theoretical bandwidth scaling analysis", "Nanoscale transducer thermal dissipation model"],
+  },
+};
+
 export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: RoadmapExplorerProps) {
   const isMaster = slug === masterRoadmap.id;
   const field = roadmapFieldById(slug);
@@ -141,6 +297,8 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
   const [difficulty, setDifficulty] = useState<DifficultyFilter>("Beginner");
   const [selected, setSelected] = useState<SelectedTopic | null>(null);
   const [drawerTab, setDrawerTab] = useState<DrawerTab>("knowledge");
+  const [faqOpen, setFaqOpen] = useState<boolean>(false);
+  const brief = field ? DISCIPLINE_BRIEFS[field.id] : undefined;
 
   // Flowchart Canvas Pan & Zoom States
   const [zoom, setZoom] = useState<number>(1.0);
@@ -423,6 +581,17 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
     <div className="min-w-0">
       {/* Top Header & Overview Bar */}
       <header className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
+        {/* Back navigation on individual discipline tracks */}
+        {!isMaster && (
+          <Link
+            href="/roadmap"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--accent)] hover:text-[var(--accent-bright)] transition-colors mb-2.5 group cursor-pointer"
+          >
+            <ArrowLeft size={13} className="transition-transform group-hover:-translate-x-0.5" />
+            <span>All Roadmaps</span>
+          </Link>
+        )}
+
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[var(--dim)] uppercase">
@@ -431,7 +600,12 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
               <span>·</span>
               <span className="text-[var(--accent-bright)]">{isMaster ? "Complete Curriculum" : field?.category}</span>
             </div>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight text-[var(--text)] m-0">{title}</h1>
+            <h1 className="mt-1 text-3xl font-extrabold tracking-tight text-[var(--text)] m-0">{title}</h1>
+            <p className="mt-1 text-xs text-[var(--dim)] m-0">
+              {isMaster
+                ? "Comprehensive 4-tier curriculum for Full-Dive VR systems engineering"
+                : `Step-by-step engineering curriculum for ${field?.title ?? "Full-Dive Systems"}`}
+            </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -450,35 +624,37 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
               </button>
             )}
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <button
-                className="inline-flex size-[34px] items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface-2)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)] transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-amber-400 px-3.5 py-1.5 text-xs font-bold text-black hover:bg-amber-300 transition-colors cursor-pointer shadow-sm border-0"
                 onClick={exportProgress}
-                aria-label="Export Progress JSON"
-                title="Export Progress JSON"
+                aria-label="Download Progress JSON"
+                title="Download Progress JSON"
               >
-                {exported ? <Check size={15} /> : <Download size={15} />}
+                {exported ? <Check size={14} /> : <Download size={14} />}
+                <span>{exported ? "Saved!" : "Download"}</span>
+              </button>
+
+              <button
+                className="inline-flex items-center gap-1.5 rounded-lg bg-amber-400 px-3.5 py-1.5 text-xs font-bold text-black hover:bg-amber-300 transition-colors cursor-pointer shadow-sm border-0"
+                onClick={share}
+                aria-label="Share roadmap"
+                title="Share roadmap link"
+              >
+                {copied ? <Check size={14} /> : <Share2 size={14} />}
+                <span>{copied ? "Copied!" : "Share"}</span>
               </button>
 
               <button
                 className={clsx(
                   "inline-flex size-[34px] items-center justify-center rounded-lg border bg-[var(--surface-2)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)] transition-colors cursor-pointer",
-                  saved ? "border-[var(--accent-bright)] text-[var(--accent-bright)] bg-[rgba(63,140,255,0.1)]" : "border-[var(--border)]",
+                  saved ? "border-amber-400 text-amber-400 bg-[rgba(251,191,36,0.1)]" : "border-[var(--border)]",
                 )}
                 onClick={toggleFavorite}
                 aria-label={saved ? "Saved" : "Save roadmap"}
                 title={saved ? "Saved" : "Save roadmap"}
               >
                 {saved ? <Check size={15} /> : <Bookmark size={15} />}
-              </button>
-
-              <button
-                className="inline-flex size-[34px] items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface-2)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)] transition-colors cursor-pointer"
-                onClick={share}
-                aria-label="Share roadmap"
-                title="Share roadmap link"
-              >
-                {copied ? <Check size={15} /> : <Share2 size={15} />}
               </button>
             </div>
           </div>
@@ -541,6 +717,70 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
             <GitFork size={15} /> How to Contribute
           </button>
         </nav>
+
+        {/* Collapsible Discipline FAQ Accordion */}
+        {!isMaster && field && (
+          <div className="mt-4 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] overflow-hidden transition-all">
+            <button
+              type="button"
+              className="flex w-full items-center justify-between px-4 py-2.5 text-left text-xs font-bold text-[var(--text)] hover:bg-[var(--surface-3)] transition-colors cursor-pointer border-0 bg-transparent"
+              onClick={() => setFaqOpen(!faqOpen)}
+              aria-expanded={faqOpen}
+            >
+              <span className="flex items-center gap-2">
+                <span className="grid size-5 place-items-center rounded-full bg-[rgba(63,140,255,0.15)] text-[var(--accent-bright)] text-[11px] font-bold">
+                  i
+                </span>
+                <span className="font-semibold text-[var(--text)]">
+                  {brief?.question ?? `What is ${field.title}?`}
+                </span>
+              </span>
+              <ChevronDown
+                size={14}
+                className={clsx("text-[var(--dim)] transition-transform duration-200", faqOpen && "rotate-180")}
+              />
+            </button>
+            {faqOpen && (
+              <div className="border-t border-[var(--border)] bg-[var(--surface)] p-4 text-xs text-[var(--muted)] space-y-3">
+                <p className="leading-relaxed m-0 text-[var(--text)]">
+                  {brief?.summary ?? field.description}
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
+                  <div className="rounded border border-[var(--border)] bg-[var(--surface-2)] p-2.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--dim)] block mb-1">
+                      Prerequisites
+                    </span>
+                    <ul className="m-0 pl-3.5 space-y-0.5 text-[11px]">
+                      {(brief?.prerequisites ?? field.prerequisites).map((p) => (
+                        <li key={p}>{p}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="rounded border border-[var(--border)] bg-[var(--surface-2)] p-2.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--dim)] block mb-1">
+                      Key Challenges
+                    </span>
+                    <ul className="m-0 pl-3.5 space-y-0.5 text-[11px]">
+                      {(brief?.keyChallenges ?? [field.sections[0]?.summary, field.sections[1]?.summary].filter(Boolean)).map((c) => (
+                        <li key={c}>{c}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="rounded border border-[var(--border)] bg-[var(--surface-2)] p-2.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--dim)] block mb-1">
+                      Core Benchmarks
+                    </span>
+                    <ul className="m-0 pl-3.5 space-y-0.5 text-[11px]">
+                      {(brief?.benchmarks ?? [field.sections[0]?.project, field.sections[1]?.project].filter(Boolean)).map((b) => (
+                        <li key={b}>{b}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </header>
 
       {/* Workspace Grid: Flowchart Canvas + Track Rail */}
@@ -911,6 +1151,31 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
                   onMouseLeave={handleMouseUp}
                   onWheel={handleWheel}
                 >
+                  {/* Floating Canvas Legend */}
+                  {!isMaster && (
+                    <div className="flowchart-canvas-legend">
+                      <div className="flowchart-canvas-legend-title">Legend</div>
+                      <div className="flowchart-canvas-legend-items">
+                        <div className="legend-item">
+                          <span className="legend-badge is-core">
+                            <Check size={9} strokeWidth={3} />
+                          </span>
+                          <span>Personal Recommendation</span>
+                        </div>
+                        <div className="legend-item">
+                          <span className="legend-badge is-recommended">
+                            <Check size={9} strokeWidth={3} />
+                          </span>
+                          <span>Alternative Option</span>
+                        </div>
+                        <div className="legend-item">
+                          <span className="legend-line is-flexible" />
+                          <span>Order not strict</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Transformed Flowchart Layer */}
                   <div
                     className="roadmap-canvas-transform"
@@ -1078,7 +1343,19 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
                                         }}
                                       >
                                         <div className="flowchart-main-node-top">
-                                          <span className="flowchart-main-node-title">{topic}</span>
+                                          <div className="flex items-center gap-2 flex-1 min-w-0 pr-1">
+                                            {details.badge === "Core Milestone" && (
+                                              <span className="flowchart-corner-badge is-core" title="Personal Recommendation / Core Milestone">
+                                                <Check size={9} strokeWidth={3} />
+                                              </span>
+                                            )}
+                                            {details.badge === "Recommended" && (
+                                              <span className="flowchart-corner-badge is-recommended" title="Alternative Option / Recommended">
+                                                <Check size={9} strokeWidth={3} />
+                                              </span>
+                                            )}
+                                            <span className="flowchart-main-node-title leading-snug">{topic}</span>
+                                          </div>
                                           {details.badge && (
                                             <span
                                               className={clsx(
@@ -1434,6 +1711,30 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
             <div className="flex-1 overflow-y-auto p-5 space-y-6">
               {drawerTab === "knowledge" && (
                 <>
+                  {/* Recommended Milestone Benchmark Highlight Card */}
+                  <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 shadow-sm">
+                    <div className="flex items-center justify-between text-xs font-bold text-amber-300 mb-1.5">
+                      <span className="flex items-center gap-1.5">
+                        <Sparkles size={13} className="text-amber-400" />
+                        <span>Recommended · Core Milestone</span>
+                      </span>
+                      <span className="text-[11px] text-amber-400/90 font-mono">Est. 8–12 hrs study</span>
+                    </div>
+                    <p className="text-xs text-[var(--muted)] m-0 mb-3 leading-relaxed">
+                      {activeTopicDetail.overview.slice(0, 150)}...
+                    </p>
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1.5 rounded-md bg-amber-400 px-3 py-1.5 text-xs font-bold text-black hover:bg-amber-300 transition-colors cursor-pointer shadow-sm border-0"
+                      onClick={() => {
+                        setStatus(selected, "learning");
+                      }}
+                    >
+                      <span>Start Learning</span>
+                      <ArrowRight size={13} />
+                    </button>
+                  </div>
+
                   {/* Detailed Technical Overview */}
                   <section>
                     <div className="flex items-center justify-between mb-2">

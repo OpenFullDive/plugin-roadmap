@@ -119,6 +119,75 @@
   margin: 0 4px;
 }
 
+/* Floating Canvas Legend Box */
+.flowchart-canvas-legend {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border, #2a3236);
+  background: rgba(21, 26, 29, 0.92);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  pointer-events: auto;
+  user-select: none;
+}
+
+.flowchart-canvas-legend-title {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--dim, #8999a6);
+}
+
+.flowchart-canvas-legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted, #c2c9cc);
+}
+
+.legend-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-badge.is-core {
+  background: #874efe;
+  color: #ffffff;
+}
+
+.legend-badge.is-recommended {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.legend-line.is-flexible {
+  width: 15px;
+  height: 0;
+  border-top: 2px dashed #3f8cff;
+  flex-shrink: 0;
+}
+
 /* --------------------------------------------------------------------------
    3. Flowchart SVG Connectors
    -------------------------------------------------------------------------- */
@@ -265,11 +334,11 @@
   display: flex !important;
   flex-direction: column !important;
   justify-content: space-between !important;
-  width: 320px !important;
+  width: 340px !important;
   min-height: 84px !important;
   padding: 14px 18px !important;
-  border-radius: 8px !important;
-  border: 1.5px solid var(--border, #2a3236) !important;
+  border-radius: 10px !important;
+  border: 2px solid var(--border, #2a3236) !important;
   background: var(--surface, #151a1d) !important;
   color: var(--text, #eef1f3) !important;
   cursor: pointer;
@@ -369,6 +438,28 @@
   background: rgba(234, 179, 8, 0.1);
 }
 
+/* Circular Recommendation Corner Badges */
+.flowchart-corner-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.flowchart-corner-badge.is-core {
+  background: #874efe;
+  color: #ffffff;
+}
+
+.flowchart-corner-badge.is-recommended {
+  background: #10b981;
+  color: #ffffff;
+}
+
 .flowchart-main-node-footer {
   display: flex;
   align-items: center;
@@ -458,15 +549,15 @@
   top: 50%;
   transform: translateY(-50%);
   width: 36px;
-  height: 1.5px;
-  background: var(--border-strong, #3f4a50);
+  height: 0;
+  border-top: 2.5px dotted #3f8cff;
   pointer-events: none;
-  transition: background 0.15s ease;
+  transition: border-color 0.15s ease;
 }
 
 .flowchart-branch-left .flowchart-subtopic-pill:hover::after,
 .flowchart-branch-left .flowchart-subtopic-pill.is-active::after {
-  background: var(--accent, #3f8cff);
+  border-color: #68a5ff;
 }
 
 .flowchart-branch-right .flowchart-subtopic-pill::before {
@@ -476,15 +567,15 @@
   top: 50%;
   transform: translateY(-50%);
   width: 36px;
-  height: 1.5px;
-  background: var(--border-strong, #3f4a50);
+  height: 0;
+  border-top: 2.5px dotted #3f8cff;
   pointer-events: none;
-  transition: background 0.15s ease;
+  transition: border-color 0.15s ease;
 }
 
 .flowchart-branch-right .flowchart-subtopic-pill:hover::before,
 .flowchart-branch-right .flowchart-subtopic-pill.is-active::before {
-  background: var(--accent, #3f8cff);
+  border-color: #68a5ff;
 }
 
 /* --------------------------------------------------------------------------
@@ -494,16 +585,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 32px;
+  height: 36px;
   position: relative;
   z-index: 2;
-  color: var(--border-strong, #3f4a50);
+  color: #3f8cff;
 }
 
 .flowchart-vertical-line {
-  width: 2px;
+  width: 0;
   height: 100%;
-  background: var(--border-strong, #3f4a50);
+  border-left: 2.5px dotted #3f8cff;
 }
 
 /* --------------------------------------------------------------------------
