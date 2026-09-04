@@ -385,27 +385,27 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
       labelY: number;
     };
 
-    const CANVAS_WIDTH = 1040;
-    const CENTER_X = 520;
+    const CANVAS_WIDTH = 1000;
+    const CENTER_X = 500;
 
     const nodes: NodeItem[] = [];
     const edges: EdgeItem[] = [];
     const sectionBoxes: SectionBoxItem[] = [];
 
-    // Top Legend Card
+    // Top Legend Card (flush with left boundary of 1000px container)
     const legendCard = {
-      x: 40,
-      y: 30,
-      width: 270,
-      height: 140,
+      x: 0,
+      y: 20,
+      width: 260,
+      height: 120,
     };
 
-    // Top Curriculum Card
+    // Top Curriculum Card (flush with right boundary: 1000 - 290 = 710)
     const curriculumCard = {
-      x: 730,
-      y: 30,
-      width: 270,
-      height: 110,
+      x: 710,
+      y: 20,
+      width: 290,
+      height: 115,
     };
 
     // Top Spine Guide Dotted Line
@@ -419,9 +419,9 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
     const trackTitleNode = {
       id: `track-start-${field.id}`,
       label: field.shortTitle,
-      x: CENTER_X - 130,
+      x: CENTER_X - 140,
       y: 175,
-      width: 260,
+      width: 280,
       height: 40,
     };
 
@@ -443,9 +443,9 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
     const sec2: RoadmapSection = field.sections[1] ?? sec1;
 
     const m1Y = 245;
-    const m1W = 230;
+    const m1W = 240;
     const m1H = 44;
-    const m1X = CENTER_X - m1W / 2; // 405
+    const m1X = CENTER_X - m1W / 2; // 380
     const m1Topic = sec1.topics[0] ?? sec1.title;
     const m1Key = topicKey(field, m1Topic);
     const m1Status = statuses[m1Key];
@@ -467,7 +467,7 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
 
     // Spine down to Sub-milestones
     const spineW = 220;
-    const spineX = CENTER_X - spineW / 2; // 410
+    const spineX = CENTER_X - spineW / 2; // 390
 
     // Section 1 Subtopic 0
     const sub1_0Y = m1Y + m1H + 21; // 310
@@ -567,10 +567,10 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
     });
 
     // RIGHT BRANCH FROM MILESTONE 1 (Radiating Curved Dotted Lines)
-    const m1RightX = m1X + m1W; // 635
+    const m1RightX = m1X + m1W; // 380 + 240 = 620
     const m1CenterY = m1Y + m1H / 2; // 267
-    const rColX = 720;
-    const rColW = 240;
+    const rColX = 710;
+    const rColW = 290;
     const rColH = 34;
     const rStartY = 200;
     const rGap = 8;
@@ -592,7 +592,7 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
       edges.push({
         id: `curve-m1-r-${idx}`,
         type: "radiating",
-        path: `M ${m1RightX} ${m1CenterY} C ${m1RightX + 40} ${m1CenterY}, ${rColX - 35} ${cardCenterY}, ${rColX} ${cardCenterY}`,
+        path: `M ${m1RightX} ${m1CenterY} C ${m1RightX + 35} ${m1CenterY}, ${rColX - 35} ${cardCenterY}, ${rColX} ${cardCenterY}`,
       });
 
       nodes.push({
@@ -615,10 +615,10 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
     edges.push({
       id: "m1-left-solid",
       type: "solid",
-      path: `M ${m1X} ${leftBranchStartY} H 330 V 200 H 315`,
+      path: `M ${m1X} ${leftBranchStartY} H 300 V 200 H 260`,
     });
 
-    const lGridX = 50;
+    const lGridX = 0;
     const lGridY = 200;
     const lPillW = 125;
     const lPillH = 34;
@@ -653,7 +653,7 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
     edges.push({
       id: "l-grid-to-pick",
       type: "solid",
-      path: `M ${lGridX + lPillW + lGapX / 2} ${gridBottomY} V ${gridBottomY + 15}`,
+      path: `M 130 ${gridBottomY} V ${gridBottomY + 15}`,
     });
 
     // Yellow Milestone: Pick Platform
@@ -664,9 +664,9 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
       topicName: m1Topic,
       section: sec1,
       label: getPlatformMilestoneTitle(field.id),
-      x: 75,
+      x: 0,
       y: pickPlatY,
-      width: 210,
+      width: 260,
       height: 38,
       badge: "recommended",
     });
@@ -679,9 +679,9 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
       topicName: m1Topic,
       section: sec1,
       label: "Beginner Project",
-      x: 70,
+      x: 0,
       y: proj1Y,
-      width: 220,
+      width: 260,
       height: 95,
       projectNote: `Build a small baseline recording and validation pipeline for ${sec1.title} with clear limits.`,
       projectBtnText: "Beginner Project Ideas",
@@ -690,9 +690,9 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
 
     // SECTION 2 (Milestone 2 - Processing & Decoding)
     const m2Y = 560;
-    const m2W = 230;
+    const m2W = 240;
     const m2H = 44;
-    const m2X = CENTER_X - m2W / 2; // 405
+    const m2X = CENTER_X - m2W / 2; // 380
     const m2Topic = sec2.topics[0] ?? sec2.title;
     const m2Key = topicKey(field, m2Topic);
 
@@ -818,7 +818,7 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
     edges.push({
       id: "m2-left-branch",
       type: "radiating",
-      path: `M ${m2X} ${m2Y + m2H / 2} C ${m2X - 40} ${m2Y + m2H / 2}, 330 560, 315 560`,
+      path: `M ${m2X} ${m2Y + m2H / 2} C ${m2X - 35} ${m2Y + m2H / 2}, 300 560, 260 560`,
     });
 
     const denoisingMethods = getDenoisingMethodsForField(field.id);
@@ -848,7 +848,7 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
     edges.push({
       id: "denoise-to-strategy",
       type: "solid",
-      path: `M ${lGridX + lPillW + lGapX / 2} ${denoiseBottomY} V ${denoiseBottomY + 17}`,
+      path: `M 130 ${denoiseBottomY} V ${denoiseBottomY + 17}`,
     });
 
     const strategyY = denoiseBottomY + 17; // 695
@@ -858,9 +858,9 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
       topicName: sec2t0,
       section: sec2,
       label: "Artifact Removal Strategy",
-      x: 75,
+      x: 0,
       y: strategyY,
-      width: 210,
+      width: 260,
       height: 38,
       badge: "recommended",
     });
@@ -873,9 +873,9 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
       topicName: sec2t1,
       section: sec2,
       label: "Intermediate Project",
-      x: 70,
+      x: 0,
       y: proj2Y,
-      width: 220,
+      width: 260,
       height: 95,
       projectNote: `Gain hands-on practice by building and testing real-time ${sec2.title} decoders.`,
       projectBtnText: "Intermediate Project Ideas",
@@ -887,9 +887,9 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
     sectionBoxes.push({
       id: "sec-box-features",
       title: "FEATURE EXTRACTION",
-      boxX: 680,
+      boxX: 710,
       boxY: 560,
-      boxW: 310,
+      boxW: 290,
       boxH: 165,
       labelX: 745,
       labelY: 550,
@@ -898,16 +898,16 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
     edges.push({
       id: "m2-to-features-box",
       type: "radiating",
-      path: `M ${m2X + m2W} ${m2Y + m2H / 2} C ${m2X + m2W + 35} ${m2Y + m2H / 2}, 660 642, 680 642`,
+      path: `M ${m2X + m2W} ${m2Y + m2H / 2} C ${m2X + m2W + 35} ${m2Y + m2H / 2}, 680 642, 710 642`,
     });
 
     const sec2FeatTopic = sec2.topics[2] ?? sec2.title;
     const featPills = [
-      { label: "Band Power (PSD)", w: 135, x: 695, y: 575, badge: "recommended" },
-      { label: "CSP Filtering", w: 135, x: 840, y: 575, badge: "recommended" },
-      { label: "Time-Frequency Wavelets", w: 135, x: 695, y: 618, badge: "alternative" },
-      { label: "FBCSP Algorithm", w: 135, x: 840, y: 618, badge: "alternative" },
-      { label: "Riemannian Geometry Covariance", w: 280, x: 695, y: 661, badge: "recommended" },
+      { label: "Band Power (PSD)", w: 130, x: 720, y: 575, badge: "recommended" },
+      { label: "CSP Filtering", w: 130, x: 860, y: 575, badge: "recommended" },
+      { label: "Time-Frequency Wavelets", w: 130, x: 720, y: 618, badge: "alternative" },
+      { label: "FBCSP Algorithm", w: 130, x: 860, y: 618, badge: "alternative" },
+      { label: "Riemannian Geometry Covariance", w: 270, x: 720, y: 661, badge: "recommended" },
     ];
     featPills.forEach((p, idx) => {
       nodes.push({
@@ -929,27 +929,27 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
     sectionBoxes.push({
       id: "sec-box-decoders",
       title: "REAL-TIME DECODERS & ML",
-      boxX: 680,
+      boxX: 710,
       boxY: 755,
-      boxW: 310,
+      boxW: 290,
       boxH: 215,
-      labelX: 735,
+      labelX: 740,
       labelY: 745,
     });
 
     edges.push({
       id: "m2-to-decoders-box",
       type: "radiating",
-      path: `M ${m2X + m2W} ${m2Y + m2H / 2} C ${m2X + m2W + 35} ${m2Y + m2H / 2}, 660 860, 680 860`,
+      path: `M ${m2X + m2W} ${m2Y + m2H / 2} C ${m2X + m2W + 35} ${m2Y + m2H / 2}, 680 860, 710 860`,
     });
 
     const sec2DecTopic = sec2.topics[6] ?? sec2.title;
     const decoderPills = [
-      { label: "Linear Discriminant (LDA)", w: 135, x: 695, y: 770, badge: "recommended" },
-      { label: "Support Vector (SVM)", w: 135, x: 840, y: 770, badge: "recommended" },
-      { label: "Adaptive Kalman Filters", w: 280, x: 695, y: 813, badge: "recommended" },
-      { label: "EEGNet / ConvNet Decoders", w: 280, x: 695, y: 856, badge: "recommended" },
-      { label: "Transformer Intent Models", w: 280, x: 695, y: 899, badge: "alternative" },
+      { label: "Linear Discriminant (LDA)", w: 130, x: 720, y: 770, badge: "recommended" },
+      { label: "Support Vector (SVM)", w: 130, x: 860, y: 770, badge: "recommended" },
+      { label: "Adaptive Kalman Filters", w: 270, x: 720, y: 813, badge: "recommended" },
+      { label: "EEGNet / ConvNet Decoders", w: 270, x: 720, y: 856, badge: "recommended" },
+      { label: "Transformer Intent Models", w: 270, x: 720, y: 899, badge: "alternative" },
     ];
     decoderPills.forEach((p, idx) => {
       nodes.push({
@@ -971,7 +971,7 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
     const m3Y = 1000;
     const m3W = 250;
     const m3H = 44;
-    const m3X = CENTER_X - m3W / 2; // 395
+    const m3X = CENTER_X - m3W / 2; // 375
     const sec2TelemTopic = sec2.topics[5] ?? "Closed-Loop Telemetry";
 
     edges.push({
@@ -1041,7 +1041,7 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
     edges.push({
       id: "m3-left-branch",
       type: "radiating",
-      path: `M ${m3X} ${m3Y + m3H / 2} C ${m3X - 40} ${m3Y + m3H / 2}, 330 1000, 315 1000`,
+      path: `M ${m3X} ${m3Y + m3H / 2} C ${m3X - 35} ${m3Y + m3H / 2}, 300 1000, 260 1000`,
     });
 
     const streamProtocols = [
@@ -1072,7 +1072,7 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
     edges.push({
       id: "stream-to-opt",
       type: "solid",
-      path: `M ${lGridX + lPillW + lGapX / 2} ${streamBottomY} V ${streamBottomY + 17}`,
+      path: `M 130 ${streamBottomY} V ${streamBottomY + 17}`,
     });
 
     const optY = streamBottomY + 17; // 1093
@@ -1082,9 +1082,9 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
       topicName: sec2TelemTopic,
       section: sec2,
       label: "Stream Engine Optimization",
-      x: 75,
+      x: 0,
       y: optY,
-      width: 210,
+      width: 260,
       height: 38,
       badge: "recommended",
     });
@@ -1097,9 +1097,9 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
       topicName: sec2TelemTopic,
       section: sec2,
       label: "Advanced Project",
-      x: 70,
+      x: 0,
       y: proj3Y,
-      width: 220,
+      width: 260,
       height: 95,
       projectNote: `Design an adversarial verification suite evaluating edge cases, latency boundaries, and safe shutdown for ${field.shortTitle}.`,
       projectBtnText: "Advanced Project Ideas",
@@ -1110,18 +1110,18 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
     sectionBoxes.push({
       id: "sec-box-safety",
       title: "SAFETY STANDARDS & LIMITS",
-      boxX: 680,
+      boxX: 710,
       boxY: 1000,
-      boxW: 310,
+      boxW: 290,
       boxH: 215,
-      labelX: 730,
+      labelX: 735,
       labelY: 990,
     });
 
     edges.push({
       id: "m3-to-safety-box",
       type: "radiating",
-      path: `M ${m3X + m3W} ${m3Y + m3H / 2} C ${m3X + m3W + 35} ${m3Y + m3H / 2}, 660 1100, 680 1100`,
+      path: `M ${m3X + m3W} ${m3Y + m3H / 2} C ${m3X + m3W + 35} ${m3Y + m3H / 2}, 680 1100, 710 1100`,
     });
 
     const safetyItems = [
@@ -1138,9 +1138,9 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
         subtopicName: si.label,
         section: sec2,
         label: si.label,
-        x: 695,
+        x: 720,
         y: 1015 + idx * 43,
-        width: 280,
+        width: 270,
         height: 34,
         badge: si.badge as any,
       });
@@ -1160,9 +1160,9 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
       topicName: sec2DecTopic,
       section: sec2,
       label: `Capstone: ${field.shortTitle} Synthesis & Integration`,
-      x: CENTER_X - 185,
+      x: CENTER_X - 190,
       y: capstoneY,
-      width: 370,
+      width: 380,
       height: 48,
       badge: "recommended",
     });
@@ -1183,6 +1183,64 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
 
   return (
     <div className="roadmap-explorer-root">
+      {/* Floating Social Share Stack (roadmap.sh signature) */}
+      <aside className="rm-floating-social-rail" aria-label="Social share options">
+        <div className="rm-floating-social">
+          <button
+            type="button"
+            className="rm-floating-social-btn"
+            title="Share on X"
+            aria-label="Share on X"
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out the ${field?.title ?? "OpenFullDive"} Roadmap`)}&url=${encodeURIComponent(window.location.href)}`, "_blank");
+              }
+            }}
+          >
+            𝕏
+          </button>
+          <button
+            type="button"
+            className="rm-floating-social-btn"
+            title="Share on Facebook"
+            aria-label="Share on Facebook"
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, "_blank");
+              }
+            }}
+          >
+            f
+          </button>
+          <button
+            type="button"
+            className="rm-floating-social-btn"
+            title="Share on Hacker News"
+            aria-label="Share on Hacker News"
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                window.open(`https://news.ycombinator.com/submitlink?u=${encodeURIComponent(window.location.href)}&t=${encodeURIComponent(field?.title ?? "OpenFullDive Roadmap")}`, "_blank");
+              }
+            }}
+          >
+            Y
+          </button>
+          <button
+            type="button"
+            className="rm-floating-social-btn"
+            title="Share on Reddit"
+            aria-label="Share on Reddit"
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                window.open(`https://reddit.com/submit?url=${encodeURIComponent(window.location.href)}&title=${encodeURIComponent(field?.title ?? "OpenFullDive Roadmap")}`, "_blank");
+              }
+            }}
+          >
+            <Share2 size={13} />
+          </button>
+        </div>
+      </aside>
+
       {/* Top Header Card (roadmap.sh Authentic Design) */}
       <header className="rm-header-card">
         {/* Row 1: Breadcrumb (Left) & Actions Bar (Right) */}
@@ -1323,13 +1381,36 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
             </button>
           </nav>
 
-          {/* Progress Info on Right */}
-          <div className="rm-tab-progress-info">
-            <span>
-              Progress: <strong className="text-[var(--text)]">{progressPercent}%</strong> ({doneCount}/{allTopicKeys.length})
-            </span>
-            <div className="rm-tab-progress-bar">
-              <div className="rm-tab-progress-fill" style={{ width: `${progressPercent}%` }} />
+          {/* Search & Progress Info on Right */}
+          <div className="flex items-center gap-3">
+            <div className="rm-search-input-wrap">
+              <Search size={13} />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Find topic..."
+                className="rm-search-input"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="rm-search-clear"
+                  title="Clear search"
+                >
+                  <X size={12} />
+                </button>
+              )}
+            </div>
+
+            <div className="rm-tab-progress-info">
+              <span>
+                Progress: <strong className="text-[var(--text)]">{progressPercent}%</strong> ({doneCount}/{allTopicKeys.length})
+              </span>
+              <div className="rm-tab-progress-bar">
+                <div className="rm-tab-progress-fill" style={{ width: `${progressPercent}%` }} />
+              </div>
             </div>
           </div>
         </div>
@@ -1379,82 +1460,11 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
         </div>
       </header>
 
-      {/* Main Flowchart / Views Area (Full-Width, Fixed Document Scroll, No Cramped Sidebar) */}
-      <main className="mt-5 w-full min-w-0">
+      {/* Main Flowchart / Views Area (Full-Width, Fixed Document Scroll, Seamless like roadmap.sh) */}
+      <main className="mt-2 w-full min-w-0">
         {/* TAB 1: Roadmap Flowchart / Linear Guide */}
         {tab === "roadmap" && (
           <section className="w-full min-w-0">
-            {/* Toolbar */}
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 shadow-sm">
-              <div className="flex items-center gap-3 text-xs text-[var(--dim)]">
-                <span className="font-bold text-[var(--text)] uppercase tracking-wider text-[11px]">
-                  {isMaster ? "System Architecture" : field?.title}
-                </span>
-                <span>·</span>
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="rm-badge-corner is-recommended"><Check size={8} /></span>
-                  Core
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="rm-badge-corner is-alternative"><Check size={8} /></span>
-                  Alternative
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="rm-badge-corner is-elective"><Check size={8} /></span>
-                  Elective
-                </span>
-              </div>
-
-              <div className="flex items-center gap-3">
-                {!isMaster && (
-                  <div className="flex items-center rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-0.5">
-                    <button
-                      type="button"
-                      className={clsx(
-                        "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] font-semibold transition-colors cursor-pointer border-0",
-                        viewMode === "flowchart"
-                          ? "bg-[var(--surface)] text-[var(--text)] shadow-sm"
-                          : "bg-transparent text-[var(--dim)] hover:text-[var(--text)]",
-                      )}
-                      onClick={() => setViewMode("flowchart")}
-                      title="Interactive Flowchart Diagram"
-                    >
-                      <Network size={12} /> Flowchart
-                    </button>
-                    <button
-                      type="button"
-                      className={clsx(
-                        "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] font-semibold transition-colors cursor-pointer border-0",
-                        viewMode === "linear"
-                          ? "bg-[var(--surface)] text-[var(--text)] shadow-sm"
-                          : "bg-transparent text-[var(--dim)] hover:text-[var(--text)]",
-                      )}
-                      onClick={() => setViewMode("linear")}
-                      title="Linear Step-by-Step Curriculum"
-                    >
-                      <List size={12} /> Linear Guide
-                    </button>
-                  </div>
-                )}
-
-                <div className="flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg)] px-2.5 py-1 text-xs text-[var(--dim)]">
-                  <Search size={13} />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Find topic..."
-                    className="w-[160px] border-0 bg-transparent text-xs text-[var(--text)] outline-none placeholder:text-[var(--dim)]"
-                  />
-                  {searchQuery && (
-                    <button onClick={() => setSearchQuery("")} className="text-[var(--dim)] hover:text-[var(--text)] cursor-pointer bg-transparent border-0 p-0">
-                      <X size={12} />
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-
             {/* Fixed Roadmap Flow Surface (roadmap.sh document scroll) */}
             {viewMode === "flowchart" && (
               <div className="roadmap-flow-wrapper" aria-label="Interactive learning flowchart">
@@ -1463,16 +1473,16 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
                   <div
                     className="roadmap-diagram-canvas"
                     style={{
-                      width: 1040,
+                      width: 1000,
                       height: 820,
                     }}
                   >
                     {/* SVG Connector Layer */}
                     <svg
                       className="rm-svg-overlay"
-                      width={1040}
+                      width={1000}
                       height={820}
-                      viewBox="0 0 1040 820"
+                      viewBox="0 0 1000 820"
                     >
                       <defs>
                         <marker
@@ -1489,36 +1499,36 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
                       </defs>
 
                       {/* Tier Bounding Boxes */}
-                      <rect x="65" y="105" width="910" height="98" rx="8" className="rm-section-box" />
-                      <rect x="25" y="255" width="990" height="98" rx="8" className="rm-section-box" />
-                      <rect x="65" y="405" width="910" height="98" rx="8" className="rm-section-box" />
-                      <rect x="195" y="555" width="650" height="98" rx="8" className="rm-section-box" />
+                      <rect x="40" y="105" width="920" height="98" rx="8" className="rm-section-box" />
+                      <rect x="15" y="255" width="970" height="98" rx="8" className="rm-section-box" />
+                      <rect x="40" y="405" width="920" height="98" rx="8" className="rm-section-box" />
+                      <rect x="180" y="555" width="640" height="98" rx="8" className="rm-section-box" />
 
                       {/* Center Spine Lines */}
-                      <path d="M 520 62 V 90" className="rm-edge-spine" markerEnd="url(#rm-arrow)" />
-                      <path d="M 520 203 V 238" className="rm-edge-spine" markerEnd="url(#rm-arrow)" />
-                      <path d="M 520 353 V 388" className="rm-edge-spine" markerEnd="url(#rm-arrow)" />
-                      <path d="M 520 503 V 538" className="rm-edge-spine" markerEnd="url(#rm-arrow)" />
-                      <path d="M 520 653 V 688" className="rm-edge-spine" markerEnd="url(#rm-arrow)" />
+                      <path d="M 500 62 V 90" className="rm-edge-spine" markerEnd="url(#rm-arrow)" />
+                      <path d="M 500 203 V 238" className="rm-edge-spine" markerEnd="url(#rm-arrow)" />
+                      <path d="M 500 353 V 388" className="rm-edge-spine" markerEnd="url(#rm-arrow)" />
+                      <path d="M 500 503 V 538" className="rm-edge-spine" markerEnd="url(#rm-arrow)" />
+                      <path d="M 500 653 V 688" className="rm-edge-spine" markerEnd="url(#rm-arrow)" />
                     </svg>
 
                     {/* Start Node */}
                     <div
                       className="rm-track-title-badge"
-                      style={{ left: 520 - 140, top: 26, width: 280 }}
+                      style={{ left: 500 - 140, top: 26, width: 280 }}
                     >
                       <Sparkles size={14} className="text-[var(--accent-bright)]" />
                       Start: Full-Dive Curriculum
                     </div>
 
                     {/* Tier 1: Scientific Foundations */}
-                    <div className="rm-group-title" style={{ left: 520 - 150, top: 92 }}>
+                    <div className="rm-group-title" style={{ left: 500 - 150, top: 92 }}>
                       01. Scientific & Physical Foundations
                     </div>
                     {[
-                      { id: "neuroscience", x: 100, y: 135, w: 250, h: 56 },
-                      { id: "hardware-architecture", x: 395, y: 135, w: 250, h: 56 },
-                      { id: "virtual-environments", x: 690, y: 135, w: 250, h: 56 },
+                      { id: "neuroscience", x: 60, y: 135, w: 270, h: 56 },
+                      { id: "hardware-architecture", x: 365, y: 135, w: 270, h: 56 },
+                      { id: "virtual-environments", x: 670, y: 135, w: 270, h: 56 },
                     ].map((item) => {
                       const f = roadmapFieldById(item.id);
                       if (!f) return null;
@@ -1541,14 +1551,14 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
                     })}
 
                     {/* Tier 2: Interfaces */}
-                    <div className="rm-group-title" style={{ left: 520 - 140, top: 242 }}>
+                    <div className="rm-group-title" style={{ left: 500 - 140, top: 242 }}>
                       02. Interfaces & Neural Interaction
                     </div>
                     {[
-                      { id: "bci", x: 45, y: 285, w: 220, h: 56 },
-                      { id: "haptics", x: 295, y: 285, w: 220, h: 56 },
-                      { id: "neural-modulation", x: 545, y: 285, w: 220, h: 56 },
-                      { id: "sensory-substitution", x: 795, y: 285, w: 220, h: 56 },
+                      { id: "bci", x: 30, y: 285, w: 225, h: 56 },
+                      { id: "haptics", x: 270, y: 285, w: 225, h: 56 },
+                      { id: "neural-modulation", x: 510, y: 285, w: 225, h: 56 },
+                      { id: "sensory-substitution", x: 750, y: 285, w: 225, h: 56 },
                     ].map((item) => {
                       const f = roadmapFieldById(item.id);
                       if (!f) return null;
@@ -1571,13 +1581,13 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
                     })}
 
                     {/* Tier 3: Systems & Safety */}
-                    <div className="rm-group-title" style={{ left: 520 - 140, top: 392 }}>
+                    <div className="rm-group-title" style={{ left: 500 - 140, top: 392 }}>
                       03. Systems, Software & Safety
                     </div>
                     {[
-                      { id: "software-frameworks", x: 100, y: 435, w: 250, h: 56 },
-                      { id: "system-integration", x: 395, y: 435, w: 250, h: 56 },
-                      { id: "ethical-engineering", x: 690, y: 435, w: 250, h: 56 },
+                      { id: "software-frameworks", x: 60, y: 435, w: 270, h: 56 },
+                      { id: "system-integration", x: 365, y: 435, w: 270, h: 56 },
+                      { id: "ethical-engineering", x: 670, y: 435, w: 270, h: 56 },
                     ].map((item) => {
                       const f = roadmapFieldById(item.id);
                       if (!f) return null;
@@ -1600,12 +1610,12 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
                     })}
 
                     {/* Tier 4: Frontier Research */}
-                    <div className="rm-group-title" style={{ left: 520 - 140, top: 542 }}>
+                    <div className="rm-group-title" style={{ left: 500 - 140, top: 542 }}>
                       04. Frontier Research & Synthesis
                     </div>
                     {[
-                      { id: "advanced-neural-mapping", x: 235, y: 585, w: 260, h: 56 },
-                      { id: "future-frontiers", x: 545, y: 585, w: 260, h: 56 },
+                      { id: "advanced-neural-mapping", x: 200, y: 585, w: 280, h: 56 },
+                      { id: "future-frontiers", x: 520, y: 585, w: 280, h: 56 },
                     ].map((item) => {
                       const f = roadmapFieldById(item.id);
                       if (!f) return null;
@@ -1630,7 +1640,7 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
                     {/* Finish Capstone */}
                     <div
                       className="rm-capstone-finish-badge"
-                      style={{ left: 520 - 190, top: 695, width: 380 }}
+                      style={{ left: 500 - 190, top: 695, width: 380 }}
                     >
                       <Flag size={16} className="text-[#34d399]" />
                       Capstone: Full-Dive Architecture Integration & Synthesis
@@ -1745,24 +1755,31 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
                       <div className="rm-legend-title">Recommendation Legend</div>
                       <div className="rm-legend-item">
                         <span className="rm-badge-corner is-recommended"><Check size={8} /></span>
-                        <span>Core Competency / High Consensus</span>
+                        <span>Personal Recommendation / Opinion</span>
                       </div>
                       <div className="rm-legend-item">
                         <span className="rm-badge-corner is-alternative"><Check size={8} /></span>
-                        <span>Alternative Option / Specialized</span>
+                        <span>Alternative Option / Pick this or green</span>
                       </div>
                       <div className="rm-legend-item">
                         <span className="rm-badge-corner is-elective"><Check size={8} /></span>
                         <span>Order not strict / Learn anytime</span>
                       </div>
-                      <button
-                        type="button"
-                        className="rm-legend-btn"
-                        onClick={() => setViewMode("linear")}
-                      >
-                        Switch to Linear Guide
-                      </button>
                     </div>
+
+                    {/* Dark action button directly below legend card matching roadmap.sh */}
+                    <button
+                      type="button"
+                      className="rm-legend-action-btn"
+                      style={{
+                        left: flowchartData.legendCard.x,
+                        top: flowchartData.legendCard.y + flowchartData.legendCard.height + 8,
+                        width: flowchartData.legendCard.width,
+                      }}
+                      onClick={() => setViewMode("linear")}
+                    >
+                      Visit Beginner Friendly Version
+                    </button>
 
                     {/* Top Right Curriculum Card */}
                     <div
@@ -1774,7 +1791,7 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
                       }}
                     >
                       <p className="curriculum-desc">
-                        Find the complete verified curriculum for full-dive neurotechnology across 12 disciplines.
+                        Find the detailed version of this roadmap along with other similar roadmaps across neurotechnology.
                       </p>
                       <Link href="/roadmap" className="curriculum-btn">
                         openfulldive.org/roadmap →
@@ -1925,6 +1942,23 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
                     })}
                   </div>
                 )}
+
+                {/* Floating AI Tutor Pill (roadmap.sh signature) */}
+                <button
+                  type="button"
+                  className="rm-floating-ai-tutor"
+                  onClick={() => {
+                    const input = document.querySelector<HTMLInputElement>(".rm-search-input");
+                    if (input) {
+                      input.focus();
+                    }
+                  }}
+                >
+                  <span className="ai-tag">
+                    <Sparkles size={14} /> AI Tutor
+                  </span>
+                  <span>Have a question? Type here</span>
+                </button>
               </div>
             )}
 
@@ -2158,7 +2192,7 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
               <span className="block text-[10px] font-bold uppercase tracking-wider text-[var(--dim)] mb-2">
                 Your Learning Status
               </span>
-              <div className="grid grid-cols-4 gap-1.5">
+              <div className="rm-drawer-status-grid">
                 {[
                   { id: undefined, label: "Todo", icon: Circle },
                   { id: "learning" as const, label: "Learning", icon: CircleDot },
@@ -2172,16 +2206,11 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
                     <button
                       key={item.label}
                       type="button"
-                      className={clsx(
-                        "inline-flex flex-col items-center justify-center gap-1 rounded py-2 text-xs font-semibold transition-colors cursor-pointer border",
-                        isActive
-                          ? "border-[var(--accent)] bg-[var(--accent)] text-white shadow-sm"
-                          : "border-[var(--border)] bg-[var(--surface)] text-[var(--dim)] hover:border-[var(--border-strong)] hover:text-[var(--text)]",
-                      )}
+                      className={clsx("rm-drawer-status-btn", isActive && "is-active")}
                       onClick={() => setStatus(selected, item.id)}
                     >
                       <Icon size={14} />
-                      <span className="text-[11px]">{item.label}</span>
+                      <span>{item.label}</span>
                     </button>
                   );
                 })}

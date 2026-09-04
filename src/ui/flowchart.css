@@ -12,14 +12,14 @@
   overflow-x: auto;
   overflow-y: visible;
   display: flex;
-  justify-content: flex-start;
-  background-color: var(--bg, #0e1113);
-  background-image: radial-gradient(circle, rgba(137, 153, 166, 0.22) 1.2px, transparent 1.2px);
+  justify-content: center;
+  background-color: transparent;
+  background-image: radial-gradient(circle, rgba(137, 153, 166, 0.16) 1.2px, transparent 1.2px);
   background-size: 20px 20px;
-  border-radius: var(--r-card, 8px);
-  border: 1px solid var(--border, #2a3236);
-  padding: 36px 16px 80px 16px;
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.45);
+  border-radius: 0;
+  border: none;
+  padding: 16px 0 80px 0;
+  box-shadow: none;
   box-sizing: border-box;
 }
 
@@ -255,12 +255,11 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 12px 14px;
+  padding: 14px 16px;
   border-radius: 8px;
-  border: 1px solid var(--border-strong, #3f4a50);
-  background: rgba(21, 26, 29, 0.94);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  border: 1.5px solid var(--border-strong, #3f4a50);
+  background: var(--surface, #151a1d);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
   box-sizing: border-box;
 }
 
@@ -288,25 +287,29 @@
   height: 14px;
 }
 
-.rm-legend-btn {
-  margin-top: 4px;
+/* Dark action button directly below legend card matching roadmap.sh */
+.rm-legend-action-btn {
+  position: absolute;
+  z-index: 5;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 12px;
-  border-radius: 6px;
-  border: 1px solid var(--border, #2a3236);
-  background: var(--surface-3, #222a2f);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border-strong, #3f4a50);
+  background: var(--surface-2, #1b2125);
   color: var(--text, #eef1f3);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
   text-align: center;
+  box-sizing: border-box;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
-.rm-legend-btn:hover {
-  background: var(--accent, #3f8cff);
+.rm-legend-action-btn:hover {
+  background: var(--surface-3, #222a2f);
   color: #ffffff;
   border-color: var(--accent, #3f8cff);
 }
@@ -510,7 +513,19 @@
    6. Slide-Over Topic Drawer
    -------------------------------------------------------------------------- */
 .roadmap-resource-drawer {
-  animation: slideDrawer 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: min(480px, 94vw) !important;
+  max-width: 480px !important;
+  z-index: 100 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  border-left: 1px solid var(--border, #2a3236) !important;
+  background: var(--surface, #151a1d) !important;
+  box-shadow: -12px 0 40px rgba(0, 0, 0, 0.7) !important;
+  animation: slideDrawer 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes slideDrawer {
@@ -523,6 +538,11 @@
 }
 
 .roadmap-inspector-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 90 !important;
+  background: rgba(0, 0, 0, 0.65) !important;
+  backdrop-filter: blur(4px) !important;
   animation: fadeIn 0.15s ease forwards;
 }
 
@@ -533,6 +553,41 @@
   to {
     opacity: 1;
   }
+}
+
+.rm-drawer-status-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+}
+
+.rm-drawer-status-btn {
+  display: inline-flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  border-radius: 6px !important;
+  padding: 8px 4px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  border: 1px solid var(--border, #2a3236) !important;
+  background: var(--surface, #151a1d) !important;
+  color: var(--dim, #7a8890) !important;
+  transition: all 0.15s ease !important;
+}
+
+.rm-drawer-status-btn:hover {
+  border-color: var(--border-strong, #3b464c) !important;
+  color: var(--text, #eef1f3) !important;
+}
+
+.rm-drawer-status-btn.is-active {
+  border-color: var(--accent, #3f8cff) !important;
+  background: var(--accent, #3f8cff) !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
 }
 
 /* Resource chips */
@@ -612,11 +667,12 @@
 
 .roadmap-explorer-root {
   width: 100%;
-  max-width: 1140px;
+  max-width: 1000px;
   margin-left: auto;
   margin-right: auto;
   min-width: 0;
   box-sizing: border-box;
+  position: relative;
 }
 
 /* Header Card: Spacious rounded surface matching roadmap.sh */
@@ -957,6 +1013,143 @@
   font-size: 13px;
   color: var(--muted, #c2c9cc);
   line-height: 1.6;
+}
+
+/* Search Input inside Tabs Bar or Header */
+.rm-search-input-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface-2, #1b2125);
+  border: 1px solid var(--border, #2a3236);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: var(--dim, #829198);
+  transition: all 0.15s ease;
+}
+
+.rm-search-input-wrap:focus-within {
+  border-color: var(--accent, #3f8cff);
+  background: var(--surface-3, #222a2f);
+}
+
+.rm-search-input {
+  border: none !important;
+  background: transparent !important;
+  outline: none !important;
+  font-size: 12px !important;
+  color: var(--text, #eef1f3) !important;
+  width: 120px;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+.rm-search-input::placeholder {
+  color: var(--dim, #829198);
+}
+
+.rm-search-clear {
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  color: var(--dim, #829198) !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.rm-search-clear:hover {
+  color: var(--text, #eef1f3) !important;
+}
+
+/* Floating Share Rail on Left Side (roadmap.sh signature) */
+.rm-floating-social-rail {
+  position: absolute;
+  left: -48px;
+  top: 320px;
+  bottom: 80px;
+  width: 40px;
+  pointer-events: none;
+  z-index: 20;
+}
+
+@media (max-width: 1260px) {
+  .rm-floating-social-rail {
+    display: none;
+  }
+}
+
+.rm-floating-social {
+  position: sticky;
+  top: 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: auto;
+}
+
+.rm-floating-social-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 34px !important;
+  height: 34px !important;
+  padding: 0 !important;
+  border-radius: 6px !important;
+  border: 1px solid var(--border, #2a3236) !important;
+  background: var(--surface, #151a1d) !important;
+  color: var(--muted, #c2c9cc) !important;
+  cursor: pointer !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+  transition: all 0.15s ease !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35) !important;
+}
+
+.rm-floating-social-btn:hover {
+  color: var(--text, #eef1f3) !important;
+  background: var(--surface-2, #1b2125) !important;
+  border-color: var(--accent, #3f8cff) !important;
+  transform: translateX(-2px) !important;
+}
+
+/* Floating AI Tutor Pill at Bottom (roadmap.sh signature) */
+.rm-floating-ai-tutor {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 35;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 20px;
+  border-radius: 9999px;
+  border: 1px solid var(--border-strong, #3f4a50);
+  background: #111518;
+  color: var(--text, #eef1f3);
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.65);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rm-floating-ai-tutor:hover {
+  background: #182024;
+  border-color: #ffd166;
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.85);
+}
+
+.rm-floating-ai-tutor .ai-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #ffd166;
+  font-weight: 700;
 }
 
 
