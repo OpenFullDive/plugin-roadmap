@@ -1382,8 +1382,8 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
                                               key={i}
                                               d={`M ${gap},${leftSpineY} C ${gap / 2},${leftSpineY} ${gap / 2},${tY} 0,${tY}`}
                                               fill="none"
-                                              stroke="#2b78e4"
-                                              strokeWidth="3.5"
+                                              stroke="#3f8cff"
+                                              strokeWidth="2.5"
                                               strokeLinecap="round"
                                               strokeDasharray="0.8 8"
                                             />
@@ -1444,8 +1444,8 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
                                               key={i}
                                               d={`M 0,${rightSpineY} C ${gap / 2},${rightSpineY} ${gap / 2},${tY} ${gap},${tY}`}
                                               fill="none"
-                                              stroke="#2b78e4"
-                                              strokeWidth="3.5"
+                                              stroke="#3f8cff"
+                                              strokeWidth="2.5"
                                               strokeLinecap="round"
                                               strokeDasharray="0.8 8"
                                             />
@@ -1496,9 +1496,7 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
                           className="flowchart-main-node"
                           style={{
                             width: "320px",
-                            background: "#fdff00",
                             fontWeight: 800,
-                            fontSize: "16px",
                           }}
                           onClick={() => {
                             if (field.sections[0]?.topics[0]) {
@@ -1511,7 +1509,7 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
                             }
                           }}
                         >
-                          <Flag size={16} className="mr-2 text-black flex-shrink-0" />
+                          <Flag size={16} className="mr-2 text-[var(--accent-bright)] flex-shrink-0" />
                           <span>{field.title} Complete</span>
                         </button>
                       </div>
