@@ -1266,37 +1266,22 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
                     {/* Mode B: Detailed Track Flowchart (Interactive Nodes) */}
                     {!isMaster && field && (
                       <div className="flowchart-track-container">
-                        {/* Start Node */}
-                        <div className="flex justify-center mb-6 relative z-10">
-                          <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--surface)] px-6 py-2 text-xs font-bold text-[var(--text)] shadow-md">
-                            <Sparkles size={15} className="text-[var(--accent-bright)]" />
-                            Start: {field.title}
-                          </div>
+                        {/* Notification Header */}
+                        <div className="flowchart-track-notification">
+                          <Sparkles size={14} className="text-amber-300 flex-shrink-0" />
+                          <span>Mark any topic to start tracking your progress</span>
                         </div>
 
-                        <div className="flowchart-vertical-connector">
-                          <div className="flowchart-vertical-line" />
-                          <ChevronDown size={16} />
-                        </div>
+                        {/* Central Canvas Discipline Title */}
+                        <h2 className="flowchart-canvas-title">{field.title}</h2>
 
-                        {/* Interactive Stages / Sections */}
+                        {/* Main Vertical Spine Blue Connector */}
+                        <div className="flowchart-vertical-spine-line" />
+
+                        {/* Interactive Stages / Phases */}
                         {field.sections.map((sec, secIdx) => {
-                          const secKeys = sec.topics.map((t) => topicKey(field, t));
-                          const secDone = secKeys.filter((k) => statuses[k] === "done").length;
                           return (
                             <div key={sec.id} className="flowchart-stage-block">
-                              {/* Step Stage Marker Header */}
-                              <div className="flowchart-stage-header">
-                                <span className="flowchart-stage-pill">
-                                  <span className="size-4 rounded-full bg-[var(--accent)] text-[10px] text-white flex items-center justify-center font-bold">
-                                    {secIdx + 1}
-                                  </span>
-                                  <span>{sec.title}</span>
-                                  <span className="opacity-60 text-[10px]">({secDone}/{sec.topics.length})</span>
-                                </span>
-                                <p className="flowchart-stage-desc">{sec.summary}</p>
-                              </div>
-
                               {/* Stage Topic Nodes Column */}
                               <div className="flowchart-spine-flow">
                                 {sec.topics.map((topic, topicIdx) => {
@@ -1304,30 +1289,111 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
                                   const status = statuses[key];
                                   const details = getTopicDetails(field.id, topic);
                                   const isSelected = selected?.topic === topic;
-                                  const subtopicsLeft = details.subtopics.slice(0, 2);
-                                  const subtopicsRight = details.subtopics.slice(2, 4);
+                                  const subtopics = details.subtopics || [];
+
+                                  // Pattern variation for organic technical diagram distribution
+                                  const pattern = topicIdx % 3;
+                                  const hasSectionBox = pattern === 0 && subtopics.length >= 3;
+                                  const hasRightOnly = pattern === 1 || subtopics.length <= 2;
+                                  const hasLeftOnly = pattern === 2 && !hasSectionBox;
+
+                                  // Subtopic partitioning
+                                  const leftItems = hasSectionBox
+                                    ? []
+                                    : hasLeftOnly
+                                    ? subtopics.slice(0, 2)
+                                    : [];
+                                  const rightItems = hasSectionBox
+                                    ? subtopics.slice(2, 4)
+                                    : hasRightOnly
+                                    ? subtopics.slice(0, 3)
+                                    : [];
+
+                                  // Connector calculations
+                                  const gap = 60;
+                                  const pillH = 44;
+                                  const pillGap = 10;
+
+                                  // Left side metrics
+                                  const leftCount = hasSectionBox ? 1 : leftItems.length;
+                                  const leftH = hasSectionBox ? 116 : Math.max(48, leftCount * pillH + Math.max(0, leftCount - 1) * pillGap);
+                                  const leftSpineY = Math.round(leftH / 2);
+                                  const leftTargets = hasSectionBox
+                                    ? [leftH - Math.round(pillH / 2)]
+                                    : leftItems.map((_, i) => Math.round(pillH / 2 + i * (pillH + pillGap)));
+
+                                  // Right side metrics
+                                  const rightCount = rightItems.length;
+                                  const rightH = Math.max(48, rightCount * pillH + Math.max(0, rightCount - 1) * pillGap);
+                                  const rightSpineY = Math.round(rightH / 2);
+                                  const rightTargets = rightItems.map((_, i) => Math.round(pillH / 2 + i * (pillH + pillGap)));
 
                                   return (
                                     <div key={topic} className="flowchart-node-row">
-                                      {/* Subtopics Left Wing */}
-                                      <div className="flowchart-branch-container flowchart-branch-left">
-                                        {subtopicsLeft.map((sub) => (
-                                          <button
-                                            key={sub}
-                                            type="button"
-                                            className="flowchart-subtopic-pill"
-                                            onClick={() => {
-                                              setSelected({ field, section: sec, topic, subtopicFocus: sub });
-                                              setDrawerTab("knowledge");
-                                            }}
-                                            title={`Explore ${sub}`}
-                                          >
-                                            {sub}
-                                          </button>
-                                        ))}
-                                      </div>
+                                      {/* Left Wing */}
+                                      {hasSectionBox ? (
+                                        <div className="flowchart-branch-container flowchart-branch-left">
+                                          <div className="flowchart-section-box">
+                                            <p className="flowchart-section-label">{subtopics[0]}</p>
+                                            <p className="flowchart-section-label">{subtopics[1]}</p>
+                                            <button
+                                              type="button"
+                                              className="flowchart-subtopic-pill"
+                                              onClick={() => {
+                                                setSelected({ field, section: sec, topic, subtopicFocus: subtopics[2] });
+                                                setDrawerTab("knowledge");
+                                              }}
+                                              title={`Explore ${subtopics[2]}`}
+                                            >
+                                              {subtopics[2]}
+                                            </button>
+                                          </div>
+                                        </div>
+                                      ) : leftItems.length > 0 ? (
+                                        <div className="flowchart-branch-container flowchart-branch-left">
+                                          {leftItems.map((sub) => (
+                                            <button
+                                              key={sub}
+                                              type="button"
+                                              className="flowchart-subtopic-pill"
+                                              onClick={() => {
+                                                setSelected({ field, section: sec, topic, subtopicFocus: sub });
+                                                setDrawerTab("knowledge");
+                                              }}
+                                              title={`Explore ${sub}`}
+                                            >
+                                              {sub}
+                                            </button>
+                                          ))}
+                                        </div>
+                                      ) : (
+                                        <div className="flowchart-branch-spacer" />
+                                      )}
 
-                                      {/* Main Topic Node Card */}
+                                      {/* Left SVG Connector */}
+                                      {leftCount > 0 ? (
+                                        <svg
+                                          className="flowchart-branch-svg"
+                                          style={{ height: `${leftH}px` }}
+                                          viewBox={`0 0 ${gap} ${leftH}`}
+                                        >
+                                          {leftTargets.map((tY, i) => (
+                                            <path
+                                              key={i}
+                                              d={`M ${gap},${leftSpineY} C ${gap / 2},${leftSpineY} ${gap / 2},${tY} 0,${tY}`}
+                                              fill="none"
+                                              stroke="#2b78e4"
+                                              strokeWidth="3.5"
+                                              strokeLinecap="round"
+                                              strokeDasharray="0.8 8"
+                                            />
+                                          ))}
+                                        </svg>
+                                      ) : (
+                                        <div className="flowchart-branch-svg" />
+                                      )}
+
+                                      {/* Main Spine Topic Node Card */}
                                       <button
                                         type="button"
                                         className={clsx(
@@ -1336,116 +1402,118 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
                                           status === "done" && "is-done",
                                           status === "learning" && "is-learning",
                                           status === "skipped" && "is-skipped",
+                                          searchQuery && topic.toLowerCase().includes(searchQuery.toLowerCase()) && "is-search-match",
                                         )}
                                         onClick={() => {
                                           setSelected({ field, section: sec, topic });
                                           setDrawerTab("knowledge");
                                         }}
+                                        title={`Topic: ${topic}`}
                                       >
-                                        <div className="flowchart-main-node-top">
-                                          <div className="flex items-center gap-2 flex-1 min-w-0 pr-1">
-                                            {details.badge === "Core Milestone" && (
-                                              <span className="flowchart-corner-badge is-core" title="Personal Recommendation / Core Milestone">
-                                                <Check size={9} strokeWidth={3} />
-                                              </span>
-                                            )}
-                                            {details.badge === "Recommended" && (
-                                              <span className="flowchart-corner-badge is-recommended" title="Alternative Option / Recommended">
-                                                <Check size={9} strokeWidth={3} />
-                                              </span>
-                                            )}
-                                            <span className="flowchart-main-node-title leading-snug">{topic}</span>
-                                          </div>
-                                          {details.badge && (
-                                            <span
-                                              className={clsx(
-                                                "flowchart-main-node-badge",
-                                                details.badge === "Core Milestone" && "is-core",
-                                                details.badge === "Recommended" && "is-recommended",
-                                                details.badge === "Advanced" && "is-frontier",
-                                                details.badge === "Foundational" && "is-foundational",
-                                              )}
-                                            >
-                                              {details.badge}
-                                            </span>
-                                          )}
-                                        </div>
+                                        {/* Personal Recommendation or Alternative Option Badge */}
+                                        {details.badge === "Core Milestone" && (
+                                          <span className="flowchart-node-corner-badge is-core" title="Personal Recommendation">
+                                            <Check size={10} strokeWidth={3.5} />
+                                          </span>
+                                        )}
+                                        {details.badge === "Recommended" && (
+                                          <span className="flowchart-node-corner-badge is-recommended" title="Alternative Option">
+                                            <Check size={10} strokeWidth={3.5} />
+                                          </span>
+                                        )}
 
-                                        <div className="flowchart-main-node-footer">
-                                          <span className="text-[var(--dim)] font-mono text-[10px]">
-                                            Step {secIdx + 1}.{topicIdx + 1}
+                                        {/* Completed Done Badge */}
+                                        {status === "done" && (
+                                          <span className="flowchart-node-done-badge" title="Completed">
+                                            <Check size={10} strokeWidth={3.5} />
                                           </span>
-                                          <span
-                                            className={clsx(
-                                              "flowchart-status-pill",
-                                              status === "done" && "is-done",
-                                              status === "learning" && "is-learning",
-                                              status === "skipped" && "is-skipped",
-                                              !status && "is-todo",
-                                            )}
-                                            onClick={(e) => cycleStatus(e, { field, section: sec, topic })}
-                                            title="Click to cycle status: Todo -> Learning -> Done -> Skip"
-                                          >
-                                            {status === "done" && <CheckCircle2 size={11} />}
-                                            {status === "learning" && <CircleDot size={11} />}
-                                            {status === "skipped" && <PauseCircle size={11} />}
-                                            {!status && <Circle size={11} />}
-                                            <span>
-                                              {status === "done"
-                                                ? "Done"
-                                                : status === "learning"
-                                                ? "Learning"
-                                                : status === "skipped"
-                                                ? "Skip"
-                                                : "Todo"}
-                                            </span>
-                                          </span>
-                                        </div>
+                                        )}
+
+                                        <span>{topic}</span>
                                       </button>
 
-                                      {/* Subtopics Right Wing */}
-                                      <div className="flowchart-branch-container flowchart-branch-right">
-                                        {subtopicsRight.map((sub) => (
-                                          <button
-                                            key={sub}
-                                            type="button"
-                                            className="flowchart-subtopic-pill"
-                                            onClick={() => {
-                                              setSelected({ field, section: sec, topic, subtopicFocus: sub });
-                                              setDrawerTab("knowledge");
-                                            }}
-                                            title={`Explore ${sub}`}
-                                          >
-                                            {sub}
-                                          </button>
-                                        ))}
-                                      </div>
+                                      {/* Right SVG Connector */}
+                                      {rightCount > 0 ? (
+                                        <svg
+                                          className="flowchart-branch-svg"
+                                          style={{ height: `${rightH}px` }}
+                                          viewBox={`0 0 ${gap} ${rightH}`}
+                                        >
+                                          {rightTargets.map((tY, i) => (
+                                            <path
+                                              key={i}
+                                              d={`M 0,${rightSpineY} C ${gap / 2},${rightSpineY} ${gap / 2},${tY} ${gap},${tY}`}
+                                              fill="none"
+                                              stroke="#2b78e4"
+                                              strokeWidth="3.5"
+                                              strokeLinecap="round"
+                                              strokeDasharray="0.8 8"
+                                            />
+                                          ))}
+                                        </svg>
+                                      ) : (
+                                        <div className="flowchart-branch-svg" />
+                                      )}
+
+                                      {/* Right Wing */}
+                                      {rightItems.length > 0 ? (
+                                        <div className="flowchart-branch-container flowchart-branch-right">
+                                          {rightItems.map((sub) => (
+                                            <button
+                                              key={sub}
+                                              type="button"
+                                              className="flowchart-subtopic-pill"
+                                              onClick={() => {
+                                                setSelected({ field, section: sec, topic, subtopicFocus: sub });
+                                                setDrawerTab("knowledge");
+                                              }}
+                                              title={`Explore ${sub}`}
+                                            >
+                                              {sub}
+                                            </button>
+                                          ))}
+                                        </div>
+                                      ) : (
+                                        <div className="flowchart-branch-spacer" />
+                                      )}
                                     </div>
                                   );
                                 })}
                               </div>
 
+                              {/* Inter-section Vertical Spine Connector Line */}
                               {secIdx < field.sections.length - 1 && (
-                                <div className="flowchart-vertical-connector">
-                                  <div className="flowchart-vertical-line" />
-                                  <ChevronDown size={16} />
-                                </div>
+                                <div className="flowchart-vertical-spine-line" />
                               )}
                             </div>
                           );
                         })}
 
-                        <div className="flowchart-vertical-connector">
-                          <div className="flowchart-vertical-line" />
-                          <ChevronDown size={16} />
-                        </div>
-
-                        <div className="flex justify-center relative z-10">
-                          <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--surface)] px-6 py-2.5 text-xs font-bold text-[var(--text)] shadow-md">
-                            <Flag size={15} className="text-[var(--accent-bright)]" />
-                            Field Milestone Complete: Ready to Build & Submit Evidence
-                          </div>
-                        </div>
+                        {/* End of Track Vertical Connector & Finish Milestone */}
+                        <div className="flowchart-vertical-spine-line" />
+                        <button
+                          type="button"
+                          className="flowchart-main-node"
+                          style={{
+                            width: "320px",
+                            background: "#fdff00",
+                            fontWeight: 800,
+                            fontSize: "16px",
+                          }}
+                          onClick={() => {
+                            if (field.sections[0]?.topics[0]) {
+                              setSelected({
+                                field,
+                                section: field.sections[0],
+                                topic: field.sections[0].topics[0],
+                              });
+                              setDrawerTab("knowledge");
+                            }
+                          }}
+                        >
+                          <Flag size={16} className="mr-2 text-black flex-shrink-0" />
+                          <span>{field.title} Complete</span>
+                        </button>
                       </div>
                     )}
                   </div>

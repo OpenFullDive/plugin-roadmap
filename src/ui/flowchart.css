@@ -1,6 +1,6 @@
 /* ==========================================================================
    Interactive Flowchart Engine Styling for OpenFullDive
-   Visual graph architecture using OpenFullDive design tokens
+   Authentic technical system map aesthetics with high-contrast palette
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -13,21 +13,21 @@
   border-radius: var(--r-card, 10px);
   background-color: var(--surface, #151a1d);
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .roadmap-canvas-viewport {
   width: 100%;
   height: 100%;
-  min-height: 720px;
+  min-height: 760px;
   position: relative;
   overflow: hidden;
   cursor: grab;
   user-select: none;
-  background-color: var(--bg, #0e1113);
-  background-image: radial-gradient(rgba(137, 153, 166, 0.16) 1.5px, transparent 1.5px);
-  background-size: 24px 24px;
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4);
+  background-color: #ffffff;
+  background-image: radial-gradient(#d1d5db 1.5px, transparent 1.5px);
+  background-size: 26px 26px;
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.05);
 }
 
 .roadmap-linear-viewport {
@@ -48,12 +48,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 48px 24px 80px;
-  min-width: 900px;
+  padding: 40px 24px 80px;
+  min-width: 960px;
 }
 
 /* --------------------------------------------------------------------------
-   2. Floating Canvas Controls Toolbar
+   2. Floating Canvas Controls Toolbar & Legend
    -------------------------------------------------------------------------- */
 .roadmap-canvas-controls {
   position: absolute;
@@ -64,11 +64,11 @@
   align-items: center;
   gap: 4px;
   padding: 4px 6px;
-  border-radius: 8px;
-  border: 1px solid var(--border-strong, #3f4a50);
-  background: rgba(21, 26, 29, 0.88);
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(8px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 
 .roadmap-control-btn {
@@ -80,10 +80,10 @@
   min-width: 30px !important;
   min-height: 30px !important;
   padding: 0 !important;
-  border-radius: 6px !important;
+  border-radius: 5px !important;
   border: 1px solid transparent !important;
   background: transparent !important;
-  color: var(--muted, #c2c9cc) !important;
+  color: #4b5563 !important;
   font-size: 12px !important;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -91,15 +91,15 @@
 }
 
 .roadmap-control-btn:hover {
-  background: var(--surface-2, #1b2125) !important;
-  color: var(--text, #eef1f3) !important;
-  border-color: var(--border, #2a3236) !important;
+  background: #f3f4f6 !important;
+  color: #111827 !important;
+  border-color: #d1d5db !important;
 }
 
 .roadmap-control-btn.is-active {
-  background: rgba(63, 140, 255, 0.15) !important;
-  color: var(--accent-bright, #68a5ff) !important;
-  border-color: var(--accent, #3f8cff) !important;
+  background: rgba(43, 120, 228, 0.1) !important;
+  color: #2b78e4 !important;
+  border-color: #2b78e4 !important;
 }
 
 .roadmap-zoom-label {
@@ -107,7 +107,7 @@
   font-size: 11px;
   font-family: monospace;
   font-weight: 700;
-  color: var(--dim, #8999a6);
+  color: #4b5563;
   min-width: 44px;
   text-align: center;
 }
@@ -115,7 +115,7 @@
 .roadmap-control-divider {
   width: 1px;
   height: 18px;
-  background: var(--border, #2a3236);
+  background: #e5e7eb;
   margin: 0 4px;
 }
 
@@ -127,46 +127,44 @@
   z-index: 20;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--border, #2a3236);
-  background: rgba(21, 26, 29, 0.92);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  gap: 7px;
+  padding: 10px 14px;
+  border-radius: 5px;
+  border: 2.7px solid #000000;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   pointer-events: auto;
   user-select: none;
 }
 
 .flowchart-canvas-legend-title {
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--dim, #8999a6);
+  font-size: 12px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 2px;
 }
 
 .flowchart-canvas-legend-items {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .legend-item {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  font-size: 11px;
+  gap: 8px;
+  font-size: 12px;
   font-weight: 500;
-  color: var(--muted, #c2c9cc);
+  color: #1f2937;
 }
 
 .legend-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 15px;
-  height: 15px;
+  width: 17px;
+  height: 17px;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -182,122 +180,67 @@
 }
 
 .legend-line.is-flexible {
-  width: 15px;
+  width: 20px;
   height: 0;
-  border-top: 2px dashed #3f8cff;
+  border-top: 3.5px dotted #2b78e4;
   flex-shrink: 0;
 }
 
 /* --------------------------------------------------------------------------
-   3. Flowchart SVG Connectors
+   3. Canvas Header & Title
    -------------------------------------------------------------------------- */
-.flowchart-svg-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
+.flowchart-track-notification {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 9999px;
+  background: #181d20;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  user-select: none;
 }
 
-.flowchart-connector-path {
-  fill: none;
-  stroke: var(--border-strong, #3f4a50);
-  stroke-width: 2.5px;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.flowchart-connector-path.is-solid {
-  stroke: var(--border-strong, #3f4a50);
-}
-
-.flowchart-connector-path.is-dashed {
-  stroke-dasharray: 4 5;
-  stroke: #4a575f;
-}
-
-.flowchart-connector-path.is-learning {
-  stroke: var(--accent, #3f8cff);
-  filter: drop-shadow(0 0 3px rgba(63, 140, 255, 0.4));
-}
-
-.flowchart-connector-path.is-done {
-  stroke: #10b981;
+.flowchart-canvas-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #000000;
+  text-align: center;
+  margin: 0;
+  letter-spacing: -0.02em;
+  user-select: none;
 }
 
 /* --------------------------------------------------------------------------
-   4. Milestone & Stage Containers
+   4. Flowchart Node Architecture
    -------------------------------------------------------------------------- */
-.flowchart-stage-wrapper {
-  position: relative;
-  z-index: 2;
+.flowchart-track-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
-  max-width: 960px;
-  margin-bottom: 48px;
 }
 
-.flowchart-stage-wrapper:last-child {
-  margin-bottom: 0;
-}
-
-/* Milestone Header Pill */
-.flowchart-stage-header {
-  display: inline-flex;
+.flowchart-stage-block {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 8px 24px;
-  border-radius: 9999px;
-  border: 1px solid var(--border-strong, #3f4a50);
-  background: var(--surface, #151a1d);
-  color: var(--text, #eef1f3);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
-  margin-bottom: 12px;
-  z-index: 3;
+  width: 100%;
 }
 
-.flowchart-stage-header .stage-index {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--accent, #3f8cff);
-  color: #ffffff;
-  font-size: 11px;
-  font-weight: 800;
-}
-
-.flowchart-stage-summary {
-  max-width: 640px;
-  text-align: center;
-  color: var(--muted, #c2c9cc);
-  font-size: 12px;
-  line-height: 1.55;
-  margin-top: 0;
-  margin-bottom: 24px;
-}
-
-/* --------------------------------------------------------------------------
-   5. Flowchart Graph Nodes
-   -------------------------------------------------------------------------- */
+/* Tight vertical sequence of main spine nodes */
 .flowchart-spine-flow {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 32px;
+  gap: 6px;
   width: 100%;
 }
 
+/* Node Row: Left Wing (280px) + Left Connector (60px) + Spine Node (260px) + Right Connector (60px) + Right Wing (280px) */
 .flowchart-node-row {
   display: flex;
   align-items: center;
@@ -306,316 +249,236 @@
   width: 100%;
 }
 
-/* Left & Right Branching Containers */
 .flowchart-branch-container {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  min-width: 220px;
-  max-width: 260px;
+  width: 280px;
+  flex-shrink: 0;
 }
 
 .flowchart-branch-left {
   align-items: flex-end;
-  text-align: right;
-  margin-right: 36px;
 }
 
 .flowchart-branch-right {
   align-items: flex-start;
-  text-align: left;
-  margin-left: 36px;
+}
+
+.flowchart-branch-spacer {
+  width: 280px;
+  flex-shrink: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.flowchart-branch-svg {
+  width: 60px;
+  flex-shrink: 0;
+  overflow: visible;
+  pointer-events: none;
 }
 
 /* Main Spine Topic Node Card */
 .flowchart-main-node {
   all: unset;
   box-sizing: border-box;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: space-between !important;
-  width: 340px !important;
-  min-height: 84px !important;
-  padding: 14px 18px !important;
-  border-radius: 10px !important;
-  border: 2px solid var(--border, #2a3236) !important;
-  background: var(--surface, #151a1d) !important;
-  color: var(--text, #eef1f3) !important;
-  cursor: pointer;
-  position: relative;
-  z-index: 3;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
-  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.18s ease,
-              box-shadow 0.18s ease;
-  white-space: normal !important;
-  text-align: left !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  z-index: 5;
+  width: 260px !important;
+  min-height: 46px !important;
+  padding: 10px 18px !important;
+  border-radius: 5px !important;
+  border: 2.7px solid #000000 !important;
+  background: #fdff00 !important;
+  color: #000000 !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  line-height: 1.3 !important;
+  cursor: pointer !important;
+  transition: background-color 0.15s ease, transform 0.12s ease !important;
+  user-select: none !important;
+  flex-shrink: 0 !important;
 }
 
 .flowchart-main-node:hover {
-  transform: translateY(-3px);
-  border-color: var(--accent, #3f8cff) !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 12px rgba(63, 140, 255, 0.25);
+  background: #d6d700 !important;
 }
 
 .flowchart-main-node.is-selected {
-  border-color: var(--accent-bright, #68a5ff) !important;
-  box-shadow: 0 0 0 2px rgba(63, 140, 255, 0.45), 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+  outline: 3.5px solid #2b78e4 !important;
+  outline-offset: 3px !important;
 }
 
 .flowchart-main-node.is-learning {
-  border-color: var(--accent, #3f8cff) !important;
-  background: linear-gradient(180deg, var(--surface) 0%, rgba(63, 140, 255, 0.08) 100%) !important;
-  box-shadow: 0 0 16px rgba(63, 140, 255, 0.35);
-}
-
-.flowchart-main-node.is-done {
-  border-color: #10b981 !important;
-  background: linear-gradient(180deg, var(--surface) 0%, rgba(16, 185, 129, 0.08) 100%) !important;
+  box-shadow: 0 0 0 3.5px rgba(43, 120, 228, 0.5) !important;
 }
 
 .flowchart-main-node.is-skipped {
-  opacity: 0.55;
+  opacity: 0.6;
   border-style: dashed !important;
 }
 
 .flowchart-main-node.is-search-match {
-  border-color: #ffd166 !important;
-  box-shadow: 0 0 20px rgba(255, 209, 102, 0.6) !important;
+  box-shadow: 0 0 0 4px #ff9800 !important;
 }
 
-/* Main Node Content Elements */
-.flowchart-main-node-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
-  width: 100%;
-}
-
-.flowchart-main-node-title {
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1.35;
-  color: var(--text, #eef1f3);
-  margin: 0;
-}
-
-.flowchart-main-node-badge {
-  font-size: 9px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 2px 6px;
-  border-radius: 4px;
-  border: 1px solid var(--border-strong, #3f4a50);
-  background: var(--surface-2, #1b2125);
-  color: var(--dim, #8999a6);
-  flex-shrink: 0;
-}
-
-.flowchart-main-node-badge.is-core {
-  border-color: rgba(63, 140, 255, 0.45);
-  color: var(--accent-bright, #68a5ff);
-  background: rgba(63, 140, 255, 0.12);
-}
-
-.flowchart-main-node-badge.is-recommended {
-  border-color: rgba(16, 185, 129, 0.4);
-  color: #34d399;
-  background: rgba(16, 185, 129, 0.1);
-}
-
-.flowchart-main-node-badge.is-frontier {
-  border-color: rgba(168, 85, 247, 0.4);
-  color: #c084fc;
-  background: rgba(168, 85, 247, 0.1);
-}
-
-.flowchart-main-node-badge.is-foundational {
-  border-color: rgba(234, 179, 8, 0.4);
-  color: #fde047;
-  background: rgba(234, 179, 8, 0.1);
-}
-
-/* Circular Recommendation Corner Badges */
-.flowchart-corner-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 17px;
-  height: 17px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
-}
-
-.flowchart-corner-badge.is-core {
-  background: #874efe;
-  color: #ffffff;
-}
-
-.flowchart-corner-badge.is-recommended {
-  background: #10b981;
-  color: #ffffff;
-}
-
-.flowchart-main-node-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 10px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  font-size: 11px;
-}
-
-.flowchart-status-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 2px 8px;
-  border-radius: 9999px;
-  font-size: 10px;
-  font-weight: 700;
-  transition: all 0.15s ease;
-  cursor: pointer;
-}
-
-.flowchart-status-pill.is-todo {
-  background: var(--surface-3, #22292e);
-  color: var(--dim, #8999a6);
-  border: 1px solid var(--border, #2a3236);
-}
-
-.flowchart-status-pill.is-learning {
-  background: rgba(63, 140, 255, 0.18);
-  color: var(--accent-bright, #68a5ff);
-  border: 1px solid var(--accent, #3f8cff);
-}
-
-.flowchart-status-pill.is-done {
-  background: rgba(16, 185, 129, 0.18);
-  color: #34d399;
-  border: 1px solid #10b981;
-}
-
-.flowchart-status-pill.is-skipped {
-  background: rgba(137, 153, 166, 0.15);
-  color: var(--dim, #8999a6);
-  border: 1px solid var(--border, #2a3236);
-}
-
-/* Branching Subtopic Pills with Circuit Connectors */
+/* Subtopic Branching Card */
 .flowchart-subtopic-pill {
   all: unset;
   box-sizing: border-box;
   display: inline-flex !important;
   align-items: center !important;
-  gap: 6px !important;
-  padding: 6px 12px !important;
-  border-radius: 6px !important;
-  border: 1px solid var(--border, #2a3236) !important;
-  background: var(--surface-2, #1b2125) !important;
-  color: var(--muted, #c2c9cc) !important;
-  font-size: 11px !important;
-  font-weight: 500 !important;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-  white-space: normal !important;
+  justify-content: center !important;
+  position: relative !important;
+  z-index: 5;
+  width: 100% !important;
+  max-width: 280px !important;
+  min-height: 44px !important;
+  padding: 8px 16px !important;
+  border-radius: 5px !important;
+  border: 2.7px solid #000000 !important;
+  background: #ffe599 !important;
+  color: #000000 !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  text-align: center !important;
   line-height: 1.3 !important;
-  position: relative;
-  z-index: 3;
+  cursor: pointer !important;
+  transition: background-color 0.15s ease, transform 0.12s ease !important;
+  user-select: none !important;
 }
 
 .flowchart-subtopic-pill:hover {
-  border-color: var(--accent, #3f8cff) !important;
-  color: var(--text, #eef1f3) !important;
-  background: var(--surface, #151a1d) !important;
-  transform: translateY(-1px);
+  background: #f3c950 !important;
 }
 
-.flowchart-subtopic-pill.is-active {
-  border-color: var(--accent, #3f8cff) !important;
-  color: var(--accent-bright, #68a5ff) !important;
+.flowchart-subtopic-pill.is-active,
+.flowchart-subtopic-pill.is-selected {
+  outline: 3.5px solid #2b78e4 !important;
+  outline-offset: 3px !important;
 }
 
-/* Horizontal Connector Lines from Subtopic Pills to Main Node */
-.flowchart-branch-left .flowchart-subtopic-pill::after {
-  content: "";
+/* Subtopic Section Grouping Container */
+.flowchart-section-box {
+  background: #ffffff !important;
+  border: 2.7px solid #000000 !important;
+  border-radius: 5px !important;
+  padding: 12px 16px !important;
+  width: 100% !important;
+  max-width: 280px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  position: relative !important;
+  z-index: 4;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+}
+
+.flowchart-section-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #000000;
+  line-height: 1.4;
+  text-align: left;
+  margin: 0;
+}
+
+/* Corner Recommendation & Status Badges on Nodes */
+.flowchart-node-corner-badge {
   position: absolute;
-  right: -36px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 36px;
-  height: 0;
-  border-top: 2.5px dotted #3f8cff;
-  pointer-events: none;
-  transition: border-color 0.15s ease;
+  top: -7px;
+  left: -7px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 6;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
-.flowchart-branch-left .flowchart-subtopic-pill:hover::after,
-.flowchart-branch-left .flowchart-subtopic-pill.is-active::after {
-  border-color: #68a5ff;
+.flowchart-node-corner-badge.is-core {
+  background: #874efe;
+  color: #ffffff;
 }
 
-.flowchart-branch-right .flowchart-subtopic-pill::before {
-  content: "";
+.flowchart-node-corner-badge.is-recommended {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.flowchart-node-done-badge {
   position: absolute;
-  left: -36px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 36px;
-  height: 0;
-  border-top: 2.5px dotted #3f8cff;
-  pointer-events: none;
-  transition: border-color 0.15s ease;
-}
-
-.flowchart-branch-right .flowchart-subtopic-pill:hover::before,
-.flowchart-branch-right .flowchart-subtopic-pill.is-active::before {
-  border-color: #68a5ff;
+  top: -7px;
+  right: -7px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #10b981;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 6;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
 /* --------------------------------------------------------------------------
-   6. Flowchart Connector Arrows & Badges
+   5. Connectors: Solid Vertical Spine & Dotted Curved Branches
    -------------------------------------------------------------------------- */
-.flowchart-vertical-connector {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  height: 36px;
+.flowchart-vertical-spine-line {
+  width: 3.5px;
+  height: 48px;
+  background: #2b78e4;
+  border-radius: 2px;
+  margin: 0 auto;
   position: relative;
   z-index: 2;
-  color: #3f8cff;
+  flex-shrink: 0;
 }
 
-.flowchart-vertical-line {
-  width: 0;
-  height: 100%;
-  border-left: 2.5px dotted #3f8cff;
+.flowchart-connector-path {
+  fill: none;
+  stroke: #2b78e4;
+  stroke-width: 3.5px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.flowchart-connector-path.is-solid {
+  stroke-dasharray: 0;
+}
+
+.flowchart-connector-path.is-dashed {
+  stroke-dasharray: 0.8 8;
 }
 
 /* --------------------------------------------------------------------------
-   7. Master Architecture System Map (4-Tier Flow)
+   6. Master Architecture System Map (4-Tier Flow)
    -------------------------------------------------------------------------- */
 .master-tree-container {
   display: flex;
   flex-direction: column;
-  gap: 36px;
+  gap: 32px;
   width: 100%;
   max-width: 980px;
 }
 
 .master-tier-card {
-  border: 1px solid var(--border, #2a3236);
-  border-radius: 10px;
-  background: var(--surface, #151a1d);
+  border: 2.7px solid #000000;
+  border-radius: 6px;
+  background: #ffffff;
   padding: 24px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
   position: relative;
   z-index: 2;
+  color: #000000;
 }
 
 .master-tier-header {
@@ -625,26 +488,31 @@
   gap: 16px;
   margin-bottom: 20px;
   padding-bottom: 14px;
-  border-bottom: 1px solid var(--border, #2a3236);
+  border-bottom: 1.5px solid #e5e7eb;
+}
+
+.master-tier-header p {
+  color: #4b5563 !important;
 }
 
 .master-tier-badge {
   display: inline-block;
   padding: 3px 8px;
   border-radius: 4px;
-  background: rgba(63, 140, 255, 0.15);
-  color: var(--accent-bright, #68a5ff);
-  font-size: 10px;
+  background: #fdff00;
+  border: 1.5px solid #000000;
+  color: #000000;
+  font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .master-tier-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text, #eef1f3);
+  font-size: 18px;
+  font-weight: 800;
+  color: #000000;
   margin: 0;
 }
 
@@ -661,24 +529,37 @@
   flex-direction: column !important;
   justify-content: space-between !important;
   padding: 16px !important;
-  border-radius: 8px !important;
-  border: 1px solid var(--border, #2a3236) !important;
-  background: var(--surface-2, #1b2125) !important;
-  color: var(--text, #eef1f3) !important;
+  border-radius: 5px !important;
+  border: 2.5px solid #000000 !important;
+  background: #ffe599 !important;
+  color: #000000 !important;
   cursor: pointer;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.15s ease;
   text-decoration: none !important;
 }
 
 .master-discipline-card:hover {
-  border-color: var(--accent, #3f8cff) !important;
-  background: var(--surface, #151a1d) !important;
+  background: #f3c950 !important;
   transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.master-discipline-card * {
+  color: #000000 !important;
+}
+
+.master-discipline-card p {
+  color: #374151 !important;
+}
+
+.master-discipline-card .discipline-badge {
+  background: rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  color: #000000 !important;
 }
 
 /* --------------------------------------------------------------------------
-   8. Slide-over Topic Drawer Styling
+   7. Slide-over Topic Drawer Styling
    -------------------------------------------------------------------------- */
 .roadmap-resource-drawer {
   animation: slideDrawer 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -755,8 +636,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   9. Defensive Button Resets
-   Prevents host .btn or generic button rules from distorting roadmap nodes
+   8. Defensive Button Resets
    -------------------------------------------------------------------------- */
 .roadmap-canvas-wrapper button,
 .roadmap-canvas-wrapper a.master-discipline-card {
