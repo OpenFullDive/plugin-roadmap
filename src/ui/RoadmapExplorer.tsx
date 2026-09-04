@@ -1182,190 +1182,197 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
   }, [isMaster, field, statuses]);
 
   return (
-    <div className="w-full max-w-[1140px] mx-auto min-w-0">
-      {/* Top Breadcrumb & Discipline Switcher Bar */}
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-3 text-xs">
-        <Link
-          href="/roadmap"
-          className="inline-flex items-center gap-1.5 font-bold text-[var(--muted)] hover:text-[var(--text)] transition-colors text-decoration-none"
-        >
-          <ArrowLeft size={14} />
-          <span>All Roadmaps</span>
-        </Link>
+    <div className="roadmap-explorer-root">
+      {/* Top Header Card (roadmap.sh Authentic Design) */}
+      <header className="rm-header-card">
+        {/* Row 1: Breadcrumb (Left) & Actions Bar (Right) */}
+        <div className="rm-top-bar">
+          <Link href="/roadmap" className="rm-breadcrumb-link">
+            <ArrowLeft size={15} />
+            <span>All Roadmaps</span>
+          </Link>
 
-        <div className="flex items-center gap-2">
-          <span className="text-[var(--dim)] font-medium">Discipline:</span>
-          <select
-            value={isMaster ? "master" : field?.id ?? "bci"}
-            onChange={(e) => {
-              const val = e.target.value;
-              window.location.href = val === "master" ? "/roadmap" : `/roadmap/${val}`;
-            }}
-            className="rounded-md border border-[var(--border-strong)] bg-[var(--surface-2)] px-2.5 py-1 text-xs font-semibold text-[var(--text)] outline-none focus:border-[var(--accent)] cursor-pointer"
-          >
-            <option value="master">Master Curriculum (All 12 Tracks)</option>
-            <optgroup label="12 Open Disciplines">
-              {roadmapFields.map((f) => (
-                <option key={f.id} value={f.id}>
-                  {f.shortTitle} ({f.category})
-                </option>
-              ))}
-            </optgroup>
-          </select>
-        </div>
-      </div>
-
-      {/* Top Header Card */}
-      <header className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[var(--dim)] uppercase">
-              <Compass size={14} className="text-[var(--accent)]" />
-              <span>OpenFullDive Roadmap</span>
-              <span>·</span>
-              <span className="text-[var(--accent-bright)]">{isMaster ? "Complete Curriculum" : field?.category}</span>
-            </div>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight text-[var(--text)] m-0">{title}</h1>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              className="inline-flex size-[34px] items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface-2)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)] transition-colors cursor-pointer"
-              onClick={exportProgress}
-              aria-label="Export Progress JSON"
-              title="Export Progress JSON"
-            >
-              {exported ? <Check size={15} /> : <Download size={15} />}
-            </button>
-
-            <button
-              className={clsx(
-                "inline-flex size-[34px] items-center justify-center rounded-lg border bg-[var(--surface-2)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)] transition-colors cursor-pointer",
-                saved ? "border-[var(--accent-bright)] text-[var(--accent-bright)] bg-[rgba(63,140,255,0.1)]" : "border-[var(--border)]",
-              )}
-              onClick={toggleFavorite}
-              aria-label={saved ? "Saved" : "Save roadmap"}
-              title={saved ? "Saved" : "Save roadmap"}
-            >
-              {saved ? <Check size={15} /> : <Bookmark size={15} />}
-            </button>
-
-            <button
-              className="inline-flex size-[34px] items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface-2)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)] transition-colors cursor-pointer"
-              onClick={share}
-              aria-label="Share roadmap"
-              title="Share roadmap link"
-            >
-              {copied ? <Check size={15} /> : <Share2 size={15} />}
-            </button>
-          </div>
-        </div>
-
-        {/* Description & Progress Summary Bar */}
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-4 border-t border-[var(--border)] pt-4">
-          <p className="max-w-[72ch] text-xs text-[var(--muted)] leading-relaxed m-0">{description}</p>
-          <div className="flex min-w-[280px] flex-1 max-w-[440px] flex-col gap-1.5">
-            <div className="flex items-center justify-between text-[11px] text-[var(--dim)]">
-              <span>
-                Progress: <strong className="text-[var(--text)]">{progressPercent}%</strong>
-              </span>
-              <span>
-                {doneCount} of {allTopicKeys.length} topics done
-              </span>
-            </div>
-            <div className="h-[6px] w-full overflow-hidden rounded-full bg-[var(--surface-3)]">
-              <div
-                className="h-full bg-[var(--accent)] transition-all duration-300 rounded-full"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* View Navigation Tabs */}
-        <nav className="mt-4 flex gap-6 border-b border-[var(--border)] text-xs font-semibold" aria-label="Roadmap views">
-          <button
-            className={clsx(
-              "inline-flex items-center gap-2 border-b-2 pb-2.5 transition-colors cursor-pointer bg-transparent border-0 font-medium",
-              tab === "roadmap" && viewMode === "flowchart"
-                ? "border-[var(--accent-bright)] text-[var(--text)] font-bold"
-                : "border-transparent text-[var(--dim)] hover:text-[var(--muted)]",
-            )}
-            onClick={() => {
-              setTab("roadmap");
-              setViewMode("flowchart");
-            }}
-          >
-            <Layers3 size={15} /> Learning Flowchart
-          </button>
-
-          {!isMaster && (
-            <button
-              className={clsx(
-                "inline-flex items-center gap-2 border-b-2 pb-2.5 transition-colors cursor-pointer bg-transparent border-0 font-medium",
-                tab === "roadmap" && viewMode === "linear"
-                  ? "border-[var(--accent-bright)] text-[var(--text)] font-bold"
-                  : "border-transparent text-[var(--dim)] hover:text-[var(--muted)]",
-              )}
-              onClick={() => {
-                setTab("roadmap");
-                setViewMode("linear");
+          <div className="rm-actions-group">
+            {/* Discipline Switcher */}
+            <select
+              value={isMaster ? "master" : field?.id ?? "bci"}
+              onChange={(e) => {
+                const val = e.target.value;
+                window.location.href = val === "master" ? "/roadmap" : `/roadmap/${val}`;
               }}
+              className="rm-select-discipline"
+              aria-label="Select discipline track"
             >
-              <List size={15} /> Linear Guide
-            </button>
-          )}
+              <option value="master">Master Curriculum (All 12 Tracks)</option>
+              <optgroup label="12 Open Disciplines">
+                {roadmapFields.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.shortTitle} ({f.category})
+                  </option>
+                ))}
+              </optgroup>
+            </select>
 
-          <button
-            className={clsx(
-              "inline-flex items-center gap-2 border-b-2 pb-2.5 transition-colors cursor-pointer bg-transparent border-0 font-medium",
-              tab === "projects"
-                ? "border-[var(--accent-bright)] text-[var(--text)] font-bold"
-                : "border-transparent text-[var(--dim)] hover:text-[var(--muted)]",
-            )}
-            onClick={() => setTab("projects")}
-          >
-            <FolderKanban size={15} /> Projects ({projects.length})
-          </button>
-
-          <button
-            className={clsx(
-              "inline-flex items-center gap-2 border-b-2 pb-2.5 transition-colors cursor-pointer bg-transparent border-0 font-medium",
-              tab === "contribute"
-                ? "border-[var(--accent-bright)] text-[var(--text)] font-bold"
-                : "border-transparent text-[var(--dim)] hover:text-[var(--muted)]",
-            )}
-            onClick={() => setTab("contribute")}
-          >
-            <GitFork size={15} /> How to Contribute
-          </button>
-        </nav>
-
-        {/* Roadmap.sh signature banner pill & overview accordion */}
-        <div className="mt-3 flex flex-col gap-2">
-          <div className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-[rgba(255,209,102,0.1)] border border-[rgba(255,209,102,0.25)] px-3 py-2 text-xs text-[#ffd166]">
-            <div className="flex items-center gap-2">
-              <Sparkles size={14} className="text-[#ffd166] flex-shrink-0" />
-              <span>Mark any milestone to track progress. Click any card to view scientific specifications & formulas.</span>
-            </div>
+            {/* Bookmark Action */}
             <button
               type="button"
-              className="inline-flex items-center gap-1 font-bold text-[#ffd166] hover:underline cursor-pointer bg-transparent border-0 p-0 text-xs"
-              onClick={() => setShowOverviewAccordion((prev) => !prev)}
+              className={clsx("rm-btn-action", saved && "is-active")}
+              onClick={toggleFavorite}
+              aria-label={saved ? "Saved to favorites" : "Bookmark roadmap"}
+              title={saved ? "Saved to favorites" : "Bookmark roadmap"}
             >
-              <HelpCircle size={13} />
-              <span>{showOverviewAccordion ? "Hide details" : `What is ${field?.shortTitle ?? "this track"}?`}</span>
-              <ChevronDown size={13} className={clsx("transition-transform", showOverviewAccordion && "rotate-180")} />
+              <Bookmark size={16} className={saved ? "fill-[var(--accent-bright)] text-[var(--accent-bright)]" : ""} />
+            </button>
+
+            {/* Favorite / Star Action */}
+            <button
+              type="button"
+              className="rm-btn-action"
+              onClick={exportProgress}
+              aria-label="Star this roadmap"
+              title="Star this roadmap"
+            >
+              <Sparkles size={16} />
+            </button>
+
+            {/* Iconic Yellow Download Button */}
+            <button
+              type="button"
+              className="rm-btn-download"
+              onClick={exportProgress}
+              aria-label="Download Roadmap Progress"
+              title="Download Progress JSON / Curriculum"
+            >
+              {exported ? <Check size={15} strokeWidth={2.5} /> : <Download size={15} strokeWidth={2.5} />}
+              <span>{exported ? "Exported!" : "Download"}</span>
+            </button>
+
+            {/* Iconic Yellow Share Button */}
+            <button
+              type="button"
+              className="rm-btn-share"
+              onClick={share}
+              aria-label="Share Roadmap Link"
+              title="Share Roadmap Link"
+            >
+              {copied ? <Check size={16} strokeWidth={2.5} /> : <Share2 size={16} strokeWidth={2.5} />}
             </button>
           </div>
+        </div>
+
+        {/* Row 2: Hero Title */}
+        <h1 className="rm-hero-title">{title}</h1>
+
+        {/* Row 3: Subtitle */}
+        <p className="rm-hero-subtitle">
+          {isMaster
+            ? "Step by step curriculum connecting all 12 disciplines for full-dive virtual reality in 2026."
+            : `Step by step guide to mastering ${title.toLowerCase()} in 2026. ${description}`}
+        </p>
+
+        {/* Row 4: Tabs Bar (Roadmap, Projects, Linear Guide, Contribute) */}
+        <div className="rm-tabs-bar">
+          <nav className="rm-tabs-nav" aria-label="Roadmap views">
+            <button
+              type="button"
+              className={clsx("rm-tab-btn", tab === "roadmap" && viewMode === "flowchart" && "is-active")}
+              onClick={() => {
+                setTab("roadmap");
+                setViewMode("flowchart");
+              }}
+            >
+              <Layers3 size={15} />
+              <span>Roadmap</span>
+            </button>
+
+            <button
+              type="button"
+              className={clsx("rm-tab-btn", tab === "projects" && "is-active")}
+              onClick={() => setTab("projects")}
+            >
+              <FolderKanban size={15} />
+              <span>Projects</span>
+              {projects.length > 0 && (
+                <span className="rounded-full bg-[var(--surface-3)] px-1.5 py-0.2 text-[10px] font-bold text-[var(--dim)]">
+                  {projects.length}
+                </span>
+              )}
+            </button>
+
+            {!isMaster && (
+              <button
+                type="button"
+                className={clsx("rm-tab-btn", tab === "roadmap" && viewMode === "linear" && "is-active")}
+                onClick={() => {
+                  setTab("roadmap");
+                  setViewMode("linear");
+                }}
+              >
+                <List size={15} />
+                <span>Linear Guide</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              className={clsx("rm-tab-btn", tab === "contribute" && "is-active")}
+              onClick={() => setTab("contribute")}
+            >
+              <GitFork size={15} />
+              <span>Contribute</span>
+            </button>
+          </nav>
+
+          {/* Progress Info on Right */}
+          <div className="rm-tab-progress-info">
+            <span>
+              Progress: <strong className="text-[var(--text)]">{progressPercent}%</strong> ({doneCount}/{allTopicKeys.length})
+            </span>
+            <div className="rm-tab-progress-bar">
+              <div className="rm-tab-progress-fill" style={{ width: `${progressPercent}%` }} />
+            </div>
+          </div>
+        </div>
+
+        {/* Row 5: Signature Yellow Tracking Banner */}
+        <div className="rm-tracking-banner">
+          <div className="rm-tracking-banner-left">
+            <Sparkles size={15} className="text-[#ffd166] flex-shrink-0" />
+            <span>Mark any topic to start tracking. Click any card to view scientific specifications & formulas.</span>
+          </div>
+          <button
+            type="button"
+            className="rm-tracking-banner-action"
+            onClick={() => setShowOverviewAccordion((prev) => !prev)}
+          >
+            <span>{showOverviewAccordion ? "Hide overview" : "Watch overview"}</span>
+            <ArrowRight size={13} />
+          </button>
+        </div>
+
+        {/* Row 6: "What is [Discipline]?" Accordion */}
+        <div className="rm-accordion-container">
+          <button
+            type="button"
+            className="rm-accordion-header"
+            onClick={() => setShowOverviewAccordion((prev) => !prev)}
+            aria-expanded={showOverviewAccordion}
+          >
+            <div className="flex items-center gap-2">
+              <HelpCircle size={15} className="text-[#ffd166]" />
+              <span>What is {isMaster ? "Full-Dive VR Development" : field?.title ?? "this track"}?</span>
+            </div>
+            <ChevronDown size={15} className={clsx("text-[var(--dim)] transition-transform duration-200", showOverviewAccordion && "rotate-180")} />
+          </button>
 
           {showOverviewAccordion && (
-            <div className="rounded-md border border-[var(--border)] bg-[var(--surface-2)] p-3.5 text-xs text-[var(--muted)] leading-relaxed">
-              <div className="font-bold text-[var(--text)] mb-1">About {field?.title ?? "this discipline"}</div>
-              <p className="m-0 mb-2">{field?.description}</p>
-              <div className="flex flex-wrap items-center gap-4 text-[11px] text-[var(--dim)] pt-2 border-t border-[var(--border)]">
+            <div className="rm-accordion-body">
+              <div className="font-bold text-[var(--text)] mb-1">About {field?.title ?? "this curriculum"}</div>
+              <p className="m-0 mb-3 leading-relaxed">{field?.description ?? description}</p>
+              <div className="flex flex-wrap items-center gap-5 text-[11px] text-[var(--dim)] pt-2.5 border-t border-[var(--border)]">
                 <div>Target Audience: <strong className="text-[var(--text)]">{audience}</strong></div>
                 <div>Estimated Duration: <strong className="text-[var(--text)]">{duration}</strong></div>
+                <div>Level: <strong className="text-[var(--text)]">{field?.level ?? "Multidisciplinary"}</strong></div>
               </div>
             </div>
           )}

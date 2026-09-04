@@ -605,3 +605,358 @@
   word-break: break-word !important;
 }
 
+/* ==========================================================================
+   roadmap.sh Authentic Top Header Styles
+   Pixel-accurate match with roadmap.sh layout & OpenFullDive dark tokens
+   ========================================================================== */
+
+.roadmap-explorer-root {
+  width: 100%;
+  max-width: 1140px;
+  margin-left: auto;
+  margin-right: auto;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* Header Card: Spacious rounded surface matching roadmap.sh */
+.rm-header-card {
+  background-color: var(--surface, #151a1d);
+  border: 1px solid var(--border, #2a3236);
+  border-radius: 12px;
+  padding: 24px 28px 20px 28px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  margin-bottom: 24px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+  .rm-header-card {
+    padding: 16px 16px 14px 16px;
+  }
+}
+
+/* Isolate all buttons within rm-header-card from host globals.css */
+.rm-header-card button {
+  font-family: inherit !important;
+  text-transform: none !important;
+  box-sizing: border-box !important;
+  min-height: 0 !important;
+  line-height: normal !important;
+}
+
+/* Top bar: Left Breadcrumb & Right Actions */
+.rm-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.rm-breadcrumb-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--muted, #c2c9cc);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.rm-breadcrumb-link:hover {
+  color: var(--text, #eef1f3);
+}
+
+.rm-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Neutral action buttons (Bookmark, Community Star) */
+.rm-btn-action {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  padding: 0 !important;
+  border-radius: 8px !important;
+  border: 1px solid var(--border, #2a3236) !important;
+  background-color: var(--surface-2, #1d2529) !important;
+  color: var(--muted, #c2c9cc) !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.rm-btn-action:hover {
+  border-color: var(--border-strong, #465258) !important;
+  color: var(--text, #eef1f3) !important;
+  background-color: var(--surface-3, #2a3236) !important;
+}
+
+.rm-btn-action.is-active {
+  border-color: var(--accent-bright, #5c9fff) !important;
+  color: var(--accent-bright, #5c9fff) !important;
+  background-color: rgba(63, 140, 255, 0.12) !important;
+}
+
+/* Iconic Yellow Download Button (Signature roadmap.sh) */
+.rm-btn-download {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  height: 36px !important;
+  padding: 0 14px !important;
+  border-radius: 8px !important;
+  border: none !important;
+  background-color: #ffd166 !important;
+  color: #0e1113 !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em !important;
+  cursor: pointer !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+  transition: all 0.15s ease !important;
+}
+
+.rm-btn-download:hover {
+  background-color: #ffc043 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 3px 10px rgba(255, 209, 102, 0.4) !important;
+}
+
+.rm-btn-download:active {
+  transform: translateY(0) !important;
+}
+
+/* Iconic Yellow Share Button (Signature roadmap.sh) */
+.rm-btn-share {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  padding: 0 !important;
+  border-radius: 8px !important;
+  border: none !important;
+  background-color: #ffd166 !important;
+  color: #0e1113 !important;
+  cursor: pointer !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+  transition: all 0.15s ease !important;
+}
+
+.rm-btn-share:hover {
+  background-color: #ffc043 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 3px 10px rgba(255, 209, 102, 0.4) !important;
+}
+
+.rm-btn-share:active {
+  transform: translateY(0) !important;
+}
+
+/* Discipline Select Dropdown in Top Bar */
+.rm-select-discipline {
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong, #465258);
+  background-color: var(--surface-2, #1d2529);
+  color: var(--text, #eef1f3);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 0 10px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.rm-select-discipline:focus {
+  border-color: var(--accent, #3f8cff);
+}
+
+/* Large Hero Title (Signature roadmap.sh) */
+.rm-hero-title {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--text, #eef1f3);
+  margin: 22px 0 6px 0;
+  line-height: 1.15;
+}
+
+@media (min-width: 768px) {
+  .rm-hero-title {
+    font-size: 46px;
+  }
+}
+
+/* Hero Subtitle */
+.rm-hero-subtitle {
+  font-size: 14.5px;
+  color: var(--muted, #c2c9cc);
+  margin: 0 0 22px 0;
+  line-height: 1.55;
+  max-width: 820px;
+}
+
+@media (min-width: 768px) {
+  .rm-hero-subtitle {
+    font-size: 15.5px;
+  }
+}
+
+/* Nav Tabs Bar (Roadmap, Projects, Linear Guide, Contribute) */
+.rm-tabs-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border, #2a3236);
+  margin-top: 8px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.rm-tabs-nav {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.rm-tab-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 10px 4px !important;
+  border: none !important;
+  border-radius: 0 !important;
+  border-bottom: 2px solid transparent !important;
+  background: transparent !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  color: var(--dim, #829198) !important;
+  cursor: pointer !important;
+  margin-bottom: -1px !important;
+  transition: all 0.15s ease !important;
+}
+
+.rm-tab-btn:hover {
+  color: var(--text, #eef1f3) !important;
+}
+
+.rm-tab-btn.is-active {
+  color: var(--text, #eef1f3) !important;
+  font-weight: 700 !important;
+  border-bottom-color: var(--text, #eef1f3) !important;
+}
+
+/* Progress Pill on Right of Tabs Bar */
+.rm-tab-progress-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--dim, #829198);
+}
+
+.rm-tab-progress-bar {
+  width: 100px;
+  height: 6px;
+  border-radius: 999px;
+  background-color: var(--surface-3, #2a3236);
+  overflow: hidden;
+}
+
+.rm-tab-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background-color: var(--accent, #3f8cff);
+  transition: width 0.3s ease;
+}
+
+/* Signature Yellow Tracking Callout Banner */
+.rm-tracking-banner {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-radius: 8px;
+  background-color: rgba(255, 209, 102, 0.1);
+  border: 1px solid rgba(255, 209, 102, 0.25);
+  padding: 10px 16px;
+  font-size: 12.5px;
+  color: #ffd166;
+}
+
+.rm-tracking-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.rm-tracking-banner-action {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: #ffd166 !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  cursor: pointer !important;
+  transition: opacity 0.15s ease !important;
+}
+
+.rm-tracking-banner-action:hover {
+  text-decoration: underline !important;
+  opacity: 0.85 !important;
+}
+
+/* What is [Discipline]? Accordion */
+.rm-accordion-container {
+  margin-top: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border, #2a3236);
+  background-color: var(--surface-2, #1d2529);
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.rm-accordion-header {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 12px 16px !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--text, #eef1f3) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: background-color 0.15s ease !important;
+}
+
+.rm-accordion-header:hover {
+  background-color: var(--surface-3, #2a3236) !important;
+}
+
+.rm-accordion-body {
+  padding: 16px 18px;
+  border-top: 1px solid var(--border, #2a3236);
+  background-color: var(--surface, #151a1d);
+  font-size: 13px;
+  color: var(--muted, #c2c9cc);
+  line-height: 1.6;
+}
+
+
