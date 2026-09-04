@@ -289,6 +289,11 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 12px rgba(63, 140, 255, 0.25);
 }
 
+.flowchart-main-node.is-selected {
+  border-color: var(--accent-bright, #68a5ff) !important;
+  box-shadow: 0 0 0 2px rgba(63, 140, 255, 0.45), 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+}
+
 .flowchart-main-node.is-learning {
   border-color: var(--accent, #3f8cff) !important;
   background: linear-gradient(180deg, var(--surface) 0%, rgba(63, 140, 255, 0.08) 100%) !important;
@@ -341,9 +346,27 @@
 }
 
 .flowchart-main-node-badge.is-core {
-  border-color: rgba(63, 140, 255, 0.4);
+  border-color: rgba(63, 140, 255, 0.45);
   color: var(--accent-bright, #68a5ff);
-  background: rgba(63, 140, 255, 0.1);
+  background: rgba(63, 140, 255, 0.12);
+}
+
+.flowchart-main-node-badge.is-recommended {
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.flowchart-main-node-badge.is-frontier {
+  border-color: rgba(168, 85, 247, 0.4);
+  color: #c084fc;
+  background: rgba(168, 85, 247, 0.1);
+}
+
+.flowchart-main-node-badge.is-foundational {
+  border-color: rgba(234, 179, 8, 0.4);
+  color: #fde047;
+  background: rgba(234, 179, 8, 0.1);
 }
 
 .flowchart-main-node-footer {
@@ -392,7 +415,7 @@
   border: 1px solid var(--border, #2a3236);
 }
 
-/* Branching Subtopic Pills */
+/* Branching Subtopic Pills with Circuit Connectors */
 .flowchart-subtopic-pill {
   all: unset;
   box-sizing: border-box;
@@ -411,6 +434,7 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
   white-space: normal !important;
   line-height: 1.3 !important;
+  position: relative;
   z-index: 3;
 }
 
@@ -424,6 +448,43 @@
 .flowchart-subtopic-pill.is-active {
   border-color: var(--accent, #3f8cff) !important;
   color: var(--accent-bright, #68a5ff) !important;
+}
+
+/* Horizontal Connector Lines from Subtopic Pills to Main Node */
+.flowchart-branch-left .flowchart-subtopic-pill::after {
+  content: "";
+  position: absolute;
+  right: -36px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 1.5px;
+  background: var(--border-strong, #3f4a50);
+  pointer-events: none;
+  transition: background 0.15s ease;
+}
+
+.flowchart-branch-left .flowchart-subtopic-pill:hover::after,
+.flowchart-branch-left .flowchart-subtopic-pill.is-active::after {
+  background: var(--accent, #3f8cff);
+}
+
+.flowchart-branch-right .flowchart-subtopic-pill::before {
+  content: "";
+  position: absolute;
+  left: -36px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 1.5px;
+  background: var(--border-strong, #3f4a50);
+  pointer-events: none;
+  transition: background 0.15s ease;
+}
+
+.flowchart-branch-right .flowchart-subtopic-pill:hover::before,
+.flowchart-branch-right .flowchart-subtopic-pill.is-active::before {
+  background: var(--accent, #3f8cff);
 }
 
 /* --------------------------------------------------------------------------

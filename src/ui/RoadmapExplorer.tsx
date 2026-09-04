@@ -66,6 +66,7 @@ export type RoadmapExplorerProps = {
 type Tab = "roadmap" | "projects" | "contribute";
 type ViewMode = "flowchart" | "linear";
 type Difficulty = "Beginner" | "Intermediate" | "Advanced";
+type DifficultyFilter = Difficulty | "All";
 type DrawerTab = "knowledge" | "resources" | "community";
 
 type SelectedTopic = {
@@ -137,7 +138,7 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
   // View & Navigation States
   const [tab, setTab] = useState<Tab>("roadmap");
   const [viewMode, setViewMode] = useState<ViewMode>("flowchart");
-  const [difficulty, setDifficulty] = useState<Difficulty>("Beginner");
+  const [difficulty, setDifficulty] = useState<DifficultyFilter>("Beginner");
   const [selected, setSelected] = useState<SelectedTopic | null>(null);
   const [drawerTab, setDrawerTab] = useState<DrawerTab>("knowledge");
 
@@ -422,10 +423,10 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
     <div className="min-w-0">
       {/* Top Header & Overview Bar */}
       <header className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="min-w-0">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[var(--dim)] uppercase">
-              <Compass size={14} className="text-[var(--accent)]" />
+              <Compass size={14} className="text-[var(--accent)] flex-shrink-0" />
               <span>OpenFullDive Roadmap</span>
               <span>·</span>
               <span className="text-[var(--accent-bright)]">{isMaster ? "Complete Curriculum" : field?.category}</span>
@@ -433,59 +434,62 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
             <h1 className="mt-1 text-2xl font-bold tracking-tight text-[var(--text)] m-0">{title}</h1>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {firstIncomplete && (
               <button
                 type="button"
-                className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--accent)] bg-[rgba(63,140,255,0.12)] px-3.5 py-1.5 text-xs font-bold text-[var(--accent-bright)] hover:bg-[var(--accent)] hover:text-white transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--accent)] bg-[rgba(63,140,255,0.12)] px-3.5 py-1.5 text-xs font-bold text-[var(--accent-bright)] hover:bg-[var(--accent)] hover:text-white transition-all cursor-pointer max-w-[200px] sm:max-w-[280px]"
                 onClick={() => {
                   setSelected(firstIncomplete);
                   setDrawerTab("knowledge");
                 }}
+                title={`Continue with: ${firstIncomplete.topic}`}
               >
-                <span>Continue: {firstIncomplete.topic}</span>
-                <ArrowRight size={13} />
+                <span className="truncate">Continue: {firstIncomplete.topic}</span>
+                <ArrowRight size={13} className="flex-shrink-0" />
               </button>
             )}
 
-            <button
-              className="inline-flex size-[34px] items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface-2)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)] transition-colors cursor-pointer"
-              onClick={exportProgress}
-              aria-label="Export Progress JSON"
-              title="Export Progress JSON"
-            >
-              {exported ? <Check size={15} /> : <Download size={15} />}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                className="inline-flex size-[34px] items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface-2)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)] transition-colors cursor-pointer"
+                onClick={exportProgress}
+                aria-label="Export Progress JSON"
+                title="Export Progress JSON"
+              >
+                {exported ? <Check size={15} /> : <Download size={15} />}
+              </button>
 
-            <button
-              className={clsx(
-                "inline-flex size-[34px] items-center justify-center rounded-lg border bg-[var(--surface-2)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)] transition-colors cursor-pointer",
-                saved ? "border-[var(--accent-bright)] text-[var(--accent-bright)] bg-[rgba(63,140,255,0.1)]" : "border-[var(--border)]",
-              )}
-              onClick={toggleFavorite}
-              aria-label={saved ? "Saved" : "Save roadmap"}
-              title={saved ? "Saved" : "Save roadmap"}
-            >
-              {saved ? <Check size={15} /> : <Bookmark size={15} />}
-            </button>
+              <button
+                className={clsx(
+                  "inline-flex size-[34px] items-center justify-center rounded-lg border bg-[var(--surface-2)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)] transition-colors cursor-pointer",
+                  saved ? "border-[var(--accent-bright)] text-[var(--accent-bright)] bg-[rgba(63,140,255,0.1)]" : "border-[var(--border)]",
+                )}
+                onClick={toggleFavorite}
+                aria-label={saved ? "Saved" : "Save roadmap"}
+                title={saved ? "Saved" : "Save roadmap"}
+              >
+                {saved ? <Check size={15} /> : <Bookmark size={15} />}
+              </button>
 
-            <button
-              className="inline-flex size-[34px] items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface-2)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)] transition-colors cursor-pointer"
-              onClick={share}
-              aria-label="Share roadmap"
-              title="Share roadmap link"
-            >
-              {copied ? <Check size={15} /> : <Share2 size={15} />}
-            </button>
+              <button
+                className="inline-flex size-[34px] items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface-2)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)] transition-colors cursor-pointer"
+                onClick={share}
+                aria-label="Share roadmap"
+                title="Share roadmap link"
+              >
+                {copied ? <Check size={15} /> : <Share2 size={15} />}
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Description & Progress Summary Bar */}
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-4 border-t border-[var(--border)] pt-4">
+        <div className="mt-4 flex flex-col md:flex-row md:items-center justify-between gap-4 border-t border-[var(--border)] pt-4">
           <p className="max-w-[72ch] text-xs text-[var(--muted)] leading-relaxed m-0">{description}</p>
-          <div className="flex min-w-[280px] flex-1 max-w-[440px] flex-col gap-1.5">
-            <div className="flex items-center justify-between text-[11px] text-[var(--dim)]">
-              <span>
+          <div className="flex w-full md:w-auto min-w-[240px] md:max-w-[440px] flex-1 flex-col gap-1.5">
+            <div className="flex items-center justify-between text-[11px] text-[var(--dim)] font-mono">
+              <span className="flex items-center gap-1.5">
                 Progress: <strong className="text-[var(--text)]">{progressPercent}%</strong>
               </span>
               <span>
@@ -494,7 +498,7 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
             </div>
             <div className="h-[6px] w-full overflow-hidden rounded-full bg-[var(--surface-3)]">
               <div
-                className="h-full bg-[var(--accent)] transition-all duration-300 rounded-full"
+                className="h-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-bright)] transition-all duration-300 rounded-full"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -502,13 +506,13 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
         </div>
 
         {/* View Navigation Tabs */}
-        <nav className="mt-4 flex gap-6 border-b border-[var(--border)] text-xs font-semibold" aria-label="Roadmap views">
+        <nav className="mt-4 flex items-center gap-2 border-b border-[var(--border)] text-xs font-semibold overflow-x-auto no-scrollbar -mb-[1px]" aria-label="Roadmap views">
           <button
             className={clsx(
-              "inline-flex items-center gap-2 border-b-2 pb-2.5 transition-colors cursor-pointer bg-transparent border-0 font-medium",
+              "inline-flex items-center gap-2 border-b-2 py-2.5 px-3.5 transition-colors cursor-pointer bg-transparent border-0 font-medium whitespace-nowrap text-xs",
               tab === "roadmap"
                 ? "border-[var(--accent-bright)] text-[var(--text)] font-bold"
-                : "border-transparent text-[var(--dim)] hover:text-[var(--muted)]",
+                : "border-transparent text-[var(--dim)] hover:text-[var(--muted)] hover:border-[var(--border)]",
             )}
             onClick={() => setTab("roadmap")}
           >
@@ -516,10 +520,10 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
           </button>
           <button
             className={clsx(
-              "inline-flex items-center gap-2 border-b-2 pb-2.5 transition-colors cursor-pointer bg-transparent border-0 font-medium",
+              "inline-flex items-center gap-2 border-b-2 py-2.5 px-3.5 transition-colors cursor-pointer bg-transparent border-0 font-medium whitespace-nowrap text-xs",
               tab === "projects"
                 ? "border-[var(--accent-bright)] text-[var(--text)] font-bold"
-                : "border-transparent text-[var(--dim)] hover:text-[var(--muted)]",
+                : "border-transparent text-[var(--dim)] hover:text-[var(--muted)] hover:border-[var(--border)]",
             )}
             onClick={() => setTab("projects")}
           >
@@ -527,10 +531,10 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
           </button>
           <button
             className={clsx(
-              "inline-flex items-center gap-2 border-b-2 pb-2.5 transition-colors cursor-pointer bg-transparent border-0 font-medium",
+              "inline-flex items-center gap-2 border-b-2 py-2.5 px-3.5 transition-colors cursor-pointer bg-transparent border-0 font-medium whitespace-nowrap text-xs",
               tab === "contribute"
                 ? "border-[var(--accent-bright)] text-[var(--text)] font-bold"
-                : "border-transparent text-[var(--dim)] hover:text-[var(--muted)]",
+                : "border-transparent text-[var(--dim)] hover:text-[var(--muted)] hover:border-[var(--border)]",
             )}
             onClick={() => setTab("contribute")}
           >
@@ -555,13 +559,23 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
 
           <div className="p-2.5 border-b border-[var(--border)]">
             <div className="flex items-center gap-2 rounded border border-[var(--border)] bg-[var(--bg)] px-2.5 py-1.5 text-[var(--dim)] focus-within:border-[var(--accent)]">
-              <Search size={13} />
+              <Search size={13} className="flex-shrink-0" />
               <input
                 className="w-full border-0 bg-transparent p-0 text-[11px] text-[var(--text)] outline-none placeholder:text-[var(--dim)]"
                 value={trackQuery}
                 onChange={(e) => setTrackQuery(e.target.value)}
                 placeholder="Filter roadmaps..."
               />
+              {trackQuery && (
+                <button
+                  type="button"
+                  onClick={() => setTrackQuery("")}
+                  className="text-[var(--dim)] hover:text-[var(--text)] cursor-pointer bg-transparent border-0 p-0"
+                  aria-label="Clear filter"
+                >
+                  <X size={12} />
+                </button>
+              )}
             </div>
           </div>
 
@@ -570,11 +584,13 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
               href="/roadmap"
               className={clsx(
                 "flex items-center justify-between rounded p-2 text-xs transition-colors hover:bg-[var(--surface-2)]",
-                isMaster ? "bg-[var(--surface-2)] font-bold text-[var(--text)] border-l-2 border-[var(--accent)]" : "text-[var(--muted)]",
+                isMaster
+                  ? "bg-[rgba(63,140,255,0.08)] font-bold text-[var(--text)] border-l-[3px] border-[var(--accent)]"
+                  : "text-[var(--muted)]",
               )}
             >
               <span className="flex items-center gap-2">
-                <Network size={14} className="text-[var(--accent)]" />
+                <Network size={14} className={isMaster ? "text-[var(--accent-bright)]" : "text-[var(--accent)]"} />
                 <span>Master System Tree</span>
               </span>
               <span className="text-[10px] text-[var(--dim)] font-mono">
@@ -585,25 +601,38 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
             {visibleTracks.map((item) => {
               const keys = item.sections.flatMap((s) => s.topics.map((t) => topicKey(item, t)));
               const itemDone = keys.filter((k) => statuses[k] === "done").length;
+              const trackPct = keys.length ? Math.round((itemDone / keys.length) * 100) : 0;
               const active = !isMaster && item.id === field?.id;
+              const isComplete = keys.length > 0 && itemDone === keys.length;
               return (
                 <Link
                   key={item.id}
                   href={`/roadmap/${item.id}`}
                   className={clsx(
-                    "flex items-center justify-between rounded p-2 text-xs transition-colors hover:bg-[var(--surface-2)]",
+                    "flex items-center justify-between rounded p-2 text-xs transition-colors hover:bg-[var(--surface-2)] group",
                     active
-                      ? "bg-[var(--surface-2)] font-bold text-[var(--text)] border-l-2 border-[var(--accent)]"
+                      ? "bg-[rgba(63,140,255,0.08)] font-bold text-[var(--text)] border-l-[3px] border-[var(--accent)]"
                       : "text-[var(--muted)]",
                   )}
                 >
-                  <div className="min-w-0 pr-2">
-                    <div className="truncate font-medium">{item.shortTitle}</div>
+                  <div className="min-w-0 pr-2 flex-1">
+                    <div className="truncate font-medium group-hover:text-[var(--text)]">{item.shortTitle}</div>
                     <div className="text-[10px] text-[var(--dim)] truncate">{item.category}</div>
                   </div>
-                  <span className="text-[10px] text-[var(--dim)] font-mono flex-shrink-0">
-                    {itemDone}/{keys.length}
-                  </span>
+                  <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                    <span className="text-[10px] text-[var(--dim)] font-mono flex items-center gap-1">
+                      {isComplete ? <Check size={11} className="text-[#10b981]" /> : null}
+                      <span>{itemDone}/{keys.length}</span>
+                    </span>
+                    {keys.length > 0 && (
+                      <div className="w-12 h-1 rounded-full bg-[var(--surface-3)] overflow-hidden">
+                        <div
+                          className="h-full bg-[var(--accent)] rounded-full transition-all duration-200"
+                          style={{ width: `${trackPct}%` }}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </Link>
               );
             })}
@@ -745,85 +774,131 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
               {!isMaster && field && viewMode === "linear" ? (
                 <div className="roadmap-linear-viewport p-6 sm:p-8 flex justify-center">
                   <div className="w-full max-w-[840px] space-y-6">
-                    {field.sections.map((sec, secIdx) => (
-                      <div key={sec.id} className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
-                        <header className="mb-4">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent-bright)]">
-                            Phase {secIdx + 1}
-                          </span>
-                          <h3 className="mt-1 text-lg font-bold text-[var(--text)] m-0">{sec.title}</h3>
-                          <p className="mt-1 text-xs text-[var(--muted)] m-0">{sec.summary}</p>
-                        </header>
-
-                        <div className="space-y-3">
-                          {sec.topics.map((topic) => {
-                            const key = topicKey(field, topic);
-                            const status = statuses[key];
-                            const details = getTopicDetails(field.id, topic);
-                            return (
+                    {field.sections.map((sec, secIdx) => {
+                      const secKeys = sec.topics.map((t) => topicKey(field, t));
+                      const secDone = secKeys.filter((k) => statuses[k] === "done").length;
+                      const secPct = secKeys.length ? Math.round((secDone / secKeys.length) * 100) : 0;
+                      return (
+                        <div key={sec.id} className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
+                          <header className="mb-4">
+                            <div className="flex items-center justify-between gap-2 mb-1">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent-bright)]">
+                                Phase {secIdx + 1}
+                              </span>
+                              <span className="rounded bg-[var(--surface-2)] px-2 py-0.5 text-[10px] font-mono text-[var(--dim)] border border-[var(--border)]">
+                                {secDone}/{sec.topics.length} Done ({secPct}%)
+                              </span>
+                            </div>
+                            <h3 className="text-lg font-bold text-[var(--text)] m-0">{sec.title}</h3>
+                            <p className="mt-1 text-xs text-[var(--muted)] m-0 leading-relaxed">{sec.summary}</p>
+                            <div className="mt-3 h-1 w-full rounded-full bg-[var(--surface-3)] overflow-hidden">
                               <div
-                                key={topic}
-                                className="flex items-start justify-between gap-4 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-4 hover:border-[var(--border-strong)] transition-colors"
-                              >
-                                <div className="min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <h4 className="text-sm font-bold text-[var(--text)] m-0">{topic}</h4>
-                                    <span className="text-[9px] font-semibold text-[var(--dim)] uppercase">
-                                      {details.badge}
-                                    </span>
-                                  </div>
-                                  <p className="mt-1 text-xs text-[var(--muted)] line-clamp-2 m-0 leading-relaxed">
-                                    {details.overview}
-                                  </p>
-                                  <div className="mt-2 flex flex-wrap gap-1.5">
-                                    {details.subtopics.map((sub) => (
-                                      <span
-                                        key={sub}
-                                        className="rounded bg-[var(--surface-3)] px-2 py-0.5 text-[10px] text-[var(--dim)]"
-                                      >
-                                        {sub}
-                                      </span>
-                                    ))}
-                                  </div>
-                                </div>
+                                className="h-full bg-[var(--accent)] rounded-full transition-all duration-300"
+                                style={{ width: `${secPct}%` }}
+                              />
+                            </div>
+                          </header>
 
-                                <div className="flex items-center gap-2 flex-shrink-0">
-                                  <button
-                                    type="button"
-                                    className={clsx(
-                                      "flowchart-status-pill",
-                                      status === "done" && "is-done",
-                                      status === "learning" && "is-learning",
-                                      status === "skipped" && "is-skipped",
-                                      !status && "is-todo",
-                                    )}
-                                    onClick={(e) => cycleStatus(e, { field, section: sec, topic })}
-                                  >
-                                    {status === "done"
-                                      ? "Done"
+                          <div className="space-y-3">
+                            {sec.topics.map((topic, topicIdx) => {
+                              const key = topicKey(field, topic);
+                              const status = statuses[key];
+                              const details = getTopicDetails(field.id, topic);
+                              return (
+                                <div
+                                  key={topic}
+                                  className={clsx(
+                                    "flex flex-col sm:flex-row sm:items-start justify-between gap-4 rounded-lg border p-4 transition-all",
+                                    status === "done"
+                                      ? "border-[#10b981]/35 bg-[rgba(16,185,129,0.03)]"
                                       : status === "learning"
-                                      ? "Learning"
+                                      ? "border-[var(--accent)]/45 bg-[rgba(63,140,255,0.03)]"
                                       : status === "skipped"
-                                      ? "Skip"
-                                      : "Todo"}
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="rounded border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1 text-xs font-semibold text-[var(--text)] hover:border-[var(--accent)] cursor-pointer"
-                                    onClick={() => {
-                                      setSelected({ field, section: sec, topic });
-                                      setDrawerTab("knowledge");
-                                    }}
-                                  >
-                                    Inspect
-                                  </button>
+                                      ? "border-[var(--border)] bg-[var(--surface-2)] opacity-60"
+                                      : "border-[var(--border)] bg-[var(--surface-2)] hover:border-[var(--border-strong)]",
+                                  )}
+                                >
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <span className="text-[10px] font-mono text-[var(--dim)]">
+                                        {secIdx + 1}.{topicIdx + 1}
+                                      </span>
+                                      <h4 className="text-sm font-bold text-[var(--text)] m-0">{topic}</h4>
+                                      {details.badge && (
+                                        <span
+                                          className={clsx(
+                                            "flowchart-main-node-badge",
+                                            details.badge === "Core Milestone" && "is-core",
+                                            details.badge === "Recommended" && "is-recommended",
+                                            details.badge === "Advanced" && "is-frontier",
+                                            details.badge === "Foundational" && "is-foundational",
+                                          )}
+                                        >
+                                          {details.badge}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <p className="mt-1.5 text-xs text-[var(--muted)] line-clamp-2 m-0 leading-relaxed">
+                                      {details.overview}
+                                    </p>
+                                    <div className="mt-2.5 flex flex-wrap gap-1.5">
+                                      {details.subtopics.map((sub) => (
+                                        <span
+                                          key={sub}
+                                          className="rounded bg-[var(--surface-3)] px-2 py-0.5 text-[10px] text-[var(--dim)]"
+                                        >
+                                          {sub}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-center">
+                                    <button
+                                      type="button"
+                                      className={clsx(
+                                        "flowchart-status-pill",
+                                        status === "done" && "is-done",
+                                        status === "learning" && "is-learning",
+                                        status === "skipped" && "is-skipped",
+                                        !status && "is-todo",
+                                      )}
+                                      onClick={(e) => cycleStatus(e, { field, section: sec, topic })}
+                                      title="Click to cycle status: Todo -> Learning -> Done -> Skip"
+                                    >
+                                      {status === "done" && <CheckCircle2 size={11} />}
+                                      {status === "learning" && <CircleDot size={11} />}
+                                      {status === "skipped" && <PauseCircle size={11} />}
+                                      {!status && <Circle size={11} />}
+                                      <span>
+                                        {status === "done"
+                                          ? "Done"
+                                          : status === "learning"
+                                          ? "Learning"
+                                          : status === "skipped"
+                                          ? "Skip"
+                                          : "Todo"}
+                                      </span>
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="inline-flex items-center gap-1 rounded border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1 text-xs font-semibold text-[var(--text)] hover:border-[var(--accent)] hover:text-[var(--accent-bright)] transition-colors cursor-pointer"
+                                      onClick={() => {
+                                        setSelected({ field, section: sec, topic });
+                                        setDrawerTab("knowledge");
+                                      }}
+                                    >
+                                      <span>Inspect</span>
+                                      <ArrowRight size={12} />
+                                    </button>
+                                  </div>
                                 </div>
-                              </div>
-                            );
-                          })}
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               ) : (
@@ -1011,6 +1086,7 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
                                                 details.badge === "Core Milestone" && "is-core",
                                                 details.badge === "Recommended" && "is-recommended",
                                                 details.badge === "Advanced" && "is-frontier",
+                                                details.badge === "Foundational" && "is-foundational",
                                               )}
                                             >
                                               {details.badge}
@@ -1157,44 +1233,67 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
               </p>
             </header>
 
-            <div className="flex items-center gap-2 mb-6">
-              {(["Beginner", "Intermediate", "Advanced"] as Difficulty[]).map((level) => (
-                <button
-                  key={level}
-                  type="button"
-                  className={clsx(
-                    "rounded-full border px-3 py-1 text-xs font-semibold transition-colors cursor-pointer",
-                    difficulty === level
-                      ? "border-[var(--accent)] bg-[var(--accent)] text-white"
-                      : "border-[var(--border)] bg-[var(--surface-2)] text-[var(--dim)] hover:text-[var(--text)]",
-                  )}
-                  onClick={() => setDifficulty(level)}
-                >
-                  {level}
-                </button>
-              ))}
+            <div className="flex items-center gap-2 mb-6 flex-wrap">
+              {(["All", "Beginner", "Intermediate", "Advanced"] as DifficultyFilter[]).map((level) => {
+                const count = level === "All" ? projects.length : projects.filter((p) => p.difficulty === level).length;
+                return (
+                  <button
+                    key={level}
+                    type="button"
+                    className={clsx(
+                      "rounded-full border px-3 py-1 text-xs font-semibold transition-colors cursor-pointer inline-flex items-center gap-1.5",
+                      difficulty === level
+                        ? "border-[var(--accent)] bg-[var(--accent)] text-white shadow-xs"
+                        : "border-[var(--border)] bg-[var(--surface-2)] text-[var(--dim)] hover:text-[var(--text)]",
+                    )}
+                    onClick={() => setDifficulty(level)}
+                  >
+                    <span>{level === "All" ? "All Levels" : level}</span>
+                    <span
+                      className={clsx(
+                        "rounded-full px-1.5 py-0.2 text-[10px] font-mono",
+                        difficulty === level ? "bg-white/20 text-white" : "bg-[var(--surface-3)] text-[var(--dim)]",
+                      )}
+                    >
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
 
             <div className="grid grid-cols-2 gap-4 max-[768px]:grid-cols-1">
               {projects
-                .filter((p) => p.difficulty === difficulty)
+                .filter((p) => difficulty === "All" || p.difficulty === difficulty)
                 .map((project) => (
                   <article
                     key={project.id}
-                    className="flex flex-col justify-between rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-4"
+                    className="flex flex-col justify-between rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-4 hover:border-[var(--border-strong)] transition-all hover:shadow-sm"
                   >
                     <div>
-                      <span className="text-[10px] font-semibold text-[var(--dim)] uppercase">
-                        {project.field.shortTitle} · {project.difficulty}
-                      </span>
+                      <div className="flex items-center justify-between text-[10px] font-semibold text-[var(--dim)] uppercase mb-1">
+                        <span>{project.field.shortTitle}</span>
+                        <span
+                          className={clsx(
+                            "rounded px-1.5 py-0.5 text-[9px] font-bold uppercase",
+                            project.difficulty === "Beginner" && "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
+                            project.difficulty === "Intermediate" && "bg-blue-500/10 text-blue-400 border border-blue-500/20",
+                            project.difficulty === "Advanced" && "bg-purple-500/10 text-purple-400 border border-purple-500/20",
+                          )}
+                        >
+                          {project.difficulty}
+                        </span>
+                      </div>
                       <h3 className="mt-1 text-sm font-bold text-[var(--text)] m-0">{project.title}</h3>
                       <p className="mt-2 text-xs text-[var(--muted)] leading-relaxed m-0">{project.description}</p>
                     </div>
                     <Link
                       href="/commons/technology"
-                      className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-[var(--accent-bright)] hover:underline"
+                      className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--accent-bright)] hover:underline"
                     >
-                      Discuss project in Commons <ArrowRight size={13} />
+                      <MessageCircle size={13} />
+                      <span>Discuss project in Commons</span>
+                      <ArrowRight size={12} />
                     </Link>
                   </article>
                 ))}
@@ -1241,11 +1340,21 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
             </header>
 
             {/* Status Segmented Controls */}
-            <div className="border-b border-[var(--border)] bg-[var(--surface-2)] p-4">
-              <span className="block text-[10px] font-bold uppercase tracking-wider text-[var(--dim)] mb-2">
-                Your Learning Status
-              </span>
-              <div className="grid grid-cols-4 gap-1.5">
+            <div className="border-b border-[var(--border)] bg-[var(--surface-2)] px-5 py-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="block text-[10px] font-bold uppercase tracking-wider text-[var(--dim)]">
+                  Your Learning Status
+                </span>
+                {(() => {
+                  const currentStatus = statuses[topicKey(selected.field, selected.topic)];
+                  return (
+                    <span className="text-[10px] text-[var(--dim)] font-mono">
+                      {currentStatus ? `State: ${currentStatus.toUpperCase()}` : "State: TODO"}
+                    </span>
+                  );
+                })()}
+              </div>
+              <div className="flex items-center rounded-lg border border-[var(--border)] bg-[var(--surface)] p-1 gap-1">
                 {[
                   { id: undefined, label: "Todo", icon: Circle },
                   { id: "learning" as const, label: "Learning", icon: CircleDot },
@@ -1260,14 +1369,20 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
                       key={item.label}
                       type="button"
                       className={clsx(
-                        "inline-flex flex-col items-center justify-center gap-1 rounded py-2 text-xs font-semibold transition-colors cursor-pointer border",
+                        "flex-1 inline-flex items-center justify-center gap-1.5 rounded-md py-1.5 text-xs font-semibold transition-all cursor-pointer border-0",
                         isActive
-                          ? "border-[var(--accent)] bg-[var(--accent)] text-white shadow-sm"
-                          : "border-[var(--border)] bg-[var(--surface)] text-[var(--dim)] hover:border-[var(--border-strong)] hover:text-[var(--text)]",
+                          ? item.id === "done"
+                            ? "bg-[#10b981] text-white shadow-sm font-bold"
+                            : item.id === "learning"
+                            ? "bg-[var(--accent)] text-white shadow-sm font-bold"
+                            : item.id === "skipped"
+                            ? "bg-[var(--dim)] text-white shadow-sm font-bold"
+                            : "bg-[var(--surface-3)] text-[var(--text)] shadow-sm font-bold"
+                          : "bg-transparent text-[var(--dim)] hover:text-[var(--text)] hover:bg-[var(--surface-2)]",
                       )}
                       onClick={() => setStatus(selected, item.id)}
                     >
-                      <Icon size={14} />
+                      <Icon size={13} className="flex-shrink-0" />
                       <span className="text-[11px]">{item.label}</span>
                     </button>
                   );
@@ -1367,15 +1482,24 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
                         return (
                           <li
                             key={item}
-                            className="flex items-start gap-2.5 cursor-pointer p-2 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] hover:border-[var(--accent)] transition-colors"
+                            role="checkbox"
+                            aria-checked={isChecked}
+                            tabIndex={0}
+                            className="flex items-start gap-2.5 cursor-pointer p-2.5 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] hover:border-[var(--accent)] transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
                             onClick={() => toggleChecklist(checkKey)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                toggleChecklist(checkKey);
+                              }
+                            }}
                           >
                             {isChecked ? (
                               <SquareCheck size={16} className="text-[#10b981] flex-shrink-0 mt-0.5" />
                             ) : (
                               <Square size={16} className="text-[var(--dim)] flex-shrink-0 mt-0.5" />
                             )}
-                            <span className={clsx(isChecked && "line-through text-[var(--dim)]", "leading-relaxed")}>
+                            <span className={clsx(isChecked && "line-through text-[var(--dim)]", "leading-relaxed select-none")}>
                               {item}
                             </span>
                           </li>
@@ -1456,17 +1580,19 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
             </div>
 
             {/* Drawer Footer with Sequential Navigation (roadmap.sh style) */}
-            <footer className="flex items-center justify-between border-t border-[var(--border)] bg-[var(--surface-2)] p-4">
+            <footer className="flex items-center justify-between border-t border-[var(--border)] bg-[var(--surface-2)] p-4 gap-2">
               {prevTopic ? (
                 <button
                   type="button"
-                  className="inline-flex items-center gap-1.5 rounded border border-[var(--border)] px-3 py-1.5 text-xs font-medium text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)] cursor-pointer"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-xs font-medium text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)] transition-colors cursor-pointer max-w-[180px]"
                   onClick={() => {
                     setSelected(prevTopic);
                     setDrawerTab("knowledge");
                   }}
+                  title={`Previous: ${prevTopic.topic}`}
                 >
-                  <ArrowLeft size={13} /> Previous
+                  <ArrowLeft size={13} className="flex-shrink-0" />
+                  <span className="truncate">Previous</span>
                 </button>
               ) : (
                 <div />
@@ -1475,13 +1601,15 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
               {nextTopic && (
                 <button
                   type="button"
-                  className="inline-flex items-center gap-1.5 rounded border border-[var(--accent)] bg-[var(--accent)] px-3 py-1.5 text-xs font-bold text-white hover:bg-[var(--accent-hover,#2f6fd6)] cursor-pointer"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-[var(--accent)] bg-[var(--accent)] px-3.5 py-1.5 text-xs font-bold text-white hover:bg-[var(--accent-hover,#2f6fd6)] transition-all cursor-pointer max-w-[220px]"
                   onClick={() => {
                     setSelected(nextTopic);
                     setDrawerTab("knowledge");
                   }}
+                  title={`Next: ${nextTopic.topic}`}
                 >
-                  Next: {nextTopic.topic} <ArrowRight size={13} />
+                  <span className="truncate">Next: {nextTopic.topic}</span>
+                  <ArrowRight size={13} className="flex-shrink-0" />
                 </button>
               )}
             </footer>
@@ -1493,34 +1621,86 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
 }
 
 function ContributionPanel({ fieldName }: { fieldName: string }) {
+  const [expandedStep, setExpandedStep] = useState<number | null>(0);
+
+  const steps = [
+    {
+      title: "1. Choose one bounded problem",
+      summary: "Pick a single topic node and define a reproducible deliverable reviewable within weeks.",
+      detail: "Avoid broad architecture rewrites. Focus on a single verification checkpoint (e.g., verifying 128-channel spike sorter latency bounds or calibrating tactile stimulation array current).",
+    },
+    {
+      title: "2. Declare scope and safety bounds",
+      summary: "Document hypotheses, non-goals, measurement apparatus, and safe shutdown conditions.",
+      detail: "Safety boundaries are strictly enforced. All biological or neural interface testing must specify isolation transformers, optical coupling, current limiting, and hardware emergency stop triggers.",
+    },
+    {
+      title: "3. Build and test in public",
+      summary: "Publish raw datasets, calibration benches, reproduction code, and negative findings.",
+      detail: "Negative findings are as valuable as breakthroughs. Share failed iterations, measurement noise artifacts, and unexpected thermal or latency spikes in public repositories.",
+    },
+    {
+      title: "4. Solicit peer challenge",
+      summary: "Request cross-discipline critique from adjacent fields to test system integration assumptions.",
+      detail: "Post draft RFCs in the Technology Commons feed. Software engineers must consult with neurobiology reviewers before assuming signal fidelity.",
+    },
+    {
+      title: "5. Submit to the evidence ledger",
+      summary: "Publish your findings to the community evidence ledger under editorial review.",
+      detail: "Accepted evidence entries receive an immutable cryptographic digest, permanent archival citation, and integration into the master curriculum graph.",
+    },
+  ];
+
   return (
-    <section className="col-start-1 row-start-1 min-w-0 flex flex-col gap-6 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-6">
+    <section className="col-start-1 row-start-1 min-w-0 flex flex-col gap-6 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
       <header>
         <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent-bright)]">
           From Learning to Useful Work
         </span>
         <h2 className="mt-1 text-xl font-bold text-[var(--text)] m-0">Contribute to {fieldName}</h2>
-        <p className="mt-1 text-xs text-[var(--muted)] m-0">
+        <p className="mt-1 text-xs text-[var(--muted)] m-0 leading-relaxed max-w-[70ch]">
           The OpenFullDive project progresses through small, inspectable, and reproducible work—never through unsupported claims.
         </p>
       </header>
 
-      <div className="flex flex-col gap-3">
-        {[
-          ["1. Choose one bounded problem", "Pick a single topic node and define a reproducible deliverable reviewable within weeks."],
-          ["2. Declare scope and safety bounds", "Document hypotheses, non-goals, measurement apparatus, and safe shutdown conditions."],
-          ["3. Build and test in public", "Publish raw datasets, calibration benches, reproduction code, and negative findings."],
-          ["4. Solicit peer challenge", "Request cross-discipline critique from adjacent fields to test system integration assumptions."],
-          ["5. Submit to the evidence ledger", "Publish your findings to the community evidence ledger under editorial review."],
-        ].map(([title, body]) => (
-          <article key={title} className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-4">
-            <h3 className="text-xs font-bold text-[var(--text)] m-0">{title}</h3>
-            <p className="mt-1 text-xs text-[var(--muted)] leading-relaxed m-0">{body}</p>
-          </article>
-        ))}
+      <div className="flex flex-col gap-2.5">
+        {steps.map((step, idx) => {
+          const isExpanded = expandedStep === idx;
+          return (
+            <article
+              key={step.title}
+              className={clsx(
+                "rounded-lg border transition-all cursor-pointer overflow-hidden",
+                isExpanded
+                  ? "border-[var(--accent)] bg-[var(--surface-2)] shadow-xs"
+                  : "border-[var(--border)] bg-[var(--surface-2)] hover:border-[var(--border-strong)]",
+              )}
+              onClick={() => setExpandedStep(isExpanded ? null : idx)}
+            >
+              <div className="flex items-center justify-between p-4">
+                <div className="min-w-0 pr-3">
+                  <h3 className="text-xs font-bold text-[var(--text)] m-0">{step.title}</h3>
+                  <p className="mt-1 text-xs text-[var(--muted)] leading-relaxed m-0">{step.summary}</p>
+                </div>
+                <ChevronDown
+                  size={16}
+                  className={clsx(
+                    "text-[var(--dim)] flex-shrink-0 transition-transform duration-200",
+                    isExpanded && "rotate-180 text-[var(--accent-bright)]",
+                  )}
+                />
+              </div>
+              {isExpanded && (
+                <div className="border-t border-[var(--border)] bg-[var(--surface-3)]/40 px-4 py-3 text-xs text-[var(--dim)] leading-relaxed">
+                  {step.detail}
+                </div>
+              )}
+            </article>
+          );
+        })}
       </div>
 
-      <footer className="flex items-center gap-3 pt-2">
+      <footer className="flex flex-wrap items-center gap-3 pt-2">
         <Link className="primary btn inline-flex items-center gap-2" href="/commons/technology">
           <MessageCircle size={15} /> Start a project discussion
         </Link>
