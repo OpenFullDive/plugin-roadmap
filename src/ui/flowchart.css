@@ -89,117 +89,127 @@
 
 /* Main Milestone Topic Node (Yellow / Gold with dark text) */
 .rm-milestone-main {
-  position: absolute;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 8px 14px;
-  border-radius: 6px;
-  background: #ffe599;
-  border: 2px solid #000000;
-  color: #0e1113;
-  font-size: 13.5px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1.25;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-  user-select: none;
-  cursor: pointer;
-  box-sizing: border-box;
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  position: absolute !important;
+  z-index: 3 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  padding: 6px 12px !important;
+  border-radius: 6px !important;
+  background: #ffe599 !important;
+  border: 2px solid #000000 !important;
+  color: #0e1113 !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em !important;
+  line-height: 1.25 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+  user-select: none !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  overflow: visible !important;
 }
 
 .rm-milestone-main:hover {
-  background: #ffd166;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(255, 209, 102, 0.45);
+  background: #ffd166 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 14px rgba(255, 209, 102, 0.45) !important;
 }
 
 /* Secondary Milestone Node */
 .rm-milestone-sub {
-  position: absolute;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 6px 12px;
-  border-radius: 5px;
-  background: #fff2cc;
-  border: 1.5px solid #000000;
-  color: #0e1113;
-  font-size: 12.5px;
-  font-weight: 600;
-  line-height: 1.25;
-  user-select: none;
-  cursor: pointer;
-  box-sizing: border-box;
-  transition: all 0.15s ease;
+  position: absolute !important;
+  z-index: 3 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  padding: 5px 10px !important;
+  border-radius: 5px !important;
+  background: #fff2cc !important;
+  border: 1.5px solid #000000 !important;
+  color: #0e1113 !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  line-height: 1.25 !important;
+  user-select: none !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+  transition: all 0.15s ease !important;
+  overflow: visible !important;
 }
 
 .rm-milestone-sub:hover {
-  background: #ffe599;
-  transform: translateY(-1px);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+  background: #ffe599 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3) !important;
 }
 
 /* Concept / Subtopic Pill (Radiating right column & tool grids) */
 .rm-concept-pill {
-  position: absolute;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 12px;
-  border-radius: 5px;
-  background: #fff2cc;
-  border: 1.5px solid #000000;
-  color: #0e1113;
-  font-size: 11.5px;
-  font-weight: 600;
-  line-height: 1.2;
-  user-select: none;
-  cursor: pointer;
-  box-sizing: border-box;
-  transition: all 0.15s ease;
-  white-space: normal;
-  text-align: left;
+  position: absolute !important;
+  z-index: 3 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  padding: 4px 8px !important;
+  border-radius: 5px !important;
+  background: #fff2cc !important;
+  border: 1.5px solid #000000 !important;
+  color: #0e1113 !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+  user-select: none !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+  transition: all 0.15s ease !important;
+  white-space: normal !important;
+  overflow: visible !important;
 }
 
 .rm-concept-pill:hover {
-  background: #ffe599;
-  border-color: var(--accent, #3f8cff);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  background: #ffe599 !important;
+  border-color: var(--accent, #3f8cff) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
 }
 
-/* Corner Recommendation / Status Badges (Purple / Green / Gray) */
+/* Corner Recommendation / Status Badges (Purple / Green / Gray) - pinned cleanly to top-right corner */
 .rm-badge-corner {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 13px;
-  height: 13px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  margin-left: 6px;
+  position: absolute !important;
+  top: -5px !important;
+  right: -5px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 14px !important;
+  height: 14px !important;
+  border-radius: 50% !important;
+  flex-shrink: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  z-index: 10 !important;
+  border: 1.5px solid var(--bg, #0e1113) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
 }
 
 .rm-badge-corner.is-recommended {
-  background: #a855f7;
-  color: #ffffff;
+  background: #a855f7 !important;
+  color: #ffffff !important;
 }
 
 .rm-badge-corner.is-alternative {
-  background: #10b981;
-  color: #ffffff;
+  background: #10b981 !important;
+  color: #ffffff !important;
 }
 
 .rm-badge-corner.is-elective {
-  background: #6b7280;
-  color: #ffffff;
+  background: #6b7280 !important;
+  color: #ffffff !important;
 }
 
 /* Done Node State */
@@ -573,11 +583,25 @@
   border: 1px solid var(--border-strong, #3f4a50);
 }
 
-/* Defensive resets */
-.roadmap-canvas-wrapper button {
+/* Defensive resets to isolate flowchart buttons completely from global button styles */
+.roadmap-flow-wrapper button,
+.roadmap-diagram-canvas button {
   white-space: normal !important;
-  line-height: normal !important;
+  line-height: 1.25 !important;
   text-transform: none !important;
   font-family: inherit !important;
+  min-height: 0 !important;
+  border-radius: 6px !important;
+  margin: 0 !important;
+  gap: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.roadmap-diagram-canvas button > span:first-child {
+  display: block !important;
+  width: 100% !important;
+  text-align: center !important;
+  line-height: 1.25 !important;
+  word-break: break-word !important;
 }
 

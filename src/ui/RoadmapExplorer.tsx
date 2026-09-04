@@ -443,9 +443,9 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
     const sec2: RoadmapSection = field.sections[1] ?? sec1;
 
     const m1Y = 245;
-    const m1W = 200;
+    const m1W = 230;
     const m1H = 44;
-    const m1X = CENTER_X - m1W / 2; // 420
+    const m1X = CENTER_X - m1W / 2; // 405
     const m1Topic = sec1.topics[0] ?? sec1.title;
     const m1Key = topicKey(field, m1Topic);
     const m1Status = statuses[m1Key];
@@ -465,111 +465,114 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
       badge: "recommended",
     });
 
-    // Spine to Sub-milestone 1
+    // Spine down to Sub-milestones
+    const spineW = 220;
+    const spineX = CENTER_X - spineW / 2; // 410
+
+    // Section 1 Subtopic 0
+    const sub1_0Y = m1Y + m1H + 21; // 310
     edges.push({
-      id: "spine-m1-to-sub",
+      id: "spine-m1-to-sub0",
       type: "spine",
-      path: `M ${CENTER_X} ${m1Y + m1H} V ${m1Y + m1H + 20}`,
+      path: `M ${CENTER_X} ${m1Y + m1H} V ${sub1_0Y}`,
       status: m1Status,
     });
 
-    const sub1Y = m1Y + m1H + 20; // 309
-    const sub1W = 180;
-    const sub1H = 36;
-    const sub1X = CENTER_X - sub1W / 2; // 430
     const t0 = sec1.topics[0] ?? "Foundations";
     const t0Key = topicKey(field, t0);
     nodes.push({
-      id: `sub1-${slugifyTopic(t0)}`,
+      id: `sub1-0-${slugifyTopic(t0)}`,
       type: "milestone-sub",
       topicName: t0,
       section: sec1,
       label: t0,
-      x: sub1X,
-      y: sub1Y,
-      width: sub1W,
-      height: sub1H,
+      x: spineX,
+      y: sub1_0Y,
+      width: spineW,
+      height: 38,
       status: statuses[t0Key],
       badge: "recommended",
     });
 
-    // Spine to Paired Boxes
-    const pairY = sub1Y + sub1H + 20; // 365
+    // Section 1 Subtopic 1
+    const sub1_1Y = sub1_0Y + 38 + 18; // 366
     edges.push({
-      id: "spine-to-pair1",
+      id: "spine-sub0-to-sub1",
       type: "spine",
-      path: `M ${CENTER_X} ${sub1Y + sub1H} V ${pairY - 5} H 472 V ${pairY}`,
-    });
-    edges.push({
-      id: "spine-to-pair2",
-      type: "spine",
-      path: `M ${CENTER_X} ${pairY - 5} H 568 V ${pairY}`,
+      path: `M ${CENTER_X} ${sub1_0Y + 38} V ${sub1_1Y}`,
     });
 
     const t1 = sec1.topics[1] ?? "Signal Modality A";
-    const t2 = sec1.topics[2] ?? "Signal Modality B";
     const t1Key = topicKey(field, t1);
-    const t2Key = topicKey(field, t2);
-
     nodes.push({
-      id: `pair-${slugifyTopic(t1)}`,
+      id: `sub1-1-${slugifyTopic(t1)}`,
       type: "milestone-sub",
       topicName: t1,
       section: sec1,
       label: t1,
-      x: 420,
-      y: pairY,
-      width: 95,
-      height: 36,
+      x: spineX,
+      y: sub1_1Y,
+      width: spineW,
+      height: 38,
       status: statuses[t1Key],
       badge: "recommended",
     });
 
+    // Section 1 Subtopic 2
+    const sub1_2Y = sub1_1Y + 38 + 18; // 422
+    edges.push({
+      id: "spine-sub1-to-sub2",
+      type: "spine",
+      path: `M ${CENTER_X} ${sub1_1Y + 38} V ${sub1_2Y}`,
+    });
+
+    const t2 = sec1.topics[2] ?? "Signal Modality B";
+    const t2Key = topicKey(field, t2);
     nodes.push({
-      id: `pair-${slugifyTopic(t2)}`,
+      id: `sub1-2-${slugifyTopic(t2)}`,
       type: "milestone-sub",
       topicName: t2,
       section: sec1,
       label: t2,
-      x: 525,
-      y: pairY,
-      width: 95,
-      height: 36,
+      x: spineX,
+      y: sub1_2Y,
+      width: spineW,
+      height: 38,
       status: statuses[t2Key],
       badge: "alternative",
     });
 
-    // Single Box below paired boxes
-    const single1Y = pairY + 36 + 15; // 416
+    // Section 1 Subtopic 3
+    const sub1_3Y = sub1_2Y + 38 + 18; // 478
     edges.push({
-      id: "spine-to-single1",
+      id: "spine-sub2-to-sub3",
       type: "spine",
-      path: `M ${CENTER_X} ${pairY + 36} V ${single1Y}`,
+      path: `M ${CENTER_X} ${sub1_2Y + 38} V ${sub1_3Y}`,
     });
 
     const t3 = sec1.topics[3] ?? "Sensor Montages";
     const t3Key = topicKey(field, t3);
     nodes.push({
-      id: `single1-${slugifyTopic(t3)}`,
+      id: `sub1-3-${slugifyTopic(t3)}`,
       type: "milestone-sub",
       topicName: t3,
       section: sec1,
       label: t3,
-      x: sub1X,
-      y: single1Y,
-      width: sub1W,
-      height: sub1H,
+      x: spineX,
+      y: sub1_3Y,
+      width: spineW,
+      height: 38,
       status: statuses[t3Key],
       badge: "alternative",
     });
 
     // RIGHT BRANCH FROM MILESTONE 1 (Radiating Curved Dotted Lines)
-    const m1RightX = m1X + m1W; // 620
+    const m1RightX = m1X + m1W; // 635
     const m1CenterY = m1Y + m1H / 2; // 267
     const rColX = 720;
-    const rColW = 230;
+    const rColW = 240;
     const rColH = 34;
-    const rStartY = 195;
+    const rStartY = 200;
     const rGap = 8;
 
     const rightTopicsM1 = [
@@ -589,7 +592,7 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
       edges.push({
         id: `curve-m1-r-${idx}`,
         type: "radiating",
-        path: `M ${m1RightX} ${m1CenterY} C ${m1RightX + 45} ${m1CenterY}, ${rColX - 35} ${cardCenterY}, ${rColX} ${cardCenterY}`,
+        path: `M ${m1RightX} ${m1CenterY} C ${m1RightX + 40} ${m1CenterY}, ${rColX - 35} ${cardCenterY}, ${rColX} ${cardCenterY}`,
       });
 
       nodes.push({
@@ -615,9 +618,9 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
       path: `M ${m1X} ${leftBranchStartY} H 330 V 200 H 315`,
     });
 
-    const lGridX = 60;
+    const lGridX = 50;
     const lGridY = 200;
-    const lPillW = 120;
+    const lPillW = 125;
     const lPillH = 34;
     const lGapX = 10;
     const lGapY = 8;
@@ -661,22 +664,22 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
       topicName: m1Topic,
       section: sec1,
       label: getPlatformMilestoneTitle(field.id),
-      x: 85,
+      x: 75,
       y: pickPlatY,
-      width: 200,
+      width: 210,
       height: 38,
       badge: "recommended",
     });
 
     // Inlined Beginner Project Callout Card
-    const proj1Y = pickPlatY + 38 + 14; // 427
+    const proj1Y = pickPlatY + 38 + 17; // 430
     nodes.push({
       id: `proj-card-beginner`,
       type: "project-card",
       topicName: m1Topic,
       section: sec1,
       label: "Beginner Project",
-      x: 75,
+      x: 70,
       y: proj1Y,
       width: 220,
       height: 95,
@@ -687,9 +690,9 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
 
     // SECTION 2 (Milestone 2 - Processing & Decoding)
     const m2Y = 560;
-    const m2W = 200;
+    const m2W = 230;
     const m2H = 44;
-    const m2X = CENTER_X - m2W / 2; // 420
+    const m2X = CENTER_X - m2W / 2; // 405
     const m2Topic = sec2.topics[0] ?? sec2.title;
     const m2Key = topicKey(field, m2Topic);
 
@@ -697,7 +700,7 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
     edges.push({
       id: "spine-m1-to-m2",
       type: "spine",
-      path: `M ${CENTER_X} ${single1Y + sub1H} V ${m2Y}`,
+      path: `M ${CENTER_X} ${sub1_3Y + 38} V ${m2Y}`,
     });
 
     // Milestone 2 Node (Yellow #ffe599)
@@ -715,66 +718,99 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
       badge: "recommended",
     });
 
-    // Sub-milestone 2 directly below
-    const sub2Y = m2Y + m2H + 20; // 624
+    // Section 2 Subtopic 0
+    const sub2_0Y = m2Y + m2H + 20; // 624
     edges.push({
-      id: "spine-m2-to-sub",
+      id: "spine-m2-to-sub0",
       type: "spine",
-      path: `M ${CENTER_X} ${m2Y + m2H} V ${sub2Y}`,
+      path: `M ${CENTER_X} ${m2Y + m2H} V ${sub2_0Y}`,
     });
 
     const sec2t0 = sec2.topics[0] ?? "Artifact Removal";
     const sec2t0Key = topicKey(field, sec2t0);
     nodes.push({
-      id: `sub2-${slugifyTopic(sec2t0)}`,
+      id: `sub2-0-${slugifyTopic(sec2t0)}`,
       type: "milestone-sub",
       topicName: sec2t0,
       section: sec2,
       label: sec2t0,
-      x: sub1X,
-      y: sub2Y,
-      width: sub1W,
-      height: sub1H,
+      x: spineX,
+      y: sub2_0Y,
+      width: spineW,
+      height: 38,
       status: statuses[sec2t0Key],
       badge: "recommended",
     });
 
-    // Paired boxes below sub2 along the spine (symmetrical with Section 1)
-    const pair2Y = sub2Y + sub1H + 20; // 680
+    // Section 2 Subtopic 1
+    const sub2_1Y = sub2_0Y + 38 + 18; // 680
     edges.push({
-      id: "spine-sub2-to-pair2",
+      id: "spine-sub2-0-to-1",
       type: "spine",
-      path: `M ${CENTER_X} ${sub2Y + sub1H} V ${pair2Y}`,
+      path: `M ${CENTER_X} ${sub2_0Y + 38} V ${sub2_1Y}`,
     });
-    edges.push({
-      id: "pair2-split",
-      type: "spine",
-      path: `M 467 ${pair2Y} H 572`,
-    });
+
+    const sec2t1 = sec2.topics[1] ?? "Neural noise filtering";
+    const sec2t1Key = topicKey(field, sec2t1);
     nodes.push({
-      id: "sub2-pair-node-1",
+      id: `sub2-1-${slugifyTopic(sec2t1)}`,
       type: "milestone-sub",
-      topicName: sec2t0,
-      subtopicName: "Bandpass & Notch (0.5-100Hz)",
+      topicName: sec2t1,
       section: sec2,
-      label: "Bandpass & Notch",
-      x: 420,
-      y: pair2Y,
-      width: 95,
-      height: 36,
+      label: sec2t1,
+      x: spineX,
+      y: sub2_1Y,
+      width: spineW,
+      height: 38,
+      status: statuses[sec2t1Key],
       badge: "recommended",
     });
+
+    // Section 2 Subtopic 2
+    const sub2_2Y = sub2_1Y + 38 + 18; // 736
+    edges.push({
+      id: "spine-sub2-1-to-2",
+      type: "spine",
+      path: `M ${CENTER_X} ${sub2_1Y + 38} V ${sub2_2Y}`,
+    });
+
+    const sec2t2 = sec2.topics[2] ?? "Feature extraction methods";
+    const sec2t2Key = topicKey(field, sec2t2);
     nodes.push({
-      id: "sub2-pair-node-2",
+      id: `sub2-2-${slugifyTopic(sec2t2)}`,
       type: "milestone-sub",
-      topicName: sec2t0,
-      subtopicName: "Baseline Drift & Line Noise",
+      topicName: sec2t2,
       section: sec2,
-      label: "Line Noise & Drift",
-      x: 525,
-      y: pair2Y,
-      width: 95,
-      height: 36,
+      label: sec2t2,
+      x: spineX,
+      y: sub2_2Y,
+      width: spineW,
+      height: 38,
+      status: statuses[sec2t2Key],
+      badge: "alternative",
+    });
+
+    // Section 2 Subtopic 3
+    const sub2_3Y = sub2_2Y + 38 + 18; // 792
+    edges.push({
+      id: "spine-sub2-2-to-3",
+      type: "spine",
+      path: `M ${CENTER_X} ${sub2_2Y + 38} V ${sub2_3Y}`,
+    });
+
+    const sec2t3 = sec2.topics[3] ?? "Signal amplification circuits";
+    const sec2t3Key = topicKey(field, sec2t3);
+    nodes.push({
+      id: `sub2-3-${slugifyTopic(sec2t3)}`,
+      type: "milestone-sub",
+      topicName: sec2t3,
+      section: sec2,
+      label: sec2t3,
+      x: spineX,
+      y: sub2_3Y,
+      width: spineW,
+      height: 38,
+      status: statuses[sec2t3Key],
       badge: "alternative",
     });
 
@@ -782,7 +818,7 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
     edges.push({
       id: "m2-left-branch",
       type: "radiating",
-      path: `M ${m2X} ${m2Y + m2H / 2} C ${m2X - 45} ${m2Y + m2H / 2}, 330 560, 315 560`,
+      path: `M ${m2X} ${m2Y + m2H / 2} C ${m2X - 40} ${m2Y + m2H / 2}, 330 560, 315 560`,
     });
 
     const denoisingMethods = getDenoisingMethodsForField(field.id);
@@ -812,37 +848,36 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
     edges.push({
       id: "denoise-to-strategy",
       type: "solid",
-      path: `M ${lGridX + lPillW + lGapX / 2} ${denoiseBottomY} V ${denoiseBottomY + 15}`,
+      path: `M ${lGridX + lPillW + lGapX / 2} ${denoiseBottomY} V ${denoiseBottomY + 17}`,
     });
 
-    const strategyY = denoiseBottomY + 15; // 693
+    const strategyY = denoiseBottomY + 17; // 695
     nodes.push({
       id: `strategy-milestone-${field.id}`,
       type: "milestone-main",
       topicName: sec2t0,
       section: sec2,
       label: "Artifact Removal Strategy",
-      x: 85,
+      x: 75,
       y: strategyY,
-      width: 200,
+      width: 210,
       height: 38,
       badge: "recommended",
     });
 
     // Intermediate Project Callout Card
-    const proj2Y = strategyY + 38 + 14; // 745
-    const sec2ProjTopic = sec2.topics[1] ?? sec2.title;
+    const proj2Y = strategyY + 38 + 17; // 750
     nodes.push({
       id: "proj-card-intermediate",
       type: "project-card",
-      topicName: sec2ProjTopic,
+      topicName: sec2t1,
       section: sec2,
       label: "Intermediate Project",
-      x: 75,
+      x: 70,
       y: proj2Y,
       width: 220,
       height: 95,
-      projectNote: `At this point, you should know enough to filter signals. Gain hands-on practice by building ${sec2.title} decoders.`,
+      projectNote: `Gain hands-on practice by building and testing real-time ${sec2.title} decoders.`,
       projectBtnText: "Intermediate Project Ideas",
       projectLevel: "Intermediate",
     });
@@ -852,27 +887,27 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
     sectionBoxes.push({
       id: "sec-box-features",
       title: "FEATURE EXTRACTION",
-      boxX: 690,
+      boxX: 680,
       boxY: 560,
-      boxW: 280,
-      boxH: 160,
-      labelX: 750,
+      boxW: 310,
+      boxH: 165,
+      labelX: 745,
       labelY: 550,
     });
 
     edges.push({
       id: "m2-to-features-box",
       type: "radiating",
-      path: `M ${m2X + m2W} ${m2Y + m2H / 2} C ${m2X + m2W + 40} ${m2Y + m2H / 2}, 660 640, 690 640`,
+      path: `M ${m2X + m2W} ${m2Y + m2H / 2} C ${m2X + m2W + 35} ${m2Y + m2H / 2}, 660 642, 680 642`,
     });
 
     const sec2FeatTopic = sec2.topics[2] ?? sec2.title;
     const featPills = [
-      { label: "Band Power (PSD)", w: 115, x: 705, y: 575, badge: "recommended" },
-      { label: "CSP Filtering", w: 115, x: 835, y: 575, badge: "recommended" },
-      { label: "Time-Frequency Wavelets", w: 115, x: 705, y: 618, badge: "alternative" },
-      { label: "FBCSP Algorithm", w: 115, x: 835, y: 618, badge: "alternative" },
-      { label: "Riemannian Geometry Covariance", w: 245, x: 705, y: 661, badge: "recommended" },
+      { label: "Band Power (PSD)", w: 135, x: 695, y: 575, badge: "recommended" },
+      { label: "CSP Filtering", w: 135, x: 840, y: 575, badge: "recommended" },
+      { label: "Time-Frequency Wavelets", w: 135, x: 695, y: 618, badge: "alternative" },
+      { label: "FBCSP Algorithm", w: 135, x: 840, y: 618, badge: "alternative" },
+      { label: "Riemannian Geometry Covariance", w: 280, x: 695, y: 661, badge: "recommended" },
     ];
     featPills.forEach((p, idx) => {
       nodes.push({
@@ -894,27 +929,27 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
     sectionBoxes.push({
       id: "sec-box-decoders",
       title: "REAL-TIME DECODERS & ML",
-      boxX: 690,
-      boxY: 740,
-      boxW: 280,
-      boxH: 195,
-      labelX: 745,
-      labelY: 730,
+      boxX: 680,
+      boxY: 755,
+      boxW: 310,
+      boxH: 215,
+      labelX: 735,
+      labelY: 745,
     });
 
     edges.push({
       id: "m2-to-decoders-box",
       type: "radiating",
-      path: `M ${m2X + m2W} ${m2Y + m2H / 2} C ${m2X + m2W + 40} ${m2Y + m2H / 2}, 660 835, 690 835`,
+      path: `M ${m2X + m2W} ${m2Y + m2H / 2} C ${m2X + m2W + 35} ${m2Y + m2H / 2}, 660 860, 680 860`,
     });
 
     const sec2DecTopic = sec2.topics[6] ?? sec2.title;
     const decoderPills = [
-      { label: "Linear Discriminant (LDA)", w: 115, x: 705, y: 755, badge: "recommended" },
-      { label: "Support Vector (SVM)", w: 115, x: 835, y: 755, badge: "recommended" },
-      { label: "Adaptive Kalman Filters", w: 245, x: 705, y: 798, badge: "recommended" },
-      { label: "EEGNet / ConvNet Decoders", w: 245, x: 705, y: 841, badge: "recommended" },
-      { label: "Transformer Intent Models", w: 245, x: 705, y: 884, badge: "alternative" },
+      { label: "Linear Discriminant (LDA)", w: 135, x: 695, y: 770, badge: "recommended" },
+      { label: "Support Vector (SVM)", w: 135, x: 840, y: 770, badge: "recommended" },
+      { label: "Adaptive Kalman Filters", w: 280, x: 695, y: 813, badge: "recommended" },
+      { label: "EEGNet / ConvNet Decoders", w: 280, x: 695, y: 856, badge: "recommended" },
+      { label: "Transformer Intent Models", w: 280, x: 695, y: 899, badge: "alternative" },
     ];
     decoderPills.forEach((p, idx) => {
       nodes.push({
@@ -933,16 +968,16 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
     });
 
     // SECTION 3 (Milestone 3 - Telemetry & Safety)
-    const m3Y = 970;
-    const m3W = 200;
+    const m3Y = 1000;
+    const m3W = 250;
     const m3H = 44;
-    const m3X = CENTER_X - m3W / 2; // 420
+    const m3X = CENTER_X - m3W / 2; // 395
     const sec2TelemTopic = sec2.topics[5] ?? "Closed-Loop Telemetry";
 
     edges.push({
       id: "spine-m2-to-m3",
       type: "spine",
-      path: `M ${CENTER_X} ${pair2Y + 36} V ${m3Y}`,
+      path: `M ${CENTER_X} ${sub2_3Y + 38} V ${m3Y}`,
     });
 
     nodes.push({
@@ -958,12 +993,12 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
       badge: "recommended",
     });
 
-    // Sub-milestone 3
-    const sub3Y = m3Y + m3H + 20; // 1034
+    // Sub-milestone 3_0
+    const sub3_0Y = m3Y + m3H + 20; // 1064
     edges.push({
-      id: "spine-m3-to-sub",
+      id: "spine-m3-to-sub0",
       type: "spine",
-      path: `M ${CENTER_X} ${m3Y + m3H} V ${sub3Y}`,
+      path: `M ${CENTER_X} ${m3Y + m3H} V ${sub3_0Y}`,
     });
 
     nodes.push({
@@ -973,10 +1008,32 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
       subtopicName: "Latency Budget (<15ms)",
       section: sec2,
       label: "Latency Budget (<15ms)",
-      x: sub1X,
-      y: sub3Y,
-      width: sub1W,
-      height: sub1H,
+      x: spineX,
+      y: sub3_0Y,
+      width: spineW,
+      height: 38,
+      badge: "recommended",
+    });
+
+    // Sub-milestone 3_1
+    const sub3_1Y = sub3_0Y + 38 + 18; // 1120
+    edges.push({
+      id: "spine-sub3-to-sub3-1",
+      type: "spine",
+      path: `M ${CENTER_X} ${sub3_0Y + 38} V ${sub3_1Y}`,
+    });
+
+    nodes.push({
+      id: `sub3-watchdog-${field.id}`,
+      type: "milestone-sub",
+      topicName: sec2TelemTopic,
+      subtopicName: "Real-Time Safety Watchdog",
+      section: sec2,
+      label: "Real-Time Safety Watchdog",
+      x: spineX,
+      y: sub3_1Y,
+      width: spineW,
+      height: 38,
       badge: "recommended",
     });
 
@@ -984,7 +1041,7 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
     edges.push({
       id: "m3-left-branch",
       type: "radiating",
-      path: `M ${m3X} ${m3Y + m3H / 2} C ${m3X - 45} ${m3Y + m3H / 2}, 330 970, 315 970`,
+      path: `M ${m3X} ${m3Y + m3H / 2} C ${m3X - 40} ${m3Y + m3H / 2}, 330 1000, 315 1000`,
     });
 
     const streamProtocols = [
@@ -995,7 +1052,7 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
       const col = idx % 2;
       const row = Math.floor(idx / 2);
       const px = lGridX + col * (lPillW + lGapX);
-      const py = 970 + row * (lPillH + lGapY);
+      const py = 1000 + row * (lPillH + lGapY);
       nodes.push({
         id: `stream-${idx}`,
         type: "concept-pill",
@@ -1011,36 +1068,36 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
       });
     });
 
-    const streamBottomY = 970 + 2 * (lPillH + lGapY) - lGapY; // 1046
+    const streamBottomY = 1000 + 2 * (lPillH + lGapY) - lGapY; // 1076
     edges.push({
       id: "stream-to-opt",
       type: "solid",
-      path: `M ${lGridX + lPillW + lGapX / 2} ${streamBottomY} V ${streamBottomY + 15}`,
+      path: `M ${lGridX + lPillW + lGapX / 2} ${streamBottomY} V ${streamBottomY + 17}`,
     });
 
-    const optY = streamBottomY + 15; // 1061
+    const optY = streamBottomY + 17; // 1093
     nodes.push({
       id: `stream-opt-milestone`,
       type: "milestone-main",
       topicName: sec2TelemTopic,
       section: sec2,
       label: "Stream Engine Optimization",
-      x: 85,
+      x: 75,
       y: optY,
-      width: 200,
+      width: 210,
       height: 38,
       badge: "recommended",
     });
 
     // Advanced Project Callout Card
-    const proj3Y = optY + 38 + 14; // 1113
+    const proj3Y = optY + 38 + 17; // 1148
     nodes.push({
       id: "proj-card-advanced",
       type: "project-card",
       topicName: sec2TelemTopic,
       section: sec2,
       label: "Advanced Project",
-      x: 75,
+      x: 70,
       y: proj3Y,
       width: 220,
       height: 95,
@@ -1053,18 +1110,18 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
     sectionBoxes.push({
       id: "sec-box-safety",
       title: "SAFETY STANDARDS & LIMITS",
-      boxX: 690,
-      boxY: 970,
-      boxW: 280,
-      boxH: 180,
-      labelX: 735,
-      labelY: 960,
+      boxX: 680,
+      boxY: 1000,
+      boxW: 310,
+      boxH: 215,
+      labelX: 730,
+      labelY: 990,
     });
 
     edges.push({
       id: "m3-to-safety-box",
       type: "radiating",
-      path: `M ${m3X + m3W} ${m3Y + m3H / 2} C ${m3X + m3W + 40} ${m3Y + m3H / 2}, 660 1060, 690 1060`,
+      path: `M ${m3X + m3W} ${m3Y + m3H / 2} C ${m3X + m3W + 35} ${m3Y + m3H / 2}, 660 1100, 680 1100`,
     });
 
     const safetyItems = [
@@ -1081,20 +1138,20 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
         subtopicName: si.label,
         section: sec2,
         label: si.label,
-        x: 705,
-        y: 985 + idx * 40,
-        width: 245,
-        height: 32,
+        x: 695,
+        y: 1015 + idx * 43,
+        width: 280,
+        height: 34,
         badge: si.badge as any,
       });
     });
 
     // CAPSTONE FINISH MILESTONE
-    const capstoneY = 1260;
+    const capstoneY = 1270;
     edges.push({
       id: "spine-to-capstone",
       type: "spine",
-      path: `M ${CENTER_X} ${sub3Y + sub1H} V ${capstoneY}`,
+      path: `M ${CENTER_X} ${sub3_1Y + 38} V ${capstoneY}`,
     });
 
     nodes.push({
@@ -1103,9 +1160,9 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
       topicName: sec2DecTopic,
       section: sec2,
       label: `Capstone: ${field.shortTitle} Synthesis & Integration`,
-      x: CENTER_X - 180,
+      x: CENTER_X - 185,
       y: capstoneY,
-      width: 360,
+      width: 370,
       height: 48,
       badge: "recommended",
     });
