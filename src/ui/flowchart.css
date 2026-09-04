@@ -1,6 +1,6 @@
 /* ==========================================================================
-   roadmap.sh Flowchart Engine Styling for OpenFullDive
-   Matches roadmap.sh visual graph architecture using OpenFullDive dark tokens
+   Interactive Flowchart Engine Styling for OpenFullDive
+   Visual graph architecture using OpenFullDive design tokens
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -53,7 +53,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   2. Floating Canvas Controls Toolbar (roadmap.sh style)
+   2. Floating Canvas Controls Toolbar
    -------------------------------------------------------------------------- */
 .roadmap-canvas-controls {
   position: absolute;
@@ -176,7 +176,7 @@
   margin-bottom: 0;
 }
 
-/* Milestone Header Pill (roadmap.sh style) */
+/* Milestone Header Pill */
 .flowchart-stage-header {
   display: inline-flex;
   align-items: center;
@@ -219,7 +219,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   5. Flowchart Graph Nodes (roadmap.sh boxes)
+   5. Flowchart Graph Nodes
    -------------------------------------------------------------------------- */
 .flowchart-spine-flow {
   display: flex;

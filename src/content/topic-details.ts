@@ -21,7 +21,7 @@ export type TopicDetail = {
 /**
  * Curated, high-depth knowledge registry for Full-Dive disciplines.
  * Contains authentic domain descriptions, branching subtopics, verified competencies,
- * and academic/industry references modeled after roadmap.sh content standards.
+ * and academic/industry references for engineering curricula.
  */
 export const TOPIC_DETAILS_MAP: Record<string, Partial<TopicDetail>> = {
   // ---------------- NEUROSCIENCE: Sensory Perception ----------------

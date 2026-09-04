@@ -655,7 +655,7 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
             <div className="roadmap-canvas-wrapper" aria-label="Interactive learning roadmap">
               {/* Consolidated Top Toolbar (Integrated into the Canvas Card) */}
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] bg-[var(--surface)] px-4 py-2.5">
-                {/* Status Legend (roadmap.sh style) */}
+                {/* Status Legend */}
                 <div className="flex items-center gap-3 text-xs text-[var(--dim)]">
                   <span className="font-bold text-[var(--text)] uppercase tracking-wider text-[11px]">
                     {isMaster ? "System Tree" : field?.title}
@@ -1307,7 +1307,7 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
         )}
       </div>
 
-      {/* Slide-over Topic Detail Drawer (roadmap.sh style) */}
+      {/* Slide-over Topic Detail Drawer */}
       {selected && activeTopicDetail && (
         <>
           <button
@@ -1579,7 +1579,7 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
               )}
             </div>
 
-            {/* Drawer Footer with Sequential Navigation (roadmap.sh style) */}
+            {/* Drawer Footer with Sequential Navigation */}
             <footer className="flex items-center justify-between border-t border-[var(--border)] bg-[var(--surface-2)] p-4 gap-2">
               {prevTopic ? (
                 <button
