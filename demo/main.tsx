@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import RoadmapExplorer from "../src/ui/RoadmapExplorer";
 import { masterRoadmap, roadmapFields } from "../src/content/roadmap";
@@ -20,10 +20,24 @@ function DemoHarness() {
   // Sync with URL location if query param or path changes
   useEffect(() => {
     const syncFromLocation = () => {
+      const path = window.location.pathname;
+      if (path.startsWith("/roadmap/")) {
+        const seg = path.replace("/roadmap/", "").replace(/\/$/, "");
+        if (seg) {
+          setSelectedSlug(seg);
+          return;
+        }
+      }
+      if (path === "/roadmap") {
+        setSelectedSlug(masterRoadmap.id);
+        return;
+      }
       const params = new URLSearchParams(window.location.search);
       const track = params.get("track");
       if (track) {
         setSelectedSlug(track);
+      } else if (path === "/") {
+        setSelectedSlug(masterRoadmap.id);
       }
     };
     syncFromLocation();

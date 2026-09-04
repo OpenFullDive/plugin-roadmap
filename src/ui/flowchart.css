@@ -1,583 +1,506 @@
 /* ==========================================================================
-   Interactive Flowchart Engine Styling for OpenFullDive
-   Authentic technical system map layout unified with OpenFullDive dark tokens
+   roadmap.sh Authentic Flowchart Styles for OpenFullDive
+   Pixel-perfect roadmap.sh layout with OpenFullDive dark design tokens & typography
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   1. Canvas Container & Viewport
+   1. Diagram Container & Flow Surface (roadmap.sh fixed layout)
    -------------------------------------------------------------------------- */
-.roadmap-canvas-wrapper {
+.roadmap-flow-wrapper {
   position: relative;
   width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  display: flex;
+  justify-content: flex-start;
+  background-color: var(--bg, #0e1113);
+  background-image: radial-gradient(circle, rgba(137, 153, 166, 0.22) 1.2px, transparent 1.2px);
+  background-size: 20px 20px;
+  border-radius: var(--r-card, 8px);
   border: 1px solid var(--border, #2a3236);
-  border-radius: var(--r-card, 5px);
-  background-color: var(--surface, #151a1d);
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
-}
-
-.roadmap-canvas-viewport {
-  width: 100%;
-  height: 100%;
-  min-height: 760px;
-  position: relative;
-  overflow: hidden;
-  cursor: grab;
-  user-select: none;
-  background-color: var(--bg, #0e1113);
-  background-image: radial-gradient(rgba(130, 145, 152, 0.18) 1.5px, transparent 1.5px);
-  background-size: 24px 24px;
+  padding: 36px 16px 80px 16px;
   box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.45);
+  box-sizing: border-box;
 }
 
-.roadmap-linear-viewport {
-  width: 100%;
-  background-color: var(--bg, #0e1113);
-  min-height: 500px;
-}
-
-.roadmap-canvas-viewport.is-dragging {
-  cursor: grabbing;
-}
-
-/* Scaled & translated canvas layer */
-.roadmap-canvas-transform {
-  transform-origin: 50% 40px;
-  transition: transform 0.05s ease-out;
-  will-change: transform;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 40px 24px 80px;
-  min-width: 960px;
-}
-
-/* --------------------------------------------------------------------------
-   2. Floating Canvas Controls Toolbar & Legend
-   -------------------------------------------------------------------------- */
-.roadmap-canvas-controls {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 6px;
-  border-radius: var(--r-ctrl, 5px);
-  border: 1px solid var(--border-strong, #465258);
-  background: rgba(21, 26, 29, 0.92);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-}
-
-.roadmap-control-btn {
-  display: inline-flex !important;
-  align-items: center;
-  justify-content: center;
-  width: 30px !important;
-  height: 30px !important;
-  min-width: 30px !important;
-  min-height: 30px !important;
-  padding: 0 !important;
-  border-radius: var(--r-ctrl, 5px) !important;
-  border: 1px solid transparent !important;
-  background: transparent !important;
-  color: var(--muted, #c2c9cc) !important;
-  font-size: var(--fs-xs, 12px) !important;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  white-space: nowrap !important;
-}
-
-.roadmap-control-btn:hover {
-  background: var(--surface-2, #1d2529) !important;
-  color: var(--text, #eef1f3) !important;
-  border-color: var(--border, #2a3236) !important;
-}
-
-.roadmap-control-btn.is-active {
-  background: rgba(63, 140, 255, 0.15) !important;
-  color: var(--accent-bright, #5c9fff) !important;
-  border-color: var(--accent, #3f8cff) !important;
-}
-
-.roadmap-zoom-label {
-  padding: 0 8px;
-  font-size: var(--fs-2xs, 11px);
-  font-family: monospace;
-  font-weight: 700;
-  color: var(--dim, #829198);
-  min-width: 44px;
-  text-align: center;
-}
-
-.roadmap-control-divider {
-  width: 1px;
-  height: 18px;
-  background: var(--border, #2a3236);
-  margin: 0 4px;
-}
-
-/* Floating Canvas Legend Box */
-.flowchart-canvas-legend {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  z-index: 20;
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  padding: 10px 14px;
-  border-radius: var(--r-card, 5px);
-  border: 1px solid var(--border-strong, #465258);
-  background: rgba(21, 26, 29, 0.94);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-  pointer-events: auto;
-  user-select: none;
-}
-
-.flowchart-canvas-legend-title {
-  font-size: var(--fs-xs, 12px);
-  font-weight: 700;
-  color: var(--text, #eef1f3);
-  margin-bottom: 2px;
-}
-
-.flowchart-canvas-legend-items {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.legend-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: var(--fs-xs, 12px);
-  font-weight: 500;
-  color: var(--muted, #c2c9cc);
-}
-
-.legend-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 17px;
-  height: 17px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.legend-badge.is-core {
-  background: #874efe;
-  color: #ffffff;
-}
-
-.legend-badge.is-recommended {
-  background: #10b981;
-  color: #ffffff;
-}
-
-.legend-line.is-flexible {
-  width: 20px;
-  height: 0;
-  border-top: 2.5px dotted var(--accent, #3f8cff);
-  flex-shrink: 0;
-}
-
-/* --------------------------------------------------------------------------
-   3. Canvas Header & Title
-   -------------------------------------------------------------------------- */
-.flowchart-track-notification {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 16px;
-  border-radius: var(--r-pill, 999px);
-  background: var(--surface-2, #1d2529);
-  border: 1px solid var(--border-strong, #465258);
-  color: var(--text, #eef1f3);
-  font-size: var(--fs-xs, 12px);
-  font-weight: 600;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-  user-select: none;
-}
-
-.flowchart-canvas-title {
-  font-size: var(--fs-2xl, 28px);
-  font-weight: 800;
-  color: var(--text, #eef1f3);
-  text-align: center;
-  margin: 0;
-  letter-spacing: -0.02em;
-  user-select: none;
-}
-
-/* --------------------------------------------------------------------------
-   4. Flowchart Node Architecture
-   -------------------------------------------------------------------------- */
-.flowchart-track-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-
-.flowchart-stage-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-
-/* Tight vertical sequence of main spine nodes */
-.flowchart-spine-flow {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  width: 100%;
-}
-
-/* Node Row: Left Wing (280px) + Left Connector (60px) + Spine Node (270px) + Right Connector (60px) + Right Wing (280px) */
-.flowchart-node-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.roadmap-diagram-canvas {
   position: relative;
-  width: 100%;
-}
-
-.flowchart-branch-container {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 280px;
   flex-shrink: 0;
-}
-
-.flowchart-branch-left {
-  align-items: flex-end;
-}
-
-.flowchart-branch-right {
-  align-items: flex-start;
-}
-
-.flowchart-branch-spacer {
-  width: 280px;
-  flex-shrink: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-.flowchart-branch-svg {
-  width: 60px;
-  flex-shrink: 0;
-  overflow: visible;
-  pointer-events: none;
-}
-
-/* Main Spine Topic Node Card */
-.flowchart-main-node {
-  all: unset;
-  box-sizing: border-box;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  position: relative !important;
-  z-index: 5;
-  width: 270px !important;
-  min-height: 48px !important;
-  padding: 10px 18px !important;
-  border-radius: var(--r-card, 5px) !important;
-  border: 1.5px solid var(--border-strong, #465258) !important;
-  background: var(--surface, #151a1d) !important;
-  color: var(--text, #eef1f3) !important;
-  font-size: var(--fs-md, 14px) !important;
-  font-weight: 700 !important;
-  text-align: center !important;
-  line-height: 1.35 !important;
-  cursor: pointer !important;
-  transition: all 0.15s ease !important;
-  user-select: none !important;
-  flex-shrink: 0 !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
-}
-
-.flowchart-main-node:hover {
-  background: var(--surface-2, #1d2529) !important;
-  border-color: var(--accent, #3f8cff) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45), 0 0 10px rgba(63, 140, 255, 0.25) !important;
-}
-
-.flowchart-main-node.is-selected {
-  border-color: var(--accent-bright, #5c9fff) !important;
-  box-shadow: 0 0 0 2px var(--accent, #3f8cff), 0 4px 14px rgba(0, 0, 0, 0.5) !important;
-}
-
-.flowchart-main-node.is-learning {
-  border-color: var(--accent, #3f8cff) !important;
-  box-shadow: 0 0 0 3px rgba(63, 140, 255, 0.35) !important;
-  background: linear-gradient(180deg, var(--surface) 0%, rgba(63, 140, 255, 0.08) 100%) !important;
-}
-
-.flowchart-main-node.is-done {
-  border-color: #10b981 !important;
-}
-
-.flowchart-main-node.is-skipped {
-  opacity: 0.5;
-  border-style: dashed !important;
-}
-
-.flowchart-main-node.is-search-match {
-  border-color: #ffb703 !important;
-  box-shadow: 0 0 0 3px rgba(255, 183, 3, 0.4) !important;
-}
-
-/* Subtopic Branching Card */
-.flowchart-subtopic-pill {
-  all: unset;
-  box-sizing: border-box;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  position: relative !important;
-  z-index: 5;
-  width: 100% !important;
-  max-width: 280px !important;
-  min-height: 44px !important;
-  padding: 8px 16px !important;
-  border-radius: var(--r-card, 5px) !important;
-  border: 1px solid var(--border, #2a3236) !important;
-  background: var(--surface-2, #1d2529) !important;
-  color: var(--muted, #c2c9cc) !important;
-  font-size: var(--fs-sm, 13px) !important;
-  font-weight: 600 !important;
-  text-align: center !important;
-  line-height: 1.35 !important;
-  cursor: pointer !important;
-  transition: all 0.15s ease !important;
-  user-select: none !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
-}
-
-.flowchart-subtopic-pill:hover {
-  background: var(--surface-3, #2a3236) !important;
-  color: var(--text, #eef1f3) !important;
-  border-color: var(--accent, #3f8cff) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
-}
-
-.flowchart-subtopic-pill.is-active,
-.flowchart-subtopic-pill.is-selected {
-  border-color: var(--accent, #3f8cff) !important;
-  color: var(--accent-bright, #5c9fff) !important;
-  box-shadow: 0 0 0 2px rgba(63, 140, 255, 0.3) !important;
-}
-
-/* Subtopic Section Grouping Container */
-.flowchart-section-box {
-  background: var(--surface, #151a1d) !important;
-  border: 1px solid var(--border-strong, #465258) !important;
-  border-radius: var(--r-card, 5px) !important;
-  padding: 12px 14px !important;
-  width: 100% !important;
-  max-width: 280px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 8px !important;
-  position: relative !important;
-  z-index: 4;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.35) !important;
-}
-
-.flowchart-section-label {
-  font-size: var(--fs-xs, 12px);
-  font-weight: 500;
-  color: var(--dim, #829198);
-  line-height: 1.4;
-  text-align: left;
-  margin: 0;
-}
-
-/* Corner Recommendation & Status Badges on Nodes */
-.flowchart-node-corner-badge {
-  position: absolute;
-  top: -7px;
-  left: -7px;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 6;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
-}
-
-.flowchart-node-corner-badge.is-core {
-  background: #874efe;
-  color: #ffffff;
-}
-
-.flowchart-node-corner-badge.is-recommended {
-  background: #10b981;
-  color: #ffffff;
-}
-
-.flowchart-node-done-badge {
-  position: absolute;
-  top: -7px;
-  right: -7px;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #10b981;
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 6;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
-}
-
-/* --------------------------------------------------------------------------
-   5. Connectors: Solid Vertical Spine & Dotted Curved Branches
-   -------------------------------------------------------------------------- */
-.flowchart-vertical-spine-line {
-  width: 3px;
-  height: 48px;
-  background: var(--accent, #3f8cff);
-  border-radius: 2px;
+  user-select: none;
   margin: 0 auto;
-  position: relative;
-  z-index: 2;
-  flex-shrink: 0;
-  box-shadow: 0 0 6px rgba(63, 140, 255, 0.35);
 }
 
-.flowchart-connector-path {
+/* --------------------------------------------------------------------------
+   3. SVG Overlay, Section Boxes & Connectors
+   -------------------------------------------------------------------------- */
+.rm-svg-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 1;
+}
+
+.rm-section-box {
+  fill: rgba(21, 26, 29, 0.45);
+  stroke: var(--border-strong, #3f4a50);
+  stroke-dasharray: 5 5;
+  stroke-width: 1.5px;
+}
+
+.rm-edge-spine {
   fill: none;
   stroke: var(--accent, #3f8cff);
-  stroke-width: 2.5px;
+  stroke-width: 2.2px;
+  stroke-linecap: round;
+  transition: stroke 0.2s ease;
+}
+
+.rm-edge-spine.is-done {
+  stroke: #10b981;
+}
+
+.rm-edge-spine.is-learning {
+  stroke: #ffd166;
+}
+
+.rm-edge-branch {
+  fill: none;
+  stroke: var(--accent, #3f8cff);
+  stroke-width: 1.5px;
+  stroke-dasharray: 2.5 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.2s ease;
+}
+
+.rm-edge-solid {
+  fill: none;
+  stroke: var(--accent, #3f8cff);
+  stroke-width: 2px;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
-.flowchart-connector-path.is-solid {
-  stroke-dasharray: 0;
-}
-
-.flowchart-connector-path.is-dashed {
-  stroke-dasharray: 0.8 8;
-}
-
 /* --------------------------------------------------------------------------
-   6. Master Architecture System Map (4-Tier Flow)
+   4. Node Styling (Authentic roadmap.sh Nodes)
    -------------------------------------------------------------------------- */
-.master-tree-container {
+
+/* Main Milestone Topic Node (Yellow / Gold with dark text) */
+.rm-milestone-main {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 8px 14px;
+  border-radius: 6px;
+  background: #ffe599;
+  border: 2px solid #000000;
+  color: #0e1113;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  user-select: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.rm-milestone-main:hover {
+  background: #ffd166;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(255, 209, 102, 0.45);
+}
+
+/* Secondary Milestone Node */
+.rm-milestone-sub {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 6px 12px;
+  border-radius: 5px;
+  background: #fff2cc;
+  border: 1.5px solid #000000;
+  color: #0e1113;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.25;
+  user-select: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: all 0.15s ease;
+}
+
+.rm-milestone-sub:hover {
+  background: #ffe599;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Concept / Subtopic Pill (Radiating right column & tool grids) */
+.rm-concept-pill {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  border-radius: 5px;
+  background: #fff2cc;
+  border: 1.5px solid #000000;
+  color: #0e1113;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  user-select: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: all 0.15s ease;
+  white-space: normal;
+  text-align: left;
+}
+
+.rm-concept-pill:hover {
+  background: #ffe599;
+  border-color: var(--accent, #3f8cff);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Corner Recommendation / Status Badges (Purple / Green / Gray) */
+.rm-badge-corner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-left: 6px;
+}
+
+.rm-badge-corner.is-recommended {
+  background: #a855f7;
+  color: #ffffff;
+}
+
+.rm-badge-corner.is-alternative {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.rm-badge-corner.is-elective {
+  background: #6b7280;
+  color: #ffffff;
+}
+
+/* Done Node State */
+.rm-node-done {
+  background: rgba(16, 185, 129, 0.18) !important;
+  border-color: #10b981 !important;
+  color: #34d399 !important;
+}
+
+.rm-node-done:hover {
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35) !important;
+}
+
+/* Learning Node State */
+.rm-node-learning {
+  background: rgba(255, 209, 102, 0.22) !important;
+  border-color: #ffd166 !important;
+  color: #ffd166 !important;
+  box-shadow: 0 0 10px rgba(255, 209, 102, 0.35);
+}
+
+/* Skipped Node State */
+.rm-node-skipped {
+  background: rgba(27, 33, 37, 0.6) !important;
+  border-color: #465258 !important;
+  border-style: dashed !important;
+  color: var(--dim, #8999a6) !important;
+  text-decoration: line-through;
+  opacity: 0.65;
+}
+
+/* Search Query Highlight */
+.rm-search-matched {
+  border-color: #ffd166 !important;
+  box-shadow: 0 0 16px rgba(255, 209, 102, 0.9) !important;
+  transform: scale(1.03);
+}
+
+/* Legend Card on Top Left (roadmap.sh signature element) */
+.rm-legend-card {
+  position: absolute;
+  z-index: 5;
   display: flex;
   flex-direction: column;
-  gap: 32px;
-  width: 100%;
-  max-width: 980px;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong, #3f4a50);
+  background: rgba(21, 26, 29, 0.94);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  box-sizing: border-box;
 }
 
-.master-tier-card {
-  border: 1px solid var(--border, #2a3236);
-  border-radius: var(--r-card, 5px);
-  background: var(--surface, #151a1d);
-  padding: 24px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
-  position: relative;
-  z-index: 2;
+.rm-legend-title {
+  font-size: 11px;
+  font-weight: 700;
   color: var(--text, #eef1f3);
-}
-
-.master-tier-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 20px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--border, #2a3236);
-}
-
-.master-tier-header p {
-  color: var(--muted, #c2c9cc) !important;
-}
-
-.master-tier-badge {
-  display: inline-block;
-  padding: 3px 8px;
-  border-radius: 4px;
-  background: rgba(63, 140, 255, 0.15);
-  border: 1px solid rgba(63, 140, 255, 0.35);
-  color: var(--accent-bright, #5c9fff);
-  font-size: var(--fs-2xs, 11px);
-  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 6px;
-}
-
-.master-tier-title {
-  font-size: var(--fs-lg, 18px);
-  font-weight: 800;
-  color: var(--text, #eef1f3);
+  letter-spacing: 0.04em;
   margin: 0;
 }
 
-.master-fields-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 16px;
+.rm-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted, #c2c9cc);
 }
 
-.master-discipline-card {
-  all: unset;
-  box-sizing: border-box;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: space-between !important;
-  padding: 16px !important;
-  border-radius: var(--r-card, 5px) !important;
-  border: 1px solid var(--border, #2a3236) !important;
-  background: var(--surface-2, #1d2529) !important;
-  color: var(--text, #eef1f3) !important;
+.rm-legend-item .rm-badge-corner {
+  margin-left: 0;
+  width: 14px;
+  height: 14px;
+}
+
+.rm-legend-btn {
+  margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border, #2a3236);
+  background: var(--surface-3, #222a2f);
+  color: var(--text, #eef1f3);
+  font-size: 11px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
-  text-decoration: none !important;
+  text-align: center;
 }
 
-.master-discipline-card:hover {
-  background: var(--surface-3, #2a3236) !important;
-  border-color: var(--accent, #3f8cff) !important;
-  transform: translateY(-2px);
+.rm-legend-btn:hover {
+  background: var(--accent, #3f8cff);
+  color: #ffffff;
+  border-color: var(--accent, #3f8cff);
+}
+
+/* Curriculum Card on Top Right */
+.rm-curriculum-card {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong, #3f4a50);
+  background: rgba(21, 26, 29, 0.94);
+  backdrop-filter: blur(8px);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  box-sizing: border-box;
 }
 
-.master-discipline-card * {
+.rm-curriculum-card .curriculum-desc {
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--muted, #c2c9cc);
+  margin: 0;
+}
+
+.rm-curriculum-card .curriculum-btn {
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border, #2a3236);
+  background: var(--surface-2, #1b2125);
+  color: var(--accent-bright, #60a5fa);
+  font-size: 11px;
+  font-weight: 700;
+  font-family: monospace;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.rm-curriculum-card .curriculum-btn:hover {
+  background: var(--accent, #3f8cff);
+  color: #ffffff;
+  border-color: var(--accent, #3f8cff);
+}
+
+/* Inlined Project Callout Card on the left */
+.rm-project-card {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong, #3f4a50);
+  background: rgba(21, 26, 29, 0.92);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+}
+
+.rm-project-card .project-note {
+  font-size: 11px;
+  color: var(--muted, #c2c9cc);
+  line-height: 1.35;
+  margin: 0;
+}
+
+.rm-project-card .project-btn {
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border, #2a3236);
+  background: var(--surface-3, #222a2f);
   color: var(--text, #eef1f3);
+  font-size: 10.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  text-decoration: none;
 }
 
-.master-discipline-card p {
-  color: var(--muted, #c2c9cc) !important;
+.rm-project-card .project-btn:hover {
+  background: var(--accent, #3f8cff);
+  color: #ffffff;
+  border-color: var(--accent, #3f8cff);
+}
+
+/* Section Header & Group Labels */
+.rm-group-title {
+  position: absolute;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--border-strong, #3f4a50);
+  background: var(--surface-2, #1b2125);
+  color: var(--accent-bright, #60a5fa);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  user-select: none;
+}
+
+/* Start & Capstone Finish Badges */
+.rm-track-title-badge {
+  position: absolute;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 16px;
+  border-radius: 6px;
+  border: 2px solid var(--accent, #3f8cff);
+  background: rgba(63, 140, 255, 0.12);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  user-select: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.rm-capstone-finish-badge {
+  position: absolute;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: 2px solid #10b981;
+  background: rgba(16, 185, 129, 0.16);
+  color: #34d399;
+  font-size: 13px;
+  font-weight: 800;
+  user-select: none;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25);
 }
 
 /* --------------------------------------------------------------------------
-   7. Slide-over Topic Drawer Styling
+   5. Master System Map Disciplines
+   -------------------------------------------------------------------------- */
+.rm-master-discipline {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border, #2a3236);
+  background: var(--surface, #151a1d);
+  text-decoration: none;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  box-sizing: border-box;
+}
+
+.rm-master-discipline:hover {
+  background: var(--surface-2, #1b2125);
+  border-color: var(--accent, #3f8cff);
+  box-shadow: 0 4px 14px rgba(63, 140, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.rm-master-discipline .disc-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text, #eef1f3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rm-master-discipline .disc-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  margin-top: 3px;
+  font-size: 10px;
+  color: var(--dim, #8999a6);
+}
+
+/* --------------------------------------------------------------------------
+   6. Slide-Over Topic Drawer
    -------------------------------------------------------------------------- */
 .roadmap-resource-drawer {
-  animation: slideDrawer 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideDrawer 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes slideDrawer {
@@ -590,7 +513,7 @@
 }
 
 .roadmap-inspector-backdrop {
-  animation: fadeIn 0.18s ease forwards;
+  animation: fadeIn 0.15s ease forwards;
 }
 
 @keyframes fadeIn {
@@ -602,7 +525,7 @@
   }
 }
 
-/* Resource Badges */
+/* Resource chips */
 .resource-chip-badge {
   display: inline-flex;
   align-items: center;
@@ -650,13 +573,11 @@
   border: 1px solid var(--border-strong, #3f4a50);
 }
 
-/* --------------------------------------------------------------------------
-   8. Defensive Button Resets
-   -------------------------------------------------------------------------- */
-.roadmap-canvas-wrapper button,
-.roadmap-canvas-wrapper a.master-discipline-card {
+/* Defensive resets */
+.roadmap-canvas-wrapper button {
   white-space: normal !important;
   line-height: normal !important;
   text-transform: none !important;
   font-family: inherit !important;
 }
+
