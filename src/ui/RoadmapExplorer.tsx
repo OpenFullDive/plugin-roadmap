@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 import {
   ArrowLeft,
@@ -11,24 +11,33 @@ import {
   Check,
   CheckCircle2,
   ChevronDown,
+  ChevronRight,
   Circle,
   CircleDot,
   ClipboardCheck,
   Code2,
+  Compass,
+  Download,
   ExternalLink,
   Flag,
   FolderKanban,
   GitFork,
-  Info,
   Layers3,
+  List,
   MessageCircle,
+  Move,
+  Network,
   PauseCircle,
-  Play,
+  RotateCcw,
   Search,
   Share2,
   Sparkles,
+  Square,
+  SquareCheck,
   Users,
   X,
+  ZoomIn,
+  ZoomOut,
 } from "lucide-react";
 import {
   masterRoadmap,
@@ -39,79 +48,124 @@ import {
   type RoadmapSection,
   type TopicStatus,
 } from "../content/roadmap";
+import { getTopicDetails, type TopicDetail, type TopicResource } from "../content/topic-details";
 import { StickyRail } from "./StickyRail";
+import "./flowchart.css";
 
-/**
- * The host's per-user storage bridge — the callable the host passes down so
- * this package never imports a Server Action, the database, or any host
- * internal. Signed in, the host makes server state authoritative; signed out,
- * this component falls back to `localStorage` on its own.
- */
 export type RoadmapStorage = {
-  /** Every stored key for the signed-in viewer; `null` when signed out or unavailable. */
   getState: () => Promise<Record<string, unknown> | null>;
-  /** Persist one declared key for the signed-in viewer. */
   setState: (key: string, value: unknown) => Promise<{ ok: boolean; error?: string }>;
 };
 
 export type RoadmapExplorerProps = {
   slug: string;
-  /** Host-resolved: is there a signed-in session? Signed out falls back to `localStorage`. */
   isSignedIn?: boolean;
-  /** The host's storage bridge; when present and signed in, server state is authoritative. */
   storage?: RoadmapStorage;
 };
 
 type Tab = "roadmap" | "projects" | "contribute";
+type ViewMode = "flowchart" | "linear";
 type Difficulty = "Beginner" | "Intermediate" | "Advanced";
-type SelectedTopic = { field: RoadmapField; section: RoadmapSection; topic: string };
+type DrawerTab = "knowledge" | "resources" | "community";
 
-const FAVORITES_KEY = "ofd-roadmap-favorites-v1";
+type SelectedTopic = {
+  field: RoadmapField;
+  section: RoadmapSection;
+  topic: string;
+  subtopicFocus?: string;
+};
+
 const STATUS_KEY = "ofd-roadmap-status-v1";
-/** The versioned storage keys this plugin's manifest declares; the host persists them per user. */
-const PROGRESS_STORAGE_KEY = "progress:v1";
-const FAVORITES_STORAGE_KEY = "favorites:v1";
+const FAVORITES_KEY = "ofd-roadmap-favorites-v1";
+const CHECKLIST_KEY = "ofd-roadmap-checklist-v1";
+const PROGRESS_STORAGE_KEY = "roadmap:progress";
+const FAVORITES_STORAGE_KEY = "roadmap:favorites";
+const CHECKLIST_STORAGE_KEY = "roadmap:checklist";
 
 function readLocal<T>(key: string, fallback: T): T {
+  if (typeof window === "undefined") return fallback;
   try {
-    const raw = localStorage.getItem(key);
+    const raw = window.localStorage.getItem(key);
     return raw ? (JSON.parse(raw) as T) : fallback;
   } catch {
     return fallback;
   }
 }
 
+function writeLocal(key: string, value: unknown) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Ignore storage quota limits
+  }
+}
+
+const MASTER_TIERS = [
+  {
+    tier: "Tier 1",
+    title: "Scientific & Physical Foundations",
+    description: "Cellular neuroscience, biological sensory pathways, compute silicon, and spatial simulation engines.",
+    ids: ["neuroscience", "hardware-architecture", "virtual-environments"],
+  },
+  {
+    tier: "Tier 2",
+    title: "Interfaces & Neural Interaction",
+    description: "Signal acquisition, closed-loop decoding, tactile/kinesthetic actuation, and targeted neuromodulation.",
+    ids: ["bci", "haptics", "neural-modulation", "sensory-substitution"],
+  },
+  {
+    tier: "Tier 3",
+    title: "Systems, Software & Safety",
+    description: "Hard real-time operating systems, end-to-end latency budgets, and physiological fail-safes.",
+    ids: ["software-frameworks", "system-integration", "ethical-engineering"],
+  },
+  {
+    tier: "Tier 4",
+    title: "Frontier Research & Synthesis",
+    description: "Synaptic connectomics, high-density recording, and long-term molecular interface horizons.",
+    ids: ["advanced-neural-mapping", "future-frontiers"],
+  },
+];
+
 export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: RoadmapExplorerProps) {
   const isMaster = slug === masterRoadmap.id;
   const field = roadmapFieldById(slug);
   const fields = isMaster ? roadmapFields : field ? [field] : [];
-  /** Server-backed only when the host says signed-in AND handed us a storage bridge. */
   const serverBacked = isSignedIn && !!storage;
+
+  // View & Navigation States
   const [tab, setTab] = useState<Tab>("roadmap");
+  const [viewMode, setViewMode] = useState<ViewMode>("flowchart");
   const [difficulty, setDifficulty] = useState<Difficulty>("Beginner");
   const [selected, setSelected] = useState<SelectedTopic | null>(null);
+  const [drawerTab, setDrawerTab] = useState<DrawerTab>("knowledge");
+
+  // Flowchart Canvas Pan & Zoom States
+  const [zoom, setZoom] = useState<number>(1.0);
+  const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [dragStart, setDragStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  // Persistence States
   const [statuses, setStatuses] = useState<Record<string, TopicStatus>>({});
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [checkedChecklist, setCheckedChecklist] = useState<Record<string, boolean>>({});
   const [copied, setCopied] = useState(false);
-  const [resourceTab, setResourceTab] = useState<"resources" | "community">("resources");
+  const [exported, setExported] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [trackQuery, setTrackQuery] = useState("");
 
-  /**
-   * Anonymous stays useful; signed in, server state is authoritative. Signed
-   * out reads `localStorage` exactly as before. Signed in, this loads the
-   * viewer's server state through the host's storage bridge and — only when the
-   * server has nothing yet for a key and local storage holds something valid —
-   * imports it once. That guard is what makes it a bounded migration rather
-   * than a permanent two-master sync: it never runs again once the server has a
-   * value, so it can never clobber real progress with stale local data from a
-   * second device or a later sign-in.
-   */
+  const canvasViewportRef = useRef<HTMLDivElement>(null);
+
+  // Sync state between storage bridge and localStorage
   useEffect(() => {
     let cancelled = false;
     (async () => {
       if (!serverBacked || !storage) {
         setStatuses(readLocal(STATUS_KEY, {}));
         setFavorites(readLocal(FAVORITES_KEY, []));
+        setCheckedChecklist(readLocal(CHECKLIST_KEY, {}));
         return;
       }
 
@@ -120,6 +174,7 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
 
       let progress = remote?.[PROGRESS_STORAGE_KEY] as Record<string, TopicStatus> | undefined;
       let favs = remote?.[FAVORITES_STORAGE_KEY] as string[] | undefined;
+      let checklist = remote?.[CHECKLIST_STORAGE_KEY] as Record<string, boolean> | undefined;
 
       if (progress === undefined) {
         const local = readLocal<Record<string, TopicStatus> | null>(STATUS_KEY, null);
@@ -135,10 +190,18 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
           if (result?.ok) favs = local;
         }
       }
+      if (checklist === undefined) {
+        const local = readLocal<Record<string, boolean> | null>(CHECKLIST_KEY, null);
+        if (local && Object.keys(local).length > 0) {
+          const result = await storage.setState(CHECKLIST_STORAGE_KEY, local).catch(() => null);
+          if (result?.ok) checklist = local;
+        }
+      }
 
       if (cancelled) return;
       setStatuses(progress ?? {});
       setFavorites(favs ?? []);
+      setCheckedChecklist(checklist ?? {});
     })();
     return () => {
       cancelled = true;
@@ -152,425 +215,1276 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
   const favoriteId = isMaster ? masterRoadmap.id : field?.id ?? slug;
   const saved = favorites.includes(favoriteId);
 
+  // Flattened topic list for sequential next/prev navigation
+  const flatTopics = useMemo(() => {
+    const list: SelectedTopic[] = [];
+    for (const f of fields) {
+      for (const s of f.sections) {
+        for (const t of s.topics) {
+          list.push({ field: f, section: s, topic: t });
+        }
+      }
+    }
+    return list;
+  }, [fields]);
+
   const allTopicKeys = useMemo(
     () => fields.flatMap((item) => item.sections.flatMap((section) => section.topics.map((topic) => topicKey(item, topic)))),
     [fields],
   );
   const doneCount = allTopicKeys.filter((key) => statuses[key] === "done").length;
   const learningCount = allTopicKeys.filter((key) => statuses[key] === "learning").length;
-  const progress = allTopicKeys.length ? Math.round((doneCount / allTopicKeys.length) * 100) : 0;
+  const progressPercent = allTopicKeys.length ? Math.round((doneCount / allTopicKeys.length) * 100) : 0;
+
+  // Find first incomplete topic for "Continue" button
   const firstIncomplete = useMemo(() => {
-    for (const item of fields) {
-      for (const roadmapSection of item.sections) {
-        const topic = roadmapSection.topics.find((name) => statuses[topicKey(item, name)] !== "done" && statuses[topicKey(item, name)] !== "skipped");
-        if (topic) return { field: item, section: roadmapSection, topic };
+    for (const item of flatTopics) {
+      const key = topicKey(item.field, item.topic);
+      if (statuses[key] !== "done" && statuses[key] !== "skipped") {
+        return item;
       }
     }
     return null;
-  }, [fields, statuses]);
+  }, [flatTopics, statuses]);
+
+  // Active topic index in flattened list
+  const currentTopicIndex = useMemo(() => {
+    if (!selected) return -1;
+    return flatTopics.findIndex(
+      (item) => item.field.id === selected.field.id && item.topic === selected.topic,
+    );
+  }, [selected, flatTopics]);
+
+  const prevTopic = currentTopicIndex > 0 ? flatTopics[currentTopicIndex - 1] : null;
+  const nextTopic = currentTopicIndex >= 0 && currentTopicIndex < flatTopics.length - 1 ? flatTopics[currentTopicIndex + 1] : null;
+
+  // Detail for the currently selected topic
+  const activeTopicDetail: TopicDetail | null = useMemo(() => {
+    if (!selected) return null;
+    return getTopicDetails(selected.field.id, selected.topic);
+  }, [selected]);
+
   const visibleTracks = useMemo(() => {
     const query = trackQuery.trim().toLowerCase();
     if (!query) return roadmapFields;
-    return roadmapFields.filter((item) => [item.title, item.shortTitle, item.category, item.description].join(" ").toLowerCase().includes(query));
+    return roadmapFields.filter((item) =>
+      [item.title, item.shortTitle, item.category, item.description].join(" ").toLowerCase().includes(query),
+    );
   }, [trackQuery]);
 
-  const projects = useMemo(() => fields.flatMap((item) => item.sections.flatMap((section) => [
-    {
-      id: `${item.id}-${section.id}-beginner`, difficulty: "Beginner" as const, field: item,
-      title: `Map the evidence for ${section.topics[0]}`,
-      description: `Build a short, sourced explainer that separates established results, constraints, and open questions in ${section.title}.`,
-    },
-    {
-      id: `${item.id}-${section.id}-intermediate`, difficulty: "Intermediate" as const, field: item,
-      title: section.project,
-      description: `Turn the ${section.title} section into a reproducible community artifact with methods, tests, and limitations.`,
-    },
-    {
-      id: `${item.id}-${section.id}-advanced`, difficulty: "Advanced" as const, field: item,
-      title: `Integrate and challenge the ${section.title} assumptions`,
-      description: `Connect this module to an adjacent field, define interfaces and failure states, then request cross-discipline review.`,
-    },
-  ])), [fields]);
+  const projects = useMemo(
+    () =>
+      fields.flatMap((item) =>
+        item.sections.flatMap((section) => [
+          {
+            id: `${item.id}-${section.id}-beginner`,
+            difficulty: "Beginner" as const,
+            field: item,
+            title: `Map the evidence for ${section.topics[0]}`,
+            description: `Build a short, sourced explainer separating established results, constraints, and open questions in ${section.title}.`,
+          },
+          {
+            id: `${item.id}-${section.id}-intermediate`,
+            difficulty: "Intermediate" as const,
+            field: item,
+            title: section.project,
+            description: `Turn the ${section.title} milestone into an inspectable community reproduction with explicit methods and limitations.`,
+          },
+          {
+            id: `${item.id}-${section.id}-advanced`,
+            difficulty: "Advanced" as const,
+            field: item,
+            title: `Verification protocol for ${section.title}`,
+            description: `Design an adversarial test suite evaluating edge cases, latency boundaries, and safety limits for ${section.title}.`,
+          },
+        ]),
+      ),
+    [fields],
+  );
 
-  if (!isMaster && !field) {
-    return (
-      <div className="roadmap-missing flex flex-col items-center justify-center p-[var(--s8)] text-center">
-        <Layers3 size={30} className="text-[var(--dim)]" />
-        <h1 className="my-[var(--s3)] text-[var(--fs-2xl)] font-bold text-[var(--text)]">Roadmap not found</h1>
-        <p className="mb-[var(--s4)] text-[var(--muted)] text-[var(--fs-sm)]">The requested learning path may have moved.</p>
-        <Link className="primary btn inline-flex items-center gap-1" href="/roadmap"><ArrowLeft size={15} /> Browse all roadmaps</Link>
-      </div>
-    );
-  }
+  // Status mutation handlers
+  const setStatus = (target: SelectedTopic, next: TopicStatus | undefined) => {
+    const key = topicKey(target.field, target.topic);
+    setStatuses((prev) => {
+      const updated = { ...prev };
+      if (next === undefined) delete updated[key];
+      else updated[key] = next;
 
-  const setStatus = (topic: SelectedTopic, status?: TopicStatus) => {
-    const key = topicKey(topic.field, topic.topic);
-    setStatuses((current) => {
-      const next = { ...current };
-      if (status) next[key] = status;
-      else delete next[key];
+      writeLocal(STATUS_KEY, updated);
       if (serverBacked && storage) {
-        // Fire-and-forget, matching this component's "never block the roadmap"
-        // philosophy for storage failures — the UI already updated
-        // optimistically; a save failure is logged, not surfaced as a blocking
-        // error over a low-stakes, easily-redone action.
-        void storage.setState(PROGRESS_STORAGE_KEY, next).then((result) => {
-          if (!result.ok) console.error("[roadmap] progress save failed:", result.error);
-        });
-      } else {
-        localStorage.setItem(STATUS_KEY, JSON.stringify(next));
+        storage.setState(PROGRESS_STORAGE_KEY, updated).catch(() => {});
+      }
+      return updated;
+    });
+  };
+
+  const cycleStatus = (e: React.MouseEvent, target: SelectedTopic) => {
+    e.stopPropagation();
+    const key = topicKey(target.field, target.topic);
+    const current = statuses[key];
+    const order: Array<TopicStatus | undefined> = [undefined, "learning", "done", "skipped"];
+    const nextIdx = (order.indexOf(current) + 1) % order.length;
+    setStatus(target, order[nextIdx]);
+  };
+
+  const toggleFavorite = () => {
+    setFavorites((prev) => {
+      const next = prev.includes(favoriteId) ? prev.filter((id) => id !== favoriteId) : [...prev, favoriteId];
+      writeLocal(FAVORITES_KEY, next);
+      if (serverBacked && storage) {
+        storage.setState(FAVORITES_STORAGE_KEY, next).catch(() => {});
       }
       return next;
     });
   };
 
-  const toggleFavorite = () => {
-    setFavorites((current) => {
-      const next = current.includes(favoriteId) ? current.filter((item) => item !== favoriteId) : [...current, favoriteId];
+  const toggleChecklist = (checkKey: string) => {
+    setCheckedChecklist((prev) => {
+      const next = { ...prev, [checkKey]: !prev[checkKey] };
+      writeLocal(CHECKLIST_KEY, next);
       if (serverBacked && storage) {
-        void storage.setState(FAVORITES_STORAGE_KEY, next).then((result) => {
-          if (!result.ok) console.error("[roadmap] favorites save failed:", result.error);
-        });
-      } else {
-        localStorage.setItem(FAVORITES_KEY, JSON.stringify(next));
+        storage.setState(CHECKLIST_STORAGE_KEY, next).catch(() => {});
       }
       return next;
     });
   };
 
   const share = async () => {
-    await navigator.clipboard?.writeText(window.location.href);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1400);
+    if (typeof window === "undefined") return;
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Ignore clipboard write failures
+    }
   };
 
-  const openNextTopic = () => {
-    if (!firstIncomplete) return;
-    setSelected(firstIncomplete);
-    setResourceTab("resources");
+  const exportProgress = () => {
+    const data = {
+      roadmapSlug: slug,
+      exportedAt: new Date().toISOString(),
+      summary: {
+        total: allTopicKeys.length,
+        done: doneCount,
+        learning: learningCount,
+        progressPercent,
+      },
+      statuses,
+      favorites,
+      checklists: checkedChecklist,
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `openfulldive-roadmap-${slug}-progress.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setExported(true);
+    setTimeout(() => setExported(false), 2000);
+  };
+
+  // Canvas Pan & Zoom Handlers
+  const handleZoomIn = () => setZoom((z) => Math.min(1.5, Math.round((z + 0.15) * 100) / 100));
+  const handleZoomOut = () => setZoom((z) => Math.max(0.5, Math.round((z - 0.15) * 100) / 100));
+  const handleResetView = () => {
+    setZoom(1.0);
+    setPan({ x: 0, y: 0 });
+  };
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return; // Left click only
+    // Don't drag if clicking a button or link
+    const target = e.target as HTMLElement;
+    if (target.closest("button") || target.closest("a") || target.closest("input")) return;
+
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+    setPan({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y });
+  };
+
+  const handleMouseUp = () => setIsDragging(false);
+
+  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.1 : 0.1;
+      setZoom((z) => Math.min(1.5, Math.max(0.5, Math.round((z + delta) * 100) / 100)));
+    }
   };
 
   return (
-    <div className={clsx("roadmap-explorer-page mx-auto w-[min(100%,1380px)] pb-[var(--s12)] max-[680px]:px-[var(--s3)]", isMaster && "is-master")}>
-      <header className="roadmap-explorer-header overflow-visible border-b border-[var(--border)] bg-transparent pt-[var(--s5)]">
-        <div className="roadmap-workspace-topbar flex min-h-[52px] items-start justify-between gap-[var(--s4)] max-[680px]:min-h-[62px]">
-          <div className="roadmap-workspace-identity flex min-w-0 items-center gap-[var(--s3)]">
-            {!isMaster && (
-              <Link className="grid size-[34px] flex-none place-items-center rounded-[var(--r-ctrl)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)]" href="/roadmap" aria-label="Back to Roadmap">
-                <ArrowLeft size={17} />
-              </Link>
-            )}
-            <div className="grid min-w-0 items-start gap-[2px] max-[680px]:gap-0">
-              <span className="text-[var(--dim)] text-[10px] font-bold uppercase tracking-[0.1em] whitespace-nowrap max-[680px]:text-[9px]">{isMaster ? "Full-Dive development" : `${field?.category} path`}</span>
-              <h1 className="m-0 truncate text-[clamp(26px,2.7vw,32px)] font-bold text-[var(--text)] leading-[1.15]">{isMaster ? "Roadmap" : title}</h1>
+    <div className="min-w-0">
+      {/* Top Header & Overview Bar */}
+      <header className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 text-[11px] font-semibold tracking-wider text-[var(--dim)] uppercase">
+              <Compass size={14} className="text-[var(--accent)]" />
+              <span>OpenFullDive Roadmap</span>
+              <span>·</span>
+              <span className="text-[var(--accent-bright)]">{isMaster ? "Complete Curriculum" : field?.category}</span>
             </div>
-            {!isMaster && <span className="roadmap-level-chip inline-flex items-center rounded-full border border-[var(--border)] px-[8px] py-[2px] text-[var(--dim)] text-[var(--fs-2xs)] uppercase tracking-[0.05em]">{field?.level}</span>}
+            <h1 className="mt-1 text-2xl font-bold tracking-tight text-[var(--text)] m-0">{title}</h1>
           </div>
-          <div className="roadmap-workspace-actions flex flex-none items-center gap-[var(--s2)]">
+
+          <div className="flex items-center gap-2">
             {firstIncomplete && (
-              <button className="roadmap-continue-button inline-flex h-[36px] items-center justify-center gap-[7px] rounded-[var(--r-ctrl)] border border-[var(--accent)] bg-[var(--accent)] px-[var(--s3)] text-[var(--fs-xs)] font-[720] text-white hover:bg-[var(--accent-hover)]" onClick={openNextTopic}>
-                <Play size={14} fill="currentColor" /> Continue
+              <button
+                type="button"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--accent)] bg-[rgba(63,140,255,0.12)] px-3.5 py-1.5 text-xs font-bold text-[var(--accent-bright)] hover:bg-[var(--accent)] hover:text-white transition-all cursor-pointer"
+                onClick={() => {
+                  setSelected(firstIncomplete);
+                  setDrawerTab("knowledge");
+                }}
+              >
+                <span>Continue: {firstIncomplete.topic}</span>
+                <ArrowRight size={13} />
               </button>
             )}
+
+            <button
+              className="inline-flex size-[34px] items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface-2)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)] transition-colors cursor-pointer"
+              onClick={exportProgress}
+              aria-label="Export Progress JSON"
+              title="Export Progress JSON"
+            >
+              {exported ? <Check size={15} /> : <Download size={15} />}
+            </button>
+
             <button
               className={clsx(
-                "inline-flex size-[36px] items-center justify-center rounded-[var(--r-ctrl)] border bg-[var(--surface)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)]",
-                saved && "is-active border-[var(--border-strong)] text-[var(--text)]"
+                "inline-flex size-[34px] items-center justify-center rounded-lg border bg-[var(--surface-2)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)] transition-colors cursor-pointer",
+                saved ? "border-[var(--accent-bright)] text-[var(--accent-bright)] bg-[rgba(63,140,255,0.1)]" : "border-[var(--border)]",
               )}
               onClick={toggleFavorite}
-              aria-label={saved ? "Remove saved roadmap" : "Save roadmap"}
+              aria-label={saved ? "Saved" : "Save roadmap"}
+              title={saved ? "Saved" : "Save roadmap"}
             >
-              {saved ? <Check size={16} /> : <Bookmark size={16} />}
+              {saved ? <Check size={15} /> : <Bookmark size={15} />}
             </button>
+
             <button
-              className="inline-flex size-[36px] items-center justify-center rounded-[var(--r-ctrl)] border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)]"
+              className="inline-flex size-[34px] items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface-2)] text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)] transition-colors cursor-pointer"
               onClick={share}
-              aria-label="Copy roadmap link"
+              aria-label="Share roadmap"
+              title="Share roadmap link"
             >
-              {copied ? <Check size={16} /> : <Share2 size={16} />}
+              {copied ? <Check size={15} /> : <Share2 size={15} />}
             </button>
           </div>
         </div>
 
-        <div className="roadmap-workspace-summary grid min-h-[52px] grid-cols-[minmax(0,1fr)_minmax(360px,520px)] items-center gap-[var(--s8)] py-[var(--s2)] pb-[var(--s4)] max-[1350px]:grid-cols-1 max-[1350px]:gap-[var(--s3)]">
-          <p className="m-0 line-clamp-2 max-w-[66ch] text-[var(--muted)] text-[var(--fs-xs)] leading-[1.45]">{description}</p>
-          <div className="roadmap-workspace-progress grid w-full grid-cols-[max-content_minmax(90px,1fr)_max-content] items-center gap-[var(--s2)] text-[var(--muted)] text-[var(--fs-2xs)] max-[1350px]:w-[min(100%,520px)]">
-            <span><strong className="text-[var(--text)]">{progress}%</strong> complete</span>
-            <div className="h-[5px] overflow-hidden rounded-full bg-[var(--surface-3)]"><i className="block h-full bg-[var(--accent)] transition-[width] duration-200" style={{ width: `${progress}%` }} /></div>
-            <small className="whitespace-nowrap text-[var(--dim)]">{learningCount} learning · {doneCount} done · {allTopicKeys.length} topics</small>
+        {/* Description & Progress Summary Bar */}
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-4 border-t border-[var(--border)] pt-4">
+          <p className="max-w-[72ch] text-xs text-[var(--muted)] leading-relaxed m-0">{description}</p>
+          <div className="flex min-w-[280px] flex-1 max-w-[440px] flex-col gap-1.5">
+            <div className="flex items-center justify-between text-[11px] text-[var(--dim)]">
+              <span>
+                Progress: <strong className="text-[var(--text)]">{progressPercent}%</strong>
+              </span>
+              <span>
+                {doneCount} of {allTopicKeys.length} topics done
+              </span>
+            </div>
+            <div className="h-[6px] w-full overflow-hidden rounded-full bg-[var(--surface-3)]">
+              <div
+                className="h-full bg-[var(--accent)] transition-all duration-300 rounded-full"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
           </div>
         </div>
 
-        <nav className="roadmap-explorer-tabs flex gap-[var(--s5)] p-[0_0_var(--s2)] max-[1350px]:gap-[var(--s4)] max-[1350px]:overflow-x-auto" aria-label="Roadmap views">
-          <button className={clsx("inline-flex min-h-[38px] items-center gap-[7px] rounded-none border-0 border-b-2 bg-transparent px-0 py-0 text-[var(--fs-xs)] transition-[color,border-color] active:transform-none hover:border-transparent hover:bg-transparent focus-visible:bg-transparent", tab === "roadmap" ? "border-[var(--accent-bright)] font-[750] text-[var(--text)]" : "border-transparent text-[var(--dim)] hover:text-[var(--muted)]")} aria-current={tab === "roadmap" ? "page" : undefined} onClick={() => setTab("roadmap")}><Layers3 size={15} /> Roadmap</button>
-          <button className={clsx("inline-flex min-h-[38px] items-center gap-[7px] rounded-none border-0 border-b-2 bg-transparent px-0 py-0 text-[var(--fs-xs)] transition-[color,border-color] active:transform-none hover:border-transparent hover:bg-transparent focus-visible:bg-transparent", tab === "projects" ? "border-[var(--accent-bright)] font-[750] text-[var(--text)]" : "border-transparent text-[var(--dim)] hover:text-[var(--muted)]")} aria-current={tab === "projects" ? "page" : undefined} onClick={() => setTab("projects")}><FolderKanban size={15} /> Projects</button>
-          <button className={clsx("inline-flex min-h-[38px] items-center gap-[7px] rounded-none border-0 border-b-2 bg-transparent px-0 py-0 text-[var(--fs-xs)] transition-[color,border-color] active:transform-none hover:border-transparent hover:bg-transparent focus-visible:bg-transparent", tab === "contribute" ? "border-[var(--accent-bright)] font-[750] text-[var(--text)]" : "border-transparent text-[var(--dim)] hover:text-[var(--muted)]")} aria-current={tab === "contribute" ? "page" : undefined} onClick={() => setTab("contribute")}><GitFork size={15} /> Contribute</button>
+        {/* View Navigation Tabs */}
+        <nav className="mt-4 flex gap-6 border-b border-[var(--border)] text-xs font-semibold" aria-label="Roadmap views">
+          <button
+            className={clsx(
+              "inline-flex items-center gap-2 border-b-2 pb-2.5 transition-colors cursor-pointer bg-transparent border-0 font-medium",
+              tab === "roadmap"
+                ? "border-[var(--accent-bright)] text-[var(--text)] font-bold"
+                : "border-transparent text-[var(--dim)] hover:text-[var(--muted)]",
+            )}
+            onClick={() => setTab("roadmap")}
+          >
+            <Layers3 size={15} /> Learning Flowchart
+          </button>
+          <button
+            className={clsx(
+              "inline-flex items-center gap-2 border-b-2 pb-2.5 transition-colors cursor-pointer bg-transparent border-0 font-medium",
+              tab === "projects"
+                ? "border-[var(--accent-bright)] text-[var(--text)] font-bold"
+                : "border-transparent text-[var(--dim)] hover:text-[var(--muted)]",
+            )}
+            onClick={() => setTab("projects")}
+          >
+            <FolderKanban size={15} /> Projects ({projects.length})
+          </button>
+          <button
+            className={clsx(
+              "inline-flex items-center gap-2 border-b-2 pb-2.5 transition-colors cursor-pointer bg-transparent border-0 font-medium",
+              tab === "contribute"
+                ? "border-[var(--accent-bright)] text-[var(--text)] font-bold"
+                : "border-transparent text-[var(--dim)] hover:text-[var(--muted)]",
+            )}
+            onClick={() => setTab("contribute")}
+          >
+            <GitFork size={15} /> How to Contribute
+          </button>
         </nav>
       </header>
 
-      <div className={clsx("roadmap-workspace-grid grid grid-cols-[minmax(0,1fr)_minmax(270px,300px)] items-start gap-[var(--s6)] pt-[var(--s4)] max-[1350px]:grid-cols-1", `is-${tab}`)}>
-        <StickyRail className="roadmap-track-rail col-start-2 row-start-1 sticky top-[calc(var(--header-h)+var(--s3))] min-w-0 border border-[var(--border)] bg-[var(--bg)] max-[1350px]:!static max-[1350px]:!max-h-none max-[1350px]:!overflow-visible max-[1350px]:col-start-1 max-[1350px]:row-start-1 max-[1350px]:grid max-[1350px]:grid-cols-[minmax(180px,240px)_minmax(0,1fr)] max-[1350px]:items-start max-[1350px]:gap-[var(--s3)] max-[1350px]:border-0 max-[1350px]:border-b max-[1350px]:border-[var(--border)] max-[1350px]:p-[0_0_var(--s3)]" aria-label="Learning paths">
-          <header className="roadmap-track-rail-header flex min-h-[76px] items-start justify-between gap-[var(--s3)] border-b border-[var(--border)] p-[var(--s4)] max-[1350px]:hidden">
-            <div><h2 className="m-[0_0_3px] text-[var(--fs-md)] font-bold text-[var(--text)]">Learning paths</h2><p className="m-0 text-[var(--dim)] text-[var(--fs-xs)] leading-[1.4]">Choose a field or jump through the system map.</p></div>
-            <span className="grid size-[25px] place-items-center border border-[var(--border)] text-[var(--muted)] text-[var(--fs-2xs)] font-bold">{roadmapFields.length}</span>
+      {/* Workspace Grid: Flowchart Canvas + Track Rail */}
+      <div className="roadmap-workspace-grid grid grid-cols-[minmax(0,1fr)_290px] items-start gap-6 pt-5 max-[1150px]:grid-cols-1">
+        {/* Track Navigator Rail */}
+        <StickyRail className="col-start-2 row-start-1 sticky top-[calc(var(--header-h,62px)+16px)] rounded-lg border border-[var(--border)] bg-[var(--surface)] max-[1150px]:!static max-[1150px]:col-start-1 max-[1150px]:row-start-2">
+          <header className="flex items-center justify-between border-b border-[var(--border)] p-3.5">
+            <div>
+              <h2 className="text-xs font-bold text-[var(--text)] m-0 uppercase tracking-wider">All Disciplines</h2>
+              <p className="text-[11px] text-[var(--dim)] m-0">12 Full-Dive tracks</p>
+            </div>
+            <span className="rounded border border-[var(--border)] px-2 py-0.5 text-[10px] font-bold text-[var(--muted)] font-mono">
+              {roadmapFields.length}
+            </span>
           </header>
-          <div className="roadmap-track-search m-[var(--s3)] grid min-h-[38px] grid-cols-[18px_minmax(0,1fr)] items-center gap-[7px] border border-[var(--border)] bg-[var(--surface)] px-[var(--s2)] text-[var(--dim)] focus-within:border-[var(--focus-ring)] max-[1350px]:m-0">
-            <Search size={15} />
-            <input className="min-h-[36px] w-full border-0 bg-transparent p-0 text-[var(--text)] text-[var(--fs-xs)] outline-none" value={trackQuery} onChange={(event) => setTrackQuery(event.target.value)} placeholder="Find a path" aria-label="Find a roadmap path" />
+
+          <div className="p-2.5 border-b border-[var(--border)]">
+            <div className="flex items-center gap-2 rounded border border-[var(--border)] bg-[var(--bg)] px-2.5 py-1.5 text-[var(--dim)] focus-within:border-[var(--accent)]">
+              <Search size={13} />
+              <input
+                className="w-full border-0 bg-transparent p-0 text-[11px] text-[var(--text)] outline-none placeholder:text-[var(--dim)]"
+                value={trackQuery}
+                onChange={(e) => setTrackQuery(e.target.value)}
+                placeholder="Filter roadmaps..."
+              />
+            </div>
           </div>
-          <div className="roadmap-track-list grid gap-[2px] px-[var(--s3)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden max-[1350px]:m-0 max-[1350px]:flex max-[1350px]:overflow-x-auto max-[1350px]:overflow-y-hidden max-[1350px]:gap-[3px] max-[1350px]:p-[0_0_4px]">
+
+          <div className="flex flex-col gap-1 p-2 max-h-[460px] overflow-y-auto">
+            <Link
+              href="/roadmap"
+              className={clsx(
+                "flex items-center justify-between rounded p-2 text-xs transition-colors hover:bg-[var(--surface-2)]",
+                isMaster ? "bg-[var(--surface-2)] font-bold text-[var(--text)] border-l-2 border-[var(--accent)]" : "text-[var(--muted)]",
+              )}
+            >
+              <span className="flex items-center gap-2">
+                <Network size={14} className="text-[var(--accent)]" />
+                <span>Master System Tree</span>
+              </span>
+              <span className="text-[10px] text-[var(--dim)] font-mono">
+                {doneCount}/{allTopicKeys.length}
+              </span>
+            </Link>
+
             {visibleTracks.map((item) => {
-              const keys = item.sections.flatMap((section) => section.topics.map((topic) => topicKey(item, topic)));
-              const completed = keys.filter((key) => statuses[key] === "done").length;
+              const keys = item.sections.flatMap((s) => s.topics.map((t) => topicKey(item, t)));
+              const itemDone = keys.filter((k) => statuses[k] === "done").length;
               const active = !isMaster && item.id === field?.id;
-              const linkClasses = clsx(
-                "grid min-h-[56px] grid-cols-[minmax(0,1fr)_auto] items-center gap-[var(--s2)] p-[6px_var(--s2)] text-[var(--muted)] transition-colors hover:bg-[var(--surface)] hover:text-[var(--text)] max-[1350px]:min-w-[170px] max-[1350px]:border max-[1350px]:border-[var(--border)]",
-                active && "is-active bg-[var(--surface)] text-[var(--text)]"
-              );
-              return isMaster ? (
-                <a key={item.id} className={linkClasses} href={`#${item.id}`} onClick={(event) => {
-                  event.preventDefault();
-                  document.getElementById(item.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-                  window.history.replaceState(null, "", `#${item.id}`);
-                }}>
-                  <span className="truncate text-[var(--fs-xs)] font-[650]">{item.shortTitle}<small className="mt-[2px] block text-[var(--dim)] text-[10px] font-medium">{item.category}</small></span>
-                  <b className="text-[var(--dim)] text-[10px] font-[650]">{completed}/{keys.length}</b>
-                </a>
-              ) : (
-                <Link key={item.id} className={linkClasses} href={`/roadmap/${item.id}`}>
-                  <span className="truncate text-[var(--fs-xs)] font-[650]">{item.shortTitle}<small className="mt-[2px] block text-[var(--dim)] text-[10px] font-medium">{item.category}</small></span>
-                  <b className="text-[var(--dim)] text-[10px] font-[650]">{completed}/{keys.length}</b>
+              return (
+                <Link
+                  key={item.id}
+                  href={`/roadmap/${item.id}`}
+                  className={clsx(
+                    "flex items-center justify-between rounded p-2 text-xs transition-colors hover:bg-[var(--surface-2)]",
+                    active
+                      ? "bg-[var(--surface-2)] font-bold text-[var(--text)] border-l-2 border-[var(--accent)]"
+                      : "text-[var(--muted)]",
+                  )}
+                >
+                  <div className="min-w-0 pr-2">
+                    <div className="truncate font-medium">{item.shortTitle}</div>
+                    <div className="text-[10px] text-[var(--dim)] truncate">{item.category}</div>
+                  </div>
+                  <span className="text-[10px] text-[var(--dim)] font-mono flex-shrink-0">
+                    {itemDone}/{keys.length}
+                  </span>
                 </Link>
               );
             })}
-            {visibleTracks.length === 0 && <p className="p-[var(--s3)_var(--s2)] text-[var(--dim)] text-[var(--fs-xs)]">No matching paths.</p>}
           </div>
-          <details className="roadmap-rail-guide group m-[var(--s3)_var(--s3)_0] border-t border-[var(--border)] max-[1350px]:hidden">
-            <summary className="flex min-h-[42px] cursor-pointer items-center justify-between text-[var(--muted)] text-[var(--fs-xs)] list-none [&::-webkit-details-marker]:hidden">
-              <span className="inline-flex items-center gap-[6px]"><Info size={14} /> How this works</span>
-              <ChevronDown size={14} className="transition-transform group-open:rotate-180" />
-            </summary>
-            <p className="m-[0_0_var(--s3)] text-[var(--dim)] text-[var(--fs-2xs)] leading-[1.55]">Select a topic for its brief and resources, then mark it Learning, Done, or Skip. The sequence is a practical dependency guide—not a promise that research progresses in a straight line.</p>
-            <div className="grid gap-[5px] text-[var(--dim)] text-[10px]">
-              <span className="flex items-start gap-[6px]"><Users size={13} /> {audience}</span>
-              <span className="flex items-start gap-[6px]"><Flag size={13} /> {duration}</span>
+
+          <div className="p-3 border-t border-[var(--border)] text-[11px] text-[var(--dim)] space-y-1.5">
+            <div className="flex items-center gap-2">
+              <Users size={12} /> {audience}
             </div>
-          </details>
+            <div className="flex items-center gap-2">
+              <Flag size={12} /> {duration}
+            </div>
+          </div>
         </StickyRail>
 
+        {/* Tab 1: Flowchart Learning Canvas */}
         {tab === "roadmap" && (
-          <section className="roadmap-graph-workspace col-start-1 row-start-1 min-w-0 max-[1350px]:col-start-1 max-[1350px]:row-start-2">
-            <header className="roadmap-graph-toolbar flex min-h-[54px] items-center justify-between gap-[var(--s4)] border border-b-0 border-[var(--border)] bg-[var(--bg-elev)] px-[var(--s3)]">
-              <div className="grid">
-                <span className="text-[var(--dim)] text-[10px] font-bold uppercase tracking-[0.08em]">{isMaster ? "System map" : "Current path"}</span>
-                <strong className="text-[var(--fs-xs)] text-[var(--text)]">{isMaster ? masterRoadmap.title : field?.shortTitle}</strong>
+          <section className="col-start-1 row-start-1 min-w-0">
+            {/* The Unified Roadmap Canvas & Curriculum Container */}
+            <div className="roadmap-canvas-wrapper" aria-label="Interactive learning roadmap">
+              {/* Consolidated Top Toolbar (Integrated into the Canvas Card) */}
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] bg-[var(--surface)] px-4 py-2.5">
+                {/* Status Legend (roadmap.sh style) */}
+                <div className="flex items-center gap-3 text-xs text-[var(--dim)]">
+                  <span className="font-bold text-[var(--text)] uppercase tracking-wider text-[11px]">
+                    {isMaster ? "System Tree" : field?.title}
+                  </span>
+                  <span>·</span>
+                  <div className="flex items-center gap-3 text-xs">
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="size-2 rounded-full border border-[var(--border-strong)] bg-[var(--surface-2)]" />
+                      Todo
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="size-2 rounded-full bg-[var(--accent)] animate-pulse" />
+                      Learning
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="size-2 rounded-full bg-[#10b981]" />
+                      Done
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="size-2 rounded-full bg-[var(--dim)] opacity-40" />
+                      Skip
+                    </span>
+                  </div>
+                </div>
+
+                {/* View Switcher, Search, and Docked Zoom Controls */}
+                <div className="flex items-center gap-2.5">
+                  {/* View Mode Toggle: Flowchart vs Linear */}
+                  {!isMaster && (
+                    <div className="flex items-center rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-0.5">
+                      <button
+                        type="button"
+                        className={clsx(
+                          "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] font-semibold transition-colors cursor-pointer border-0",
+                          viewMode === "flowchart"
+                            ? "bg-[var(--surface)] text-[var(--text)] shadow-sm font-bold"
+                            : "bg-transparent text-[var(--dim)] hover:text-[var(--text)]",
+                        )}
+                        onClick={() => setViewMode("flowchart")}
+                        title="Interactive Flowchart Diagram"
+                      >
+                        <Network size={12} /> Flowchart
+                      </button>
+                      <button
+                        type="button"
+                        className={clsx(
+                          "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] font-semibold transition-colors cursor-pointer border-0",
+                          viewMode === "linear"
+                            ? "bg-[var(--surface)] text-[var(--text)] shadow-sm font-bold"
+                            : "bg-transparent text-[var(--dim)] hover:text-[var(--text)]",
+                        )}
+                        onClick={() => setViewMode("linear")}
+                        title="Linear Step-by-Step Curriculum"
+                      >
+                        <List size={12} /> Linear Guide
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Topic Search Input */}
+                  <div className="flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg)] px-2.5 py-1 text-xs text-[var(--dim)]">
+                    <Search size={13} />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Find topic..."
+                      className="w-[140px] border-0 bg-transparent text-xs text-[var(--text)] outline-none placeholder:text-[var(--dim)]"
+                    />
+                    {searchQuery && (
+                      <button onClick={() => setSearchQuery("")} className="text-[var(--dim)] hover:text-[var(--text)]">
+                        <X size={12} />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* DOCKED ZOOM CONTROLS (Only visible in Flowchart mode) */}
+                  {viewMode === "flowchart" && (
+                    <div className="flex items-center gap-1 pl-2 border-l border-[var(--border)]">
+                      <button
+                        type="button"
+                        className="roadmap-control-btn"
+                        onClick={handleZoomIn}
+                        title="Zoom In (Ctrl + Scroll Up)"
+                        aria-label="Zoom In"
+                      >
+                        <ZoomIn size={14} />
+                      </button>
+                      <span className="roadmap-zoom-label">
+                        {Math.round(zoom * 100)}%
+                      </span>
+                      <button
+                        type="button"
+                        className="roadmap-control-btn"
+                        onClick={handleZoomOut}
+                        title="Zoom Out (Ctrl + Scroll Down)"
+                        aria-label="Zoom Out"
+                      >
+                        <ZoomOut size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        className="roadmap-control-btn"
+                        onClick={handleResetView}
+                        title="Reset Canvas Position and Zoom"
+                        aria-label="Reset View"
+                      >
+                        <RotateCcw size={13} />
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="roadmap-status-legend flex flex-wrap items-center gap-[var(--s3)] p-0 text-[var(--dim)] text-[10px]" aria-label="Topic status legend">
-                <span className="inline-flex items-center gap-1"><i className="size-[7px] rounded-full bg-[var(--border-strong)]" /> Not started</span>
-                <span className="inline-flex items-center gap-1"><i className="learning size-[7px] rounded-full bg-[var(--mid)]" /> Learning</span>
-                <span className="inline-flex items-center gap-1"><i className="done size-[7px] rounded-full bg-[var(--strong)]" /> Done</span>
-                <span className="inline-flex items-center gap-1"><i className="skipped size-[7px] rounded-full bg-[var(--dim)]" /> Skipped</span>
+
+              {/* Viewport Content: Flowchart Canvas OR Native Linear Guide */}
+              {!isMaster && field && viewMode === "linear" ? (
+                <div className="roadmap-linear-viewport p-6 sm:p-8 flex justify-center">
+                  <div className="w-full max-w-[840px] space-y-6">
+                    {field.sections.map((sec, secIdx) => (
+                      <div key={sec.id} className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
+                        <header className="mb-4">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent-bright)]">
+                            Phase {secIdx + 1}
+                          </span>
+                          <h3 className="mt-1 text-lg font-bold text-[var(--text)] m-0">{sec.title}</h3>
+                          <p className="mt-1 text-xs text-[var(--muted)] m-0">{sec.summary}</p>
+                        </header>
+
+                        <div className="space-y-3">
+                          {sec.topics.map((topic) => {
+                            const key = topicKey(field, topic);
+                            const status = statuses[key];
+                            const details = getTopicDetails(field.id, topic);
+                            return (
+                              <div
+                                key={topic}
+                                className="flex items-start justify-between gap-4 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-4 hover:border-[var(--border-strong)] transition-colors"
+                              >
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <h4 className="text-sm font-bold text-[var(--text)] m-0">{topic}</h4>
+                                    <span className="text-[9px] font-semibold text-[var(--dim)] uppercase">
+                                      {details.badge}
+                                    </span>
+                                  </div>
+                                  <p className="mt-1 text-xs text-[var(--muted)] line-clamp-2 m-0 leading-relaxed">
+                                    {details.overview}
+                                  </p>
+                                  <div className="mt-2 flex flex-wrap gap-1.5">
+                                    {details.subtopics.map((sub) => (
+                                      <span
+                                        key={sub}
+                                        className="rounded bg-[var(--surface-3)] px-2 py-0.5 text-[10px] text-[var(--dim)]"
+                                      >
+                                        {sub}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2 flex-shrink-0">
+                                  <button
+                                    type="button"
+                                    className={clsx(
+                                      "flowchart-status-pill",
+                                      status === "done" && "is-done",
+                                      status === "learning" && "is-learning",
+                                      status === "skipped" && "is-skipped",
+                                      !status && "is-todo",
+                                    )}
+                                    onClick={(e) => cycleStatus(e, { field, section: sec, topic })}
+                                  >
+                                    {status === "done"
+                                      ? "Done"
+                                      : status === "learning"
+                                      ? "Learning"
+                                      : status === "skipped"
+                                      ? "Skip"
+                                      : "Todo"}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="rounded border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1 text-xs font-semibold text-[var(--text)] hover:border-[var(--accent)] cursor-pointer"
+                                    onClick={() => {
+                                      setSelected({ field, section: sec, topic });
+                                      setDrawerTab("knowledge");
+                                    }}
+                                  >
+                                    Inspect
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div
+                  ref={canvasViewportRef}
+                  className={clsx("roadmap-canvas-viewport", isDragging && "is-dragging")}
+                  onMouseDown={handleMouseDown}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                  onMouseLeave={handleMouseUp}
+                  onWheel={handleWheel}
+                >
+                  {/* Transformed Flowchart Layer */}
+                  <div
+                    className="roadmap-canvas-transform"
+                    style={{
+                      transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+                    }}
+                  >
+                    {/* Mode A: Master System Map (4-Tier Tree) */}
+                    {isMaster && (
+                      <div className="master-tree-container">
+                        {/* Start Node */}
+                        <div className="flex justify-center mb-2 relative z-10">
+                          <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--surface)] px-6 py-2 text-xs font-bold text-[var(--text)] shadow-lg">
+                            <Sparkles size={16} className="text-[var(--accent-bright)]" />
+                            Start: Foundations of Full-Dive VR
+                          </div>
+                        </div>
+
+                        {MASTER_TIERS.map((tierGroup, tierIdx) => (
+                          <div key={tierGroup.tier} className="master-tier-card">
+                            <header className="master-tier-header">
+                              <div>
+                                <span className="master-tier-badge">{tierGroup.tier}</span>
+                                <h3 className="master-tier-title">{tierGroup.title}</h3>
+                              </div>
+                              <p className="text-xs text-[var(--dim)] m-0 max-w-[440px] text-right max-[768px]:hidden">
+                                {tierGroup.description}
+                              </p>
+                            </header>
+
+                            <div className="master-fields-grid">
+                              {tierGroup.ids.map((id) => {
+                                const f = roadmapFieldById(id);
+                                if (!f) return null;
+                                const keys = f.sections.flatMap((s) => s.topics.map((t) => topicKey(f, t)));
+                                const completed = keys.filter((k) => statuses[k] === "done").length;
+                                const pct = keys.length ? Math.round((completed / keys.length) * 100) : 0;
+                                return (
+                                  <Link key={f.id} href={`/roadmap/${f.id}`} className="master-discipline-card group">
+                                    <div>
+                                      <div className="flex items-center justify-between text-[11px] text-[var(--dim)] mb-1.5">
+                                        <span className="font-semibold">{f.category}</span>
+                                        <span className="rounded bg-[var(--surface-3)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider">
+                                          {f.level}
+                                        </span>
+                                      </div>
+                                      <h4 className="text-sm font-bold text-[var(--text)] group-hover:text-[var(--accent-bright)] transition-colors m-0 mb-1">
+                                        {f.title}
+                                      </h4>
+                                      <p className="text-xs text-[var(--muted)] line-clamp-2 m-0 leading-relaxed">
+                                        {f.description}
+                                      </p>
+                                    </div>
+
+                                    <div className="mt-4 pt-3 border-t border-[var(--border)]">
+                                      <div className="flex items-center justify-between text-[11px] text-[var(--dim)] mb-1">
+                                        <span>{completed}/{keys.length} completed</span>
+                                        <span className="font-mono font-bold text-[var(--text)]">{pct}%</span>
+                                      </div>
+                                      <div className="h-1 w-full rounded-full bg-[var(--surface-3)] overflow-hidden">
+                                        <div
+                                          className="h-full bg-[var(--accent)] rounded-full transition-all duration-300"
+                                          style={{ width: `${pct}%` }}
+                                        />
+                                      </div>
+                                    </div>
+
+                                    <div className="mt-3 flex items-center justify-between text-xs font-bold text-[var(--accent-bright)] group-hover:underline">
+                                      <span>Explore Roadmap</span>
+                                      <ChevronRight size={14} />
+                                    </div>
+                                  </Link>
+                                );
+                              })}
+                            </div>
+
+                            {tierIdx < MASTER_TIERS.length - 1 && (
+                              <div className="master-tier-connector">
+                                <div className="master-connector-line" />
+                                <ChevronDown size={18} />
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Mode B: Detailed Track Flowchart (Interactive Nodes) */}
+                    {!isMaster && field && (
+                      <div className="flowchart-track-container">
+                        {/* Start Node */}
+                        <div className="flex justify-center mb-6 relative z-10">
+                          <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--surface)] px-6 py-2 text-xs font-bold text-[var(--text)] shadow-md">
+                            <Sparkles size={15} className="text-[var(--accent-bright)]" />
+                            Start: {field.title}
+                          </div>
+                        </div>
+
+                        <div className="flowchart-vertical-connector">
+                          <div className="flowchart-vertical-line" />
+                          <ChevronDown size={16} />
+                        </div>
+
+                        {/* Interactive Stages / Sections */}
+                        {field.sections.map((sec, secIdx) => {
+                          const secKeys = sec.topics.map((t) => topicKey(field, t));
+                          const secDone = secKeys.filter((k) => statuses[k] === "done").length;
+                          return (
+                            <div key={sec.id} className="flowchart-stage-block">
+                              {/* Step Stage Marker Header */}
+                              <div className="flowchart-stage-header">
+                                <span className="flowchart-stage-pill">
+                                  <span className="size-4 rounded-full bg-[var(--accent)] text-[10px] text-white flex items-center justify-center font-bold">
+                                    {secIdx + 1}
+                                  </span>
+                                  <span>{sec.title}</span>
+                                  <span className="opacity-60 text-[10px]">({secDone}/{sec.topics.length})</span>
+                                </span>
+                                <p className="flowchart-stage-desc">{sec.summary}</p>
+                              </div>
+
+                              {/* Stage Topic Nodes Column */}
+                              <div className="flowchart-spine-flow">
+                                {sec.topics.map((topic, topicIdx) => {
+                                  const key = topicKey(field, topic);
+                                  const status = statuses[key];
+                                  const details = getTopicDetails(field.id, topic);
+                                  const isSelected = selected?.topic === topic;
+                                  const subtopicsLeft = details.subtopics.slice(0, 2);
+                                  const subtopicsRight = details.subtopics.slice(2, 4);
+
+                                  return (
+                                    <div key={topic} className="flowchart-node-row">
+                                      {/* Subtopics Left Wing */}
+                                      <div className="flowchart-branch-container flowchart-branch-left">
+                                        {subtopicsLeft.map((sub) => (
+                                          <button
+                                            key={sub}
+                                            type="button"
+                                            className="flowchart-subtopic-pill"
+                                            onClick={() => {
+                                              setSelected({ field, section: sec, topic, subtopicFocus: sub });
+                                              setDrawerTab("knowledge");
+                                            }}
+                                            title={`Explore ${sub}`}
+                                          >
+                                            {sub}
+                                          </button>
+                                        ))}
+                                      </div>
+
+                                      {/* Main Topic Node Card */}
+                                      <button
+                                        type="button"
+                                        className={clsx(
+                                          "flowchart-main-node",
+                                          isSelected && "is-selected",
+                                          status === "done" && "is-done",
+                                          status === "learning" && "is-learning",
+                                          status === "skipped" && "is-skipped",
+                                        )}
+                                        onClick={() => {
+                                          setSelected({ field, section: sec, topic });
+                                          setDrawerTab("knowledge");
+                                        }}
+                                      >
+                                        <div className="flowchart-main-node-top">
+                                          <span className="flowchart-main-node-title">{topic}</span>
+                                          {details.badge && (
+                                            <span
+                                              className={clsx(
+                                                "flowchart-main-node-badge",
+                                                details.badge === "Core Milestone" && "is-core",
+                                                details.badge === "Recommended" && "is-recommended",
+                                                details.badge === "Advanced" && "is-frontier",
+                                              )}
+                                            >
+                                              {details.badge}
+                                            </span>
+                                          )}
+                                        </div>
+
+                                        <div className="flowchart-main-node-footer">
+                                          <span className="text-[var(--dim)] font-mono text-[10px]">
+                                            Step {secIdx + 1}.{topicIdx + 1}
+                                          </span>
+                                          <span
+                                            className={clsx(
+                                              "flowchart-status-pill",
+                                              status === "done" && "is-done",
+                                              status === "learning" && "is-learning",
+                                              status === "skipped" && "is-skipped",
+                                              !status && "is-todo",
+                                            )}
+                                            onClick={(e) => cycleStatus(e, { field, section: sec, topic })}
+                                            title="Click to cycle status: Todo -> Learning -> Done -> Skip"
+                                          >
+                                            {status === "done" && <CheckCircle2 size={11} />}
+                                            {status === "learning" && <CircleDot size={11} />}
+                                            {status === "skipped" && <PauseCircle size={11} />}
+                                            {!status && <Circle size={11} />}
+                                            <span>
+                                              {status === "done"
+                                                ? "Done"
+                                                : status === "learning"
+                                                ? "Learning"
+                                                : status === "skipped"
+                                                ? "Skip"
+                                                : "Todo"}
+                                            </span>
+                                          </span>
+                                        </div>
+                                      </button>
+
+                                      {/* Subtopics Right Wing */}
+                                      <div className="flowchart-branch-container flowchart-branch-right">
+                                        {subtopicsRight.map((sub) => (
+                                          <button
+                                            key={sub}
+                                            type="button"
+                                            className="flowchart-subtopic-pill"
+                                            onClick={() => {
+                                              setSelected({ field, section: sec, topic, subtopicFocus: sub });
+                                              setDrawerTab("knowledge");
+                                            }}
+                                            title={`Explore ${sub}`}
+                                          >
+                                            {sub}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+
+                              {secIdx < field.sections.length - 1 && (
+                                <div className="flowchart-vertical-connector">
+                                  <div className="flowchart-vertical-line" />
+                                  <ChevronDown size={16} />
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+
+                        <div className="flowchart-vertical-connector">
+                          <div className="flowchart-vertical-line" />
+                          <ChevronDown size={16} />
+                        </div>
+
+                        <div className="flex justify-center relative z-10">
+                          <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--surface)] px-6 py-2.5 text-xs font-bold text-[var(--text)] shadow-md">
+                            <Flag size={15} className="text-[var(--accent-bright)]" />
+                            Field Milestone Complete: Ready to Build & Submit Evidence
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Prerequisites & Related Disciplines Box */}
+            {!isMaster && field && (
+              <div className="mt-6 grid grid-cols-2 gap-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 max-[768px]:grid-cols-1">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--dim)]">
+                    Prerequisites & Preparation
+                  </span>
+                  <div className="mt-2 space-y-1.5">
+                    {field.prerequisites.map((p) => (
+                      <div key={p} className="flex items-center gap-2 text-xs text-[var(--muted)]">
+                        <CheckCircle2 size={13} className="text-[var(--strong,#34d399)]" />
+                        <span>{p}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--dim)]">
+                    Connecting Disciplines
+                  </span>
+                  <div className="mt-2 space-y-1.5">
+                    {field.related.map((id) => {
+                      const rel = roadmapFieldById(id);
+                      if (!rel) return null;
+                      return (
+                        <Link
+                          key={id}
+                          href={`/roadmap/${id}`}
+                          className="flex items-center justify-between rounded border border-[var(--border)] px-2.5 py-1.5 text-xs text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)] transition-colors"
+                        >
+                          <span>{rel.title}</span>
+                          <ArrowRight size={12} className="text-[var(--dim)]" />
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
-            </header>
-            <main className="course-roadmap-canvas flex flex-col gap-[var(--s6)] border border-[var(--border)] bg-[#0d1114] bg-[radial-gradient(rgba(137,153,166,0.13)_0.7px,transparent_0.7px)] bg-[size:18px_18px] p-[var(--s5)]" aria-label={`${title} topic map`}>
-              <div className="course-roadmap-start self-center inline-flex items-center gap-[6px] rounded-full border border-[var(--border)] bg-[var(--surface)] px-[var(--s3)] py-[6px] text-[var(--dim)] text-[var(--fs-xs)] font-medium"><Sparkles size={15} /> {isMaster ? "Full-Dive development" : "Start this path"}</div>
-              {fields.map((item, index) => (
-                <FieldMapBlock
-                  key={item.id}
-                  field={item}
-                  index={index}
-                  compact={!isMaster}
-                  statuses={statuses}
-                  onSelect={(section, topic) => { setSelected({ field: item, section, topic }); setResourceTab("resources"); }}
-                />
-              ))}
-              <div className="course-roadmap-finish self-center inline-flex items-center gap-[6px] rounded-full border border-[var(--border)] bg-[var(--surface)] px-[var(--s3)] py-[6px] text-[var(--dim)] text-[var(--fs-xs)] font-medium"><Flag size={15} /> Build, publish, and request review</div>
-            </main>
-            {!isMaster && <RoadmapRelations field={field} isMaster={false} />}
+            )}
           </section>
         )}
 
+        {/* Tab 2: Projects */}
         {tab === "projects" && (
-          <section className="course-projects col-start-1 row-start-1 flex min-w-0 flex-col gap-[var(--s5)] rounded-[var(--r-card)] border border-[var(--border)] bg-[var(--surface)] p-[var(--s5)] max-[1350px]:col-start-1 max-[1350px]:row-start-2">
-            <header>
-              <p className="eyebrow mb-[var(--s1)] text-[var(--dim)] text-[var(--fs-2xs)] uppercase tracking-[0.08em] font-bold">Learn by building</p>
-              <h2 className="my-[var(--s1)] text-[var(--fs-xl)] font-bold text-[var(--text)]">{isMaster ? "Community project library" : `${field?.shortTitle} projects`}</h2>
-              <p className="m-0 text-[var(--muted)] text-[var(--fs-sm)]">Projects are intentionally bounded. Publish the method, result, limitations, and what would disprove the conclusion.</p>
+          <section className="col-start-1 row-start-1 min-w-0 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-6">
+            <header className="mb-6">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent-bright)]">
+                Learn By Building
+              </span>
+              <h2 className="mt-1 text-xl font-bold text-[var(--text)] m-0">
+                {isMaster ? "Community Practice Projects" : `${field?.shortTitle} Projects`}
+              </h2>
+              <p className="mt-1 text-xs text-[var(--muted)] m-0">
+                Every project is bounded to produce inspectable code, measurements, and limitations for community peer review.
+              </p>
             </header>
-            <div className="course-project-filters flex items-center gap-[6px]" aria-label="Project difficulty">
-              {(["Beginner", "Intermediate", "Advanced"] as Difficulty[]).map((item) => (
+
+            <div className="flex items-center gap-2 mb-6">
+              {(["Beginner", "Intermediate", "Advanced"] as Difficulty[]).map((level) => (
                 <button
-                  key={item}
+                  key={level}
+                  type="button"
                   className={clsx(
-                    "min-h-[32px] rounded-full border px-[11px] py-[5px] text-[var(--fs-xs)] font-medium transition-colors",
-                    difficulty === item
-                      ? "border-[var(--border-strong)] bg-[var(--surface-2)] text-[var(--text)]"
-                      : "border-[var(--border)] bg-transparent text-[var(--dim)] hover:border-[var(--border-strong)] hover:text-[var(--text)]"
+                    "rounded-full border px-3 py-1 text-xs font-semibold transition-colors cursor-pointer",
+                    difficulty === level
+                      ? "border-[var(--accent)] bg-[var(--accent)] text-white"
+                      : "border-[var(--border)] bg-[var(--surface-2)] text-[var(--dim)] hover:text-[var(--text)]",
                   )}
-                  aria-current={difficulty === item ? "true" : undefined}
-                  onClick={() => setDifficulty(item)}
+                  onClick={() => setDifficulty(level)}
                 >
-                  {item}
+                  {level}
                 </button>
               ))}
             </div>
-            <div className="course-project-grid grid grid-cols-2 gap-[var(--s4)] max-[760px]:grid-cols-1">
-              {projects.filter((item) => item.difficulty === difficulty).map((project) => (
-                <article key={project.id} className="flex flex-col justify-between rounded-[var(--r-card)] border border-[var(--border)] bg-[var(--surface-2)] p-[var(--s4)]">
-                  <div>
-                    <span className="text-[var(--dim)] text-[10px] uppercase tracking-[0.05em]">{project.field.shortTitle} · {project.difficulty}</span>
-                    <h3 className="my-[var(--s2)] text-[var(--fs-sm)] font-semibold text-[var(--text)]">{project.title}</h3>
-                    <p className="m-0 text-[var(--muted)] text-[var(--fs-xs)] leading-[1.45]">{project.description}</p>
-                  </div>
-                  <Link className="mt-[var(--s3)] inline-flex items-center gap-1 text-[var(--accent-bright)] text-[var(--fs-xs)] font-medium hover:underline" href="/commons/technology">Discuss project <ArrowRight size={14} /></Link>
-                </article>
-              ))}
+
+            <div className="grid grid-cols-2 gap-4 max-[768px]:grid-cols-1">
+              {projects
+                .filter((p) => p.difficulty === difficulty)
+                .map((project) => (
+                  <article
+                    key={project.id}
+                    className="flex flex-col justify-between rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-4"
+                  >
+                    <div>
+                      <span className="text-[10px] font-semibold text-[var(--dim)] uppercase">
+                        {project.field.shortTitle} · {project.difficulty}
+                      </span>
+                      <h3 className="mt-1 text-sm font-bold text-[var(--text)] m-0">{project.title}</h3>
+                      <p className="mt-2 text-xs text-[var(--muted)] leading-relaxed m-0">{project.description}</p>
+                    </div>
+                    <Link
+                      href="/commons/technology"
+                      className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-[var(--accent-bright)] hover:underline"
+                    >
+                      Discuss project in Commons <ArrowRight size={13} />
+                    </Link>
+                  </article>
+                ))}
             </div>
           </section>
         )}
 
-        {tab === "contribute" && <ContributionPanel fieldName={isMaster ? "full-dive development" : field?.shortTitle ?? "this field"} />}
+        {/* Tab 3: Contribution Guide */}
+        {tab === "contribute" && (
+          <ContributionPanel fieldName={isMaster ? "Full-Dive Development" : field?.title ?? "this field"} />
+        )}
       </div>
 
-      {selected && (
+      {/* Slide-over Topic Detail Drawer (roadmap.sh style) */}
+      {selected && activeTopicDetail && (
         <>
-          <button className="roadmap-inspector-backdrop fixed inset-0 z-40 bg-[rgba(0,0,0,0.55)] backdrop-blur-sm" aria-label="Close topic" onClick={() => setSelected(null)} />
-          <aside className="roadmap-resource-drawer fixed top-[var(--header-h)] right-0 bottom-0 z-[45] w-[min(430px,94vw)] overflow-y-auto border-l border-[var(--border-strong)] bg-[var(--bg-elev)] shadow-[-18px_0_48px_rgba(0,0,0,0.48)] animate-[roadmap-inspector-in_0.22s_var(--ease)]" aria-label={`${selected.topic} learning resources`}>
-            <header className="flex items-start justify-between gap-[var(--s3)] border-b border-[var(--border)] p-[var(--s5)]">
-              <div>
-                <span className="text-[var(--dim)] text-[8px] font-bold uppercase tracking-[0.08em]">{selected.field.shortTitle} · {selected.section.title}</span>
-                <h2 className="my-[5px] text-[var(--fs-xl)] font-bold text-[var(--text)]">{selected.topic}</h2>
+          <button
+            type="button"
+            className="roadmap-inspector-backdrop fixed inset-0 z-40 bg-[rgba(0,0,0,0.6)] backdrop-blur-sm border-0 cursor-pointer"
+            aria-label="Close topic drawer"
+            onClick={() => setSelected(null)}
+          />
+
+          <aside
+            className="roadmap-resource-drawer fixed top-0 right-0 bottom-0 z-50 flex w-[min(480px,94vw)] flex-col border-l border-[var(--border-strong)] bg-[var(--surface)] shadow-2xl"
+            aria-label={`${selected.topic} topic sheet`}
+          >
+            {/* Drawer Header */}
+            <header className="flex items-start justify-between border-b border-[var(--border)] p-5">
+              <div className="min-w-0 pr-3">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent-bright)]">
+                  {selected.field.shortTitle} · {selected.section.title}
+                </span>
+                <h2 className="mt-1 text-lg font-bold text-[var(--text)] leading-snug m-0">{selected.topic}</h2>
               </div>
-              <button className="grid size-[32px] place-items-center rounded-[7px] border-0 bg-transparent text-[var(--muted)] hover:bg-[var(--surface-2)]" onClick={() => setSelected(null)} aria-label="Close topic"><X size={18} /></button>
+              <button
+                type="button"
+                className="grid size-8 flex-shrink-0 place-items-center rounded border border-[var(--border)] bg-[var(--surface-2)] text-[var(--muted)] hover:text-[var(--text)] cursor-pointer"
+                onClick={() => setSelected(null)}
+                aria-label="Close"
+              >
+                <X size={16} />
+              </button>
             </header>
 
-            <div className="roadmap-topic-status flex items-center gap-[var(--s2)] border-b border-[var(--border)] p-[var(--s4)_var(--s5)]" aria-label="Topic status">
+            {/* Status Segmented Controls */}
+            <div className="border-b border-[var(--border)] bg-[var(--surface-2)] p-4">
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-[var(--dim)] mb-2">
+                Your Learning Status
+              </span>
+              <div className="grid grid-cols-4 gap-1.5">
+                {[
+                  { id: undefined, label: "Todo", icon: Circle },
+                  { id: "learning" as const, label: "Learning", icon: CircleDot },
+                  { id: "done" as const, label: "Done", icon: CheckCircle2 },
+                  { id: "skipped" as const, label: "Skip", icon: PauseCircle },
+                ].map((item) => {
+                  const currentStatus = statuses[topicKey(selected.field, selected.topic)];
+                  const isActive = currentStatus === item.id;
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.label}
+                      type="button"
+                      className={clsx(
+                        "inline-flex flex-col items-center justify-center gap-1 rounded py-2 text-xs font-semibold transition-colors cursor-pointer border",
+                        isActive
+                          ? "border-[var(--accent)] bg-[var(--accent)] text-white shadow-sm"
+                          : "border-[var(--border)] bg-[var(--surface)] text-[var(--dim)] hover:border-[var(--border-strong)] hover:text-[var(--text)]",
+                      )}
+                      onClick={() => setStatus(selected, item.id)}
+                    >
+                      <Icon size={14} />
+                      <span className="text-[11px]">{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Drawer Sub-tabs */}
+            <div className="flex border-b border-[var(--border)] px-5">
               <button
+                type="button"
                 className={clsx(
-                  "inline-flex min-h-[34px] flex-1 items-center justify-center gap-[6px] rounded-[var(--r-ctrl)] border text-[var(--fs-xs)] font-medium transition-colors",
-                  statuses[topicKey(selected.field, selected.topic)] === "learning"
-                    ? "border-[var(--border-strong)] bg-[var(--surface-2)] text-[var(--text)]"
-                    : "border-[var(--border)] bg-[var(--surface)] text-[var(--dim)] hover:border-[var(--border-strong)] hover:text-[var(--text)]"
+                  "flex-1 border-b-2 py-3 text-xs font-bold transition-colors cursor-pointer bg-transparent border-0 inline-flex items-center justify-center gap-1.5",
+                  drawerTab === "knowledge"
+                    ? "border-[var(--accent-bright)] text-[var(--text)]"
+                    : "border-transparent text-[var(--dim)] hover:text-[var(--muted)]",
                 )}
-                aria-current={statuses[topicKey(selected.field, selected.topic)] === "learning" ? "true" : undefined}
-                onClick={() => setStatus(selected, statuses[topicKey(selected.field, selected.topic)] === "learning" ? undefined : "learning")}
+                onClick={() => setDrawerTab("knowledge")}
               >
-                <CircleDot size={15} /> Learning
+                <BookOpen size={14} /> Technical Brief
               </button>
               <button
+                type="button"
                 className={clsx(
-                  "inline-flex min-h-[34px] flex-1 items-center justify-center gap-[6px] rounded-[var(--r-ctrl)] border text-[var(--fs-xs)] font-medium transition-colors",
-                  statuses[topicKey(selected.field, selected.topic)] === "done"
-                    ? "border-[var(--border-strong)] bg-[var(--surface-2)] text-[var(--text)]"
-                    : "border-[var(--border)] bg-[var(--surface)] text-[var(--dim)] hover:border-[var(--border-strong)] hover:text-[var(--text)]"
+                  "flex-1 border-b-2 py-3 text-xs font-bold transition-colors cursor-pointer bg-transparent border-0 inline-flex items-center justify-center gap-1.5",
+                  drawerTab === "resources"
+                    ? "border-[var(--accent-bright)] text-[var(--text)]"
+                    : "border-transparent text-[var(--dim)] hover:text-[var(--muted)]",
                 )}
-                aria-current={statuses[topicKey(selected.field, selected.topic)] === "done" ? "true" : undefined}
-                onClick={() => setStatus(selected, statuses[topicKey(selected.field, selected.topic)] === "done" ? undefined : "done")}
+                onClick={() => setDrawerTab("resources")}
               >
-                <CheckCircle2 size={15} /> Done
+                <ClipboardCheck size={14} /> Resources ({activeTopicDetail.resources.length})
               </button>
               <button
+                type="button"
                 className={clsx(
-                  "inline-flex min-h-[34px] flex-1 items-center justify-center gap-[6px] rounded-[var(--r-ctrl)] border text-[var(--fs-xs)] font-medium transition-colors",
-                  statuses[topicKey(selected.field, selected.topic)] === "skipped"
-                    ? "border-[var(--border-strong)] bg-[var(--surface-2)] text-[var(--text)]"
-                    : "border-[var(--border)] bg-[var(--surface)] text-[var(--dim)] hover:border-[var(--border-strong)] hover:text-[var(--text)]"
+                  "flex-1 border-b-2 py-3 text-xs font-bold transition-colors cursor-pointer bg-transparent border-0 inline-flex items-center justify-center gap-1.5",
+                  drawerTab === "community"
+                    ? "border-[var(--accent-bright)] text-[var(--text)]"
+                    : "border-transparent text-[var(--dim)] hover:text-[var(--muted)]",
                 )}
-                aria-current={statuses[topicKey(selected.field, selected.topic)] === "skipped" ? "true" : undefined}
-                onClick={() => setStatus(selected, statuses[topicKey(selected.field, selected.topic)] === "skipped" ? undefined : "skipped")}
+                onClick={() => setDrawerTab("community")}
               >
-                <PauseCircle size={15} /> Skip
+                <Users size={14} /> Build & Discuss
               </button>
             </div>
 
-            <div className="roadmap-drawer-tabs flex border-b border-[var(--border)] px-[var(--s5)]">
-              <button
-                className={clsx(
-                  "inline-flex min-h-[40px] flex-1 items-center justify-center gap-[6px] rounded-none border-0 border-b-2 bg-transparent px-0 py-0 text-[var(--fs-xs)] font-medium transition-[color,border-color] active:transform-none hover:bg-transparent hover:border-transparent focus-visible:bg-transparent",
-                  resourceTab === "resources" ? "border-[var(--text)] text-[var(--text)]" : "border-transparent text-[var(--dim)] hover:text-[var(--muted)]"
-                )}
-                aria-current={resourceTab === "resources" ? "page" : undefined}
-                onClick={() => setResourceTab("resources")}
-              >
-                <BookOpen size={14} /> Resources
-              </button>
-              <button
-                className={clsx(
-                  "inline-flex min-h-[40px] flex-1 items-center justify-center gap-[6px] rounded-none border-0 border-b-2 bg-transparent px-0 py-0 text-[var(--fs-xs)] font-medium transition-[color,border-color] active:transform-none hover:bg-transparent hover:border-transparent focus-visible:bg-transparent",
-                  resourceTab === "community" ? "border-[var(--text)] text-[var(--text)]" : "border-transparent text-[var(--dim)] hover:text-[var(--muted)]"
-                )}
-                aria-current={resourceTab === "community" ? "page" : undefined}
-                onClick={() => setResourceTab("community")}
-              >
-                <Users size={14} /> Community
-              </button>
-            </div>
+            {/* Drawer Content */}
+            <div className="flex-1 overflow-y-auto p-5 space-y-6">
+              {drawerTab === "knowledge" && (
+                <>
+                  {/* Detailed Technical Overview */}
+                  <section>
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--dim)] m-0">
+                        Scientific & Engineering Mechanism
+                      </h3>
+                      <span className="rounded bg-[var(--surface-3)] px-1.5 py-0.5 text-[9px] font-bold text-[var(--accent-bright)] uppercase">
+                        {activeTopicDetail.badge}
+                      </span>
+                    </div>
+                    <p className="text-xs text-[var(--muted)] leading-relaxed m-0">{activeTopicDetail.overview}</p>
+                  </section>
 
-            {resourceTab === "resources" ? (
-              <div className="roadmap-drawer-content flex flex-col gap-[var(--s5)] p-[var(--s5)]">
-                <section className="flex flex-col gap-[var(--s2)]">
-                  <span className="text-[var(--dim)] text-[8px] font-bold uppercase tracking-[0.08em]">Learning brief</span>
-                  <p className="m-0 text-[var(--muted)] text-[var(--fs-xs)] leading-[1.6]">Study {selected.topic.toLowerCase()} as part of {selected.section.title.toLowerCase()}. Focus on its measurable mechanism, current evidence, engineering constraints, and failure modes.</p>
-                </section>
-                <section className="flex flex-col gap-[var(--s2)]">
-                  <span className="text-[var(--dim)] text-[8px] font-bold uppercase tracking-[0.08em]">What good understanding looks like</span>
-                  <ul className="grid gap-[var(--s2)]">
-                    <li className="flex items-start gap-[6px] text-[var(--muted)] text-[var(--fs-xs)]"><CheckCircle2 size={14} className="flex-none text-[var(--strong)]" /> Explain the mechanism without overstating current capability.</li>
-                    <li className="flex items-start gap-[6px] text-[var(--muted)] text-[var(--fs-xs)]"><CheckCircle2 size={14} className="flex-none text-[var(--strong)]" /> Identify the best measurement and its major confounders.</li>
-                    <li className="flex items-start gap-[6px] text-[var(--muted)] text-[var(--fs-xs)]"><CheckCircle2 size={14} className="flex-none text-[var(--strong)]" /> Connect it to at least one neighboring full-dive subsystem.</li>
-                  </ul>
-                </section>
-                <section className="flex flex-col gap-[var(--s2)]">
-                  <span className="text-[var(--dim)] text-[8px] font-bold uppercase tracking-[0.08em]">OpenFullDive resources</span>
-                  <Link className="grid grid-cols-[18px_minmax(0,1fr)_14px] items-center gap-[var(--s2)] rounded-[var(--r-ctrl)] border border-[var(--border)] bg-[var(--surface)] p-[var(--s2)_var(--s3)] hover:border-[var(--border-strong)]" href="/outlook#evidence">
-                    <ClipboardCheck size={15} className="text-[var(--dim)]" />
-                    <div>
-                      <strong className="block text-[var(--text)] text-[var(--fs-xs)]">Evidence ledger</strong>
-                      <small className="block text-[var(--dim)] text-[10px]">Find reviewed sources and capability assessments.</small>
+                  {/* Branching Subtopics */}
+                  <section>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--dim)] mb-2.5 m-0">
+                      Core Concepts & Branching Nodes
+                    </h3>
+                    <div className="space-y-1.5">
+                      {activeTopicDetail.subtopics.map((sub, idx) => (
+                        <div
+                          key={sub}
+                          className="flex items-center gap-2 rounded border border-[var(--border)] bg-[var(--surface-2)] p-2 text-xs text-[var(--text)]"
+                        >
+                          <span className="grid size-4 place-items-center rounded-full bg-[var(--surface-3)] text-[10px] font-mono text-[var(--dim)]">
+                            {idx + 1}
+                          </span>
+                          <span>{sub}</span>
+                        </div>
+                      ))}
                     </div>
-                    <ExternalLink size={13} className="text-[var(--dim)]" />
-                  </Link>
-                  <Link className="grid grid-cols-[18px_minmax(0,1fr)_14px] items-center gap-[var(--s2)] rounded-[var(--r-ctrl)] border border-[var(--border)] bg-[var(--surface)] p-[var(--s2)_var(--s3)] hover:border-[var(--border-strong)]" href={`/roadmap/${selected.field.id}`}>
-                    <BookOpen size={15} className="text-[var(--dim)]" />
-                    <div>
-                      <strong className="block text-[var(--text)] text-[var(--fs-xs)]">{selected.field.title} course</strong>
-                      <small className="block text-[var(--dim)] text-[10px]">See this topic in its complete learning path.</small>
+                  </section>
+
+                  {/* Topic-Specific Checkpoint Competencies */}
+                  <section>
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--dim)] m-0">
+                        Verification Competencies
+                      </h3>
+                      <span className="text-[10px] text-[var(--dim)]">Click to save check</span>
                     </div>
-                    <ArrowRight size={13} className="text-[var(--dim)]" />
-                  </Link>
-                  <Link className="grid grid-cols-[18px_minmax(0,1fr)_14px] items-center gap-[var(--s2)] rounded-[var(--r-ctrl)] border border-[var(--border)] bg-[var(--surface)] p-[var(--s2)_var(--s3)] hover:border-[var(--border-strong)]" href="/contribute">
-                    <Code2 size={15} className="text-[var(--dim)]" />
-                    <div>
-                      <strong className="block text-[var(--text)] text-[var(--fs-xs)]">Submit a resource</strong>
-                      <small className="block text-[var(--dim)] text-[10px]">Add a paper, dataset, tutorial, or reproduction.</small>
-                    </div>
-                    <ArrowRight size={13} className="text-[var(--dim)]" />
-                  </Link>
-                </section>
-                <div className="roadmap-resource-note flex items-start gap-[var(--s2)] rounded-[var(--r-ctrl)] border border-[var(--border)] bg-[var(--surface-2)] p-[var(--s3)] text-[var(--dim)] text-[10px] leading-[1.45]">
-                  <Info size={15} className="flex-none" /> Course links are community-curated mock content for this prototype. Evidence claims remain separate in the reviewed ledger.
+                    <ul className="space-y-2 text-xs text-[var(--muted)] m-0 p-0 list-none">
+                      {activeTopicDetail.checkpoints.map((item, idx) => {
+                        const checkKey = `${selected.field.id}:${selected.topic}:chk:${idx}`;
+                        const isChecked = checkedChecklist[checkKey] || false;
+                        return (
+                          <li
+                            key={item}
+                            className="flex items-start gap-2.5 cursor-pointer p-2 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] hover:border-[var(--accent)] transition-colors"
+                            onClick={() => toggleChecklist(checkKey)}
+                          >
+                            {isChecked ? (
+                              <SquareCheck size={16} className="text-[#10b981] flex-shrink-0 mt-0.5" />
+                            ) : (
+                              <Square size={16} className="text-[var(--dim)] flex-shrink-0 mt-0.5" />
+                            )}
+                            <span className={clsx(isChecked && "line-through text-[var(--dim)]", "leading-relaxed")}>
+                              {item}
+                            </span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </section>
+                </>
+              )}
+
+              {drawerTab === "resources" && (
+                <div className="space-y-3">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--dim)]">
+                    Curated Scientific & Technical Literature
+                  </span>
+
+                  {activeTopicDetail.resources.map((res) => (
+                    <a
+                      key={res.title}
+                      href={res.url}
+                      target={res.url.startsWith("http") ? "_blank" : undefined}
+                      rel={res.url.startsWith("http") ? "noopener noreferrer" : undefined}
+                      className="flex items-start justify-between rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-3 text-xs text-[var(--text)] hover:border-[var(--accent)] transition-colors text-decoration-none group"
+                    >
+                      <div className="min-w-0 pr-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={clsx("resource-chip-badge", `type-${res.type}`)}>{res.badge}</span>
+                          {res.author && <span className="text-[10px] text-[var(--dim)] truncate">{res.author}</span>}
+                        </div>
+                        <div className="font-semibold group-hover:text-[var(--accent-bright)] transition-colors leading-snug">
+                          {res.title}
+                        </div>
+                      </div>
+                      <ExternalLink size={14} className="text-[var(--dim)] flex-shrink-0 mt-1" />
+                    </a>
+                  ))}
                 </div>
-              </div>
-            ) : (
-              <div className="roadmap-drawer-content flex flex-col gap-[var(--s5)] p-[var(--s5)]">
-                <section className="flex flex-col gap-[var(--s2)]">
-                  <span className="text-[var(--dim)] text-[8px] font-bold uppercase tracking-[0.08em]">Discuss and build</span>
-                  <p className="m-0 text-[var(--muted)] text-[var(--fs-xs)] leading-[1.6]">Ask questions, compare sources, or propose a small project around {selected.topic.toLowerCase()}.</p>
-                  <Link className="grid grid-cols-[18px_minmax(0,1fr)_14px] items-center gap-[var(--s2)] rounded-[var(--r-ctrl)] border border-[var(--border)] bg-[var(--surface)] p-[var(--s2)_var(--s3)] hover:border-[var(--border-strong)]" href="/commons/technology">
-                    <MessageCircle size={15} className="text-[var(--dim)]" />
-                    <div>
-                      <strong className="block text-[var(--text)] text-[var(--fs-xs)]">Technology community</strong>
-                      <small className="block text-[var(--dim)] text-[10px]">Open a discussion with other contributors.</small>
-                    </div>
-                    <ArrowRight size={13} className="text-[var(--dim)]" />
-                  </Link>
-                </section>
-                <section className="flex flex-col gap-[var(--s2)]">
-                  <span className="text-[var(--dim)] text-[8px] font-bold uppercase tracking-[0.08em]">Suggested build</span>
-                  <p className="m-0 text-[var(--muted)] text-[var(--fs-xs)] leading-[1.6]">{selected.section.project}</p>
-                </section>
-              </div>
-            )}
+              )}
+
+              {drawerTab === "community" && (
+                <div className="space-y-4">
+                  <section className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-4">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent-bright)]">
+                      Suggested Milestone Deliverable
+                    </span>
+                    <h4 className="mt-1 text-xs font-bold text-[var(--text)] m-0">{selected.section.project}</h4>
+                    <p className="mt-2 text-xs text-[var(--muted)] leading-relaxed m-0">
+                      Submit an inspectable code bench, physical measurement dataset, or negative reproduction for peer review.
+                    </p>
+                    <Link
+                      href="/contribute"
+                      className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-[var(--accent-bright)] hover:underline"
+                    >
+                      <Code2 size={13} /> Submit evidence to ledger →
+                    </Link>
+                  </section>
+
+                  <section>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--dim)] mb-2 m-0">
+                      Commons Discussion
+                    </h3>
+                    <Link
+                      href="/commons/technology"
+                      className="flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-3 text-xs text-[var(--text)] hover:border-[var(--accent)] transition-colors"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <MessageCircle size={16} className="text-[var(--accent-bright)]" />
+                        <div>
+                          <div className="font-semibold">Technology Commons Feed</div>
+                          <div className="text-[10px] text-[var(--dim)]">Discuss open interface challenges</div>
+                        </div>
+                      </div>
+                      <ArrowRight size={13} className="text-[var(--dim)]" />
+                    </Link>
+                  </section>
+                </div>
+              )}
+            </div>
+
+            {/* Drawer Footer with Sequential Navigation (roadmap.sh style) */}
+            <footer className="flex items-center justify-between border-t border-[var(--border)] bg-[var(--surface-2)] p-4">
+              {prevTopic ? (
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1.5 rounded border border-[var(--border)] px-3 py-1.5 text-xs font-medium text-[var(--muted)] hover:border-[var(--border-strong)] hover:text-[var(--text)] cursor-pointer"
+                  onClick={() => {
+                    setSelected(prevTopic);
+                    setDrawerTab("knowledge");
+                  }}
+                >
+                  <ArrowLeft size={13} /> Previous
+                </button>
+              ) : (
+                <div />
+              )}
+
+              {nextTopic && (
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1.5 rounded border border-[var(--accent)] bg-[var(--accent)] px-3 py-1.5 text-xs font-bold text-white hover:bg-[var(--accent-hover,#2f6fd6)] cursor-pointer"
+                  onClick={() => {
+                    setSelected(nextTopic);
+                    setDrawerTab("knowledge");
+                  }}
+                >
+                  Next: {nextTopic.topic} <ArrowRight size={13} />
+                </button>
+              )}
+            </footer>
           </aside>
         </>
       )}
@@ -578,115 +1492,41 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
   );
 }
 
-function FieldMapBlock({ field, index, compact, statuses, onSelect }: {
-  field: RoadmapField;
-  index: number;
-  compact: boolean;
-  statuses: Record<string, TopicStatus>;
-  onSelect: (section: RoadmapSection, topic: string) => void;
-}) {
-  const done = field.sections.flatMap((section) => section.topics).filter((topic) => statuses[topicKey(field, topic)] === "done").length;
-  return (
-    <section className={clsx("field-map-block flex flex-col gap-[var(--s4)] scroll-mt-[calc(var(--header-h)+var(--s4))]", compact && "is-course")} id={field.id}>
-      <header className="field-map-heading flex items-center gap-[var(--s3)] rounded-[var(--r-ctrl)] border border-[var(--border)] bg-[var(--surface)] p-[var(--s3)_var(--s4)] shadow-[0_8px_20px_rgba(0,0,0,0.22)] max-[680px]:grid max-[680px]:grid-cols-[28px_minmax(0,1fr)] max-[680px]:items-start max-[680px]:gap-x-[var(--s3)] max-[680px]:gap-y-[var(--s2)]">
-        <span className="grid size-[28px] place-items-center rounded-full border border-[var(--border-strong)] text-[var(--dim)] text-[11px] font-bold">{String(index + 1).padStart(2, "0")}</span>
-        <div className="min-w-0 flex-1">
-          <p className="m-0 text-[var(--dim)] text-[10px] font-bold uppercase tracking-[0.08em]">{field.category}</p>
-          <h2 className="my-[2px] text-[var(--fs-md)] font-bold text-[var(--text)]">{field.title}</h2>
-          <small className="text-[var(--dim)] text-[10px]">{done}/14 topics done</small>
-        </div>
-        {!compact && <Link className="inline-flex items-center justify-end gap-1 text-[var(--accent-bright)] text-[var(--fs-xs)] font-medium hover:underline max-[680px]:col-start-2 max-[680px]:w-full" href={`/roadmap/${field.id}`}>Open course <ArrowRight size={14} /></Link>}
-      </header>
-      <div className="field-map-sections flex flex-col gap-[var(--s6)]">
-        {field.sections.map((section) => {
-          const midpoint = Math.ceil(section.topics.length / 2);
-          return (
-            <article className="field-section-row grid grid-cols-[1fr_auto_1fr] items-center gap-[58px] max-[1100px]:grid-cols-1 max-[1100px]:gap-[var(--s3)]" key={section.id} id={section.id}>
-              <div className="field-topic-branch is-left relative flex flex-col gap-[var(--s2)] after:absolute after:top-[18px] after:bottom-[18px] after:-right-[29px] after:border-r-2 after:border-dotted after:border-[rgba(92,159,255,0.78)] max-[1100px]:after:hidden">
-                {section.topics.slice(0, midpoint).map((topic) => <TopicNode key={topic} field={field} section={section} topic={topic} status={statuses[topicKey(field, topic)]} onClick={() => onSelect(section, topic)} />)}
-              </div>
-              <div className="field-section-core relative flex min-w-[140px] flex-col items-center justify-center rounded-[var(--r-card)] border border-[var(--border-strong)] bg-[var(--surface-2)] p-[var(--s3)_var(--s4)] text-center before:absolute before:top-1/2 before:-left-[30px] before:w-[30px] before:border-t-2 before:border-dotted before:border-[rgba(92,159,255,0.82)] after:absolute after:top-1/2 after:-right-[30px] after:w-[30px] after:border-t-2 after:border-dotted after:border-[rgba(92,159,255,0.82)] max-[1100px]:before:hidden max-[1100px]:after:hidden">
-                <strong className="text-[var(--text)] text-[var(--fs-sm)] font-semibold">{section.title}</strong>
-                <span className="text-[var(--dim)] text-[10px]">{section.topics.length} topics</span>
-              </div>
-              <div className="field-topic-branch is-right relative flex flex-col gap-[var(--s2)] after:absolute after:top-[18px] after:bottom-[18px] after:-left-[29px] after:border-r-2 after:border-dotted after:border-[rgba(92,159,255,0.78)] max-[1100px]:after:hidden">
-                {section.topics.slice(midpoint).map((topic) => <TopicNode key={topic} field={field} section={section} topic={topic} status={statuses[topicKey(field, topic)]} onClick={() => onSelect(section, topic)} />)}
-              </div>
-            </article>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
-
-function TopicNode({ topic, status, onClick }: { field: RoadmapField; section: RoadmapSection; topic: string; status?: TopicStatus; onClick: () => void }) {
-  return (
-    <button
-      className={clsx(
-        "field-topic-node relative flex items-center gap-[var(--s2)] rounded-[var(--r-ctrl)] border p-[8px_var(--s3)] text-left text-[var(--fs-xs)] text-[var(--text)] transition-colors hover:border-[var(--border-strong)] hover:bg-[var(--surface-2)]",
-        status === "done" && "is-done border-[rgba(92,159,255,.65)] bg-[rgba(63,140,255,.08)]",
-        status === "learning" && "is-learning border-[rgba(63,140,255,.8)] bg-[rgba(63,140,255,.1)]",
-        status === "skipped" && "is-skipped border-[var(--dim)] opacity-60",
-        !status && "border-[var(--border)] bg-[var(--surface)]"
-      )}
-      onClick={onClick}
-    >
-      <span className={clsx("field-topic-status flex-none", status === "done" && "text-[var(--strong)]", status === "learning" && "text-[var(--mid)]", !status && "text-[var(--dim)]")}>
-        {status === "done" ? <Check size={12} /> : status === "learning" ? <CircleDot size={12} /> : status === "skipped" ? <PauseCircle size={12} /> : <Circle size={10} />}
-      </span>
-      <span className="field-topic-label min-w-0 truncate">{topic}</span>
-    </button>
-  );
-}
-
-function RoadmapRelations({ field, isMaster }: { field?: RoadmapField; isMaster: boolean }) {
-  const related = isMaster ? roadmapFields.slice(0, 4) : (field?.related.map((id) => roadmapFieldById(id)).filter(Boolean) as RoadmapField[] ?? []);
-  return (
-    <div className="roadmap-relations mt-[var(--s5)] grid grid-cols-2 gap-[var(--s4)] rounded-[var(--r-card)] border border-[var(--border)] bg-[var(--surface)] p-[var(--s4)] max-[760px]:grid-cols-1">
-      <article className="flex flex-col gap-[var(--s2)]">
-        <span className="text-[var(--dim)] text-[10px] font-bold uppercase tracking-[0.08em]">{isMaster ? "Good starting fields" : "Recommended preparation"}</span>
-        <div className="flex flex-col gap-[6px]">{isMaster
-          ? <><Link className="inline-flex items-center justify-between rounded-[var(--r-ctrl)] border border-[var(--border)] p-[var(--s2)] text-[var(--muted)] text-[var(--fs-xs)] hover:border-[var(--border-strong)] hover:text-[var(--text)]" href="/roadmap/neuroscience">Neuroscience</Link><Link className="inline-flex items-center justify-between rounded-[var(--r-ctrl)] border border-[var(--border)] p-[var(--s2)] text-[var(--muted)] text-[var(--fs-xs)] hover:border-[var(--border-strong)] hover:text-[var(--text)]" href="/roadmap/ethical-engineering">Ethical engineering</Link><Link className="inline-flex items-center justify-between rounded-[var(--r-ctrl)] border border-[var(--border)] p-[var(--s2)] text-[var(--muted)] text-[var(--fs-xs)] hover:border-[var(--border-strong)] hover:text-[var(--text)]" href="/roadmap/virtual-environments">Virtual environments</Link></>
-          : field?.prerequisites.map((item) => <small key={item} className="flex items-center gap-[6px] text-[var(--dim)] text-[var(--fs-xs)]"><CheckCircle2 size={13} /> {item}</small>)
-        }</div>
-      </article>
-      <article className="flex flex-col gap-[var(--s2)]">
-        <span className="text-[var(--dim)] text-[10px] font-bold uppercase tracking-[0.08em]">Related roadmaps</span>
-        <div className="flex flex-col gap-[6px]">{related.map((item) => <Link key={item.id} className="inline-flex items-center justify-between rounded-[var(--r-ctrl)] border border-[var(--border)] p-[var(--s2)] text-[var(--muted)] text-[var(--fs-xs)] hover:border-[var(--border-strong)] hover:text-[var(--text)]" href={`/roadmap/${item.id}`}>{item.shortTitle} <ArrowRight size={12} /></Link>)}</div>
-      </article>
-    </div>
-  );
-}
-
 function ContributionPanel({ fieldName }: { fieldName: string }) {
   return (
-    <section className="course-contribution-panel col-start-1 row-start-1 flex min-w-0 flex-col gap-[var(--s5)] rounded-[var(--r-card)] border border-[var(--border)] bg-[var(--surface)] p-[var(--s5)] max-[1350px]:col-start-1 max-[1350px]:row-start-2">
+    <section className="col-start-1 row-start-1 min-w-0 flex flex-col gap-6 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-6">
       <header>
-        <p className="eyebrow mb-[var(--s1)] text-[var(--dim)] text-[var(--fs-2xs)] uppercase tracking-[0.08em] font-bold">From learning to useful work</p>
-        <h2 className="my-[var(--s1)] text-[var(--fs-xl)] font-bold text-[var(--text)]">Contribute to {fieldName}</h2>
-        <p className="m-0 text-[var(--muted)] text-[var(--fs-sm)]">The community advances through small, inspectable work—not unsupported full-dive claims.</p>
+        <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent-bright)]">
+          From Learning to Useful Work
+        </span>
+        <h2 className="mt-1 text-xl font-bold text-[var(--text)] m-0">Contribute to {fieldName}</h2>
+        <p className="mt-1 text-xs text-[var(--muted)] m-0">
+          The OpenFullDive project progresses through small, inspectable, and reproducible work—never through unsupported claims.
+        </p>
       </header>
-      <div className="flex flex-col gap-[var(--s3)]">
+
+      <div className="flex flex-col gap-3">
         {[
-          ["Choose one bounded problem", "Pick one roadmap topic and define a result that can be reviewed in weeks."],
-          ["Declare scope and safety", "Write the goal, non-goals, evidence standard, data provenance, and stop conditions."],
-          ["Build in public", "Share source, tests, failed attempts, decisions, and reproducible instructions."],
-          ["Request cross-field review", "Ask a contributor from a neighboring roadmap to challenge interfaces and assumptions."],
-          ["Publish what was learned", "Submit the result to the evidence ledger or document it as an open project update."],
-        ].map(([title, body], index) => (
-          <article key={title} className="flex items-start gap-[var(--s3)] rounded-[var(--r-card)] border border-[var(--border)] bg-[var(--surface-2)] p-[var(--s3)_var(--s4)]">
-            <span className="grid size-[24px] place-items-center rounded-full border border-[var(--border-strong)] text-[var(--dim)] text-[10px] font-bold">{index + 1}</span>
-            <div>
-              <h3 className="m-0 text-[var(--fs-sm)] font-semibold text-[var(--text)]">{title}</h3>
-              <p className="m-[2px_0_0] text-[var(--muted)] text-[var(--fs-xs)]">{body}</p>
-            </div>
+          ["1. Choose one bounded problem", "Pick a single topic node and define a reproducible deliverable reviewable within weeks."],
+          ["2. Declare scope and safety bounds", "Document hypotheses, non-goals, measurement apparatus, and safe shutdown conditions."],
+          ["3. Build and test in public", "Publish raw datasets, calibration benches, reproduction code, and negative findings."],
+          ["4. Solicit peer challenge", "Request cross-discipline critique from adjacent fields to test system integration assumptions."],
+          ["5. Submit to the evidence ledger", "Publish your findings to the community evidence ledger under editorial review."],
+        ].map(([title, body]) => (
+          <article key={title} className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-4">
+            <h3 className="text-xs font-bold text-[var(--text)] m-0">{title}</h3>
+            <p className="mt-1 text-xs text-[var(--muted)] leading-relaxed m-0">{body}</p>
           </article>
         ))}
       </div>
-      <footer className="flex items-center gap-[var(--s2)]">
-        <Link className="primary btn inline-flex items-center gap-[6px]" href="/commons/technology"><MessageCircle size={15} /> Start a project discussion</Link>
-        <Link className="btn inline-flex items-center gap-[6px]" href="/contribute"><ClipboardCheck size={15} /> Submit evidence</Link>
+
+      <footer className="flex items-center gap-3 pt-2">
+        <Link className="primary btn inline-flex items-center gap-2" href="/commons/technology">
+          <MessageCircle size={15} /> Start a project discussion
+        </Link>
+        <Link className="btn inline-flex items-center gap-2" href="/contribute">
+          <ClipboardCheck size={15} /> Submit evidence
+        </Link>
       </footer>
     </section>
   );
