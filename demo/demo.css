@@ -1,0 +1,293 @@
+﻿@source "../src";
+/* Tailwind utilities are available to migrated components. Preflight is
+   intentionally omitted: this file owns the pilot's reset, tokens, and
+   element defaults (`OFD-D63`). */
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css";
+
+/* OpenFullDive design system â€” see docs/DESIGN_SYSTEM.md */
+
+:root {
+  /* surfaces â€” layered, each step +4% light so depth reads without shadows */
+  --bg: #0e1113;
+  --bg-elev: #101416;
+  --surface: #151a1d;
+  --surface-2: #1d2529;
+  --surface-3: #2a3236;
+  --border: #2a3236;
+  --border-strong: #465258;
+  --border-accent: rgba(63, 140, 255, .5);
+
+  --text: #eef1f3;
+  --muted: #c2c9cc;
+  --dim: #829198;
+
+  --accent: #3f8cff;
+  --accent-bright: #5c9fff;
+  --accent-ink: #ffffff;
+  --focus-ring: #eef1f3;
+  --focus-halo: 0 0 0 2px rgba(238, 241, 243, .16);
+  /* One chromatic family. Semantic differences also use labels, icons,
+     border styles, and luminanceâ€”never hue alone. */
+  --strong: #8ab8ff;
+  --mid: #5c9fff;
+  --weak: #3f8cff;
+  /**
+   * The only non-blue in the palette, and deliberately so (`OFD-D55`).
+   * `--strong`/`--mid`/`--weak` are a confidence scale, not a semantic one, so
+   * borrowing `--weak` for destructive actions made "Remove content" and
+   * "Delete my account" render identically to a primary button.
+   */
+  --danger: #ff7a7a;
+  --danger-dim: rgba(255, 122, 122, .14);
+
+  --glow-accent: 0 0 0 3px rgba(63, 140, 255, .18);
+  --shadow-card: none;
+  --shadow-pop: 0 12px 32px -8px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.06);
+
+  /* 11px is the floor: reserved for uppercase micro-labels, which read a size
+     larger than their nominal value because of the letter-spacing. Nothing in
+     the product may go below it. */
+  --fs-2xs: 11px;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-md: 14px;
+  --fs-lg: 18px;
+  --fs-xl: 24px;
+  --fs-2xl: 32px;
+  --fs-3xl: 44px;
+
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 24px; --s8: 32px; --s12: 48px;
+
+  /* Shape is semantic, not decorative: boundaries are square, everyday
+     controls and compact cards get a restrained edge, and only temporary
+     floating surfaces get a softer radius. */
+  --r-boundary: 0px;
+  --r-ctrl: 5px;
+  --r-card: 5px;
+  --r-overlay: 10px;
+  --r-pill: 999px;
+
+  --sidebar-w: 272px;
+  --compact-sidebar-w: 84px;
+  --shell-gutter: 0px;
+  --header-h: 62px;
+  --feed-w: 740px;
+  --page-w: 1120px;
+
+  --ease: cubic-bezier(.22, 1, .36, 1);
+
+  color-scheme: dark;
+}
+
+/* ---------- reset and element defaults ---------- */
+
+* { box-sizing: border-box; }
+html, body { max-width: 100%; overflow-x: clip; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Reddit Sans", Arial, sans-serif;
+  font-size: var(--fs-md);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Radix reserves scrollbar width while a portalled menu is open. The browser
+   already keeps that viewport gutter here, so its extra margin caused the
+   centered feed to shift by half a scrollbar. */
+html body[data-scroll-locked] { margin-right: 0 !important; }
+
+a { color: inherit; text-decoration: none; }
+a:hover { color: var(--accent-bright); }
+
+h1, h2, h3, h4 { margin: 0 0 var(--s2); line-height: 1.2; font-weight: 700; letter-spacing: -0.012em; }
+h1 { font-size: var(--fs-xl); }
+h2 { font-size: var(--fs-lg); }
+h3 { font-size: var(--fs-md); letter-spacing: -0.01em; }
+p { margin: 0 0 var(--s3); }
+
+::selection { background: rgba(63,140,255,.32); }
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+  border-radius: 4px;
+}
+
+.skip-link {
+  position: absolute; left: var(--s3); top: var(--s3); z-index: 100;
+  background: var(--accent); color: var(--accent-ink); padding: var(--s2) var(--s3);
+  border-radius: var(--r-ctrl); font-weight: 600; transform: translateY(-200%);
+}
+.skip-link:focus { transform: none; }
+
+/* ---------- shared primitives & controls ---------- */
+
+button, .btn {
+  font: inherit; font-size: var(--fs-sm); font-weight: 600;
+  background: var(--surface-2); color: var(--text);
+  border: 1px solid var(--border); border-radius: 999px; padding: 7px 14px;
+  cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  min-height: 34px; white-space: nowrap;
+  transition: background .15s var(--ease), border-color .15s var(--ease), color .15s var(--ease), transform .1s var(--ease);
+}
+button:hover, .btn:hover { background: var(--surface-3); border-color: var(--border-strong); color: var(--text); }
+button:active, .btn:active { transform: scale(.97); }
+button[aria-pressed="true"] { border-color: var(--border-accent); color: var(--accent-bright); background: rgba(63,140,255,.12); }
+button.primary {
+  background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700;
+  box-shadow: none;
+}
+button.primary:hover { background: var(--accent-bright); border-color: var(--accent-bright); }
+button:disabled { opacity: .38; cursor: not-allowed; transform: none; }
+button.quiet { background: none; border-color: transparent; color: var(--muted); }
+button.quiet:hover { background: var(--surface-2); color: var(--text); }
+
+input, textarea {
+  font: inherit; font-size: var(--fs-sm); width: 100%; background: var(--bg);
+  color: var(--text); border: 1px solid var(--border); border-radius: var(--r-ctrl);
+  padding: 8px 11px; min-height: 36px;
+  transition: border-color .15s var(--ease), box-shadow .15s var(--ease);
+}
+input::placeholder, textarea::placeholder { color: var(--dim); }
+input:hover, textarea:hover { border-color: var(--border-strong); }
+input:focus, textarea:focus {
+  outline: none; border-color: var(--focus-ring);
+  box-shadow: var(--focus-halo);
+}
+
+input.bare-input,
+.bare-input input,
+.search-form input,
+.chat-search input {
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+input.bare-input:hover,
+.bare-input input:hover,
+.search-form input:hover,
+.chat-search input:hover {
+  border: none !important;
+}
+input.bare-input:focus,
+.bare-input input:focus,
+.search-form input:focus,
+.chat-search input:focus {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+label { display: block; font-size: var(--fs-sm); font-weight: 540; color: var(--muted); margin: var(--s3) 0 var(--s1); }
+textarea { min-height: 92px; resize: vertical; line-height: 1.55; }
+
+/* ---------- overlay backdrops ----------
+   These are <button> elements so a click or Enter dismisses the panel they sit
+   behind, but they are surfaces, not controls. The global `button:hover` above
+   has specificity (0,1,1) and outranks a single class (0,1,0), so it replaced
+   their translucent background with an opaque --surface-3. Because a
+   full-viewport overlay always contains the pointer, they were permanently in
+   :hover â€” which is why opening a drawer blanked the page behind it instead of
+   dimming it. Every state is pinned here so the element cannot be restyled by
+   the generic button rules. */
+.drawer-backdrop,
+.roadmap-inspector-backdrop,
+.community-create-backdrop {
+  --backdrop-tint: rgba(0, 0, 0, .48);
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--backdrop-tint);
+}
+.drawer-backdrop:hover, .drawer-backdrop:active, .drawer-backdrop:focus-visible,
+.roadmap-inspector-backdrop:hover, .roadmap-inspector-backdrop:active, .roadmap-inspector-backdrop:focus-visible,
+.community-create-backdrop:hover, .community-create-backdrop:active, .community-create-backdrop:focus-visible {
+  border-color: transparent;
+  background: var(--backdrop-tint);
+  transform: none;
+  translate: none;
+}
+.community-create-backdrop { --backdrop-tint: rgba(0, 0, 0, .68); }
+.drawer-backdrop { --backdrop-tint: rgba(0, 0, 0, .6); }
+
+/* ---------- shared tags, meters, tables & keyframes ---------- */
+
+.tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: var(--fs-xs); font-weight: 550; padding: 3px 9px; border-radius: 99px;
+  border: 1px solid var(--border); color: var(--muted); white-space: nowrap;
+  background: var(--surface-2); line-height: 1.5;
+}
+a.tag { transition: border-color .15s var(--ease), color .15s var(--ease); }
+a.tag:hover { border-color: var(--border-strong); color: var(--text); }
+.tag.strong { color: var(--strong); border-color: rgba(138,184,255,.42); background: rgba(63,140,255,.14); }
+.tag.mid { color: var(--mid); border-color: rgba(92,159,255,.34); background: rgba(63,140,255,.09); }
+.tag.weak { color: var(--muted); border-color: rgba(63,140,255,.24); background: rgba(63,140,255,.05); }
+.tag.neutral { color: var(--muted); border-color: var(--border); background: var(--surface-2); }
+
+.meter { height: 6px; background: var(--surface-3); border-radius: 99px; overflow: hidden; }
+.meter > span {
+  display: block; height: 100%; border-radius: 99px;
+  background: var(--accent-bright);
+  animation: grow .8s var(--ease) both;
+}
+.meter.strong > span { background: linear-gradient(90deg, #5c9fff, var(--strong)); }
+.meter.mid > span { background: linear-gradient(90deg, #3f8cff, var(--mid)); }
+.meter.weak > span { background: linear-gradient(90deg, #2f6fd6, var(--weak)); }
+@keyframes grow { from { transform: scaleX(0); transform-origin: left; } }
+
+table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+th, td { text-align: left; padding: 9px var(--s3); border-bottom: 1px solid var(--border); vertical-align: top; }
+th { color: var(--dim); font-weight: 620; font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .08em; }
+tbody tr:last-child td, tbody tr:last-child th { border-bottom: none; }
+tbody tr { transition: background .12s var(--ease); }
+tbody tr:hover { background: rgba(255,255,255,.022); }
+
+/* SVG rendering consistency */
+svg.lucide { stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Keyframe shared by Select, Tooltip, and popups */
+@keyframes popIn { from { opacity: 0; transform: translateY(-4px) scale(.97); } }
+
+/* ---------- auth transitions ---------- */
+@keyframes auth-fade { from { opacity: 0; } }
+@keyframes auth-pop { from { opacity: 0; translate: -50% -48%; scale: .985; } }
+
+/* ---------- roadmap map connectors ----------
+   Pseudo-element geometry, kept as CSS rather than utilities.
+   Each node needs a horizontal dotted stub reaching the vertical spine its
+   branch draws, and which side it grows from depends on the parent branch.
+   The Tailwind migration kept the spine and dropped the stubs, so nodes floated
+   unconnected to it. Expressing a parent-conditional pseudo-element inline is
+   possible and unreadable; this is the case utilities are worst at. */
+.field-topic-node::after,
+.field-topic-node::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 29px;
+  border-top: 2px dotted rgba(92, 159, 255, .82);
+}
+.field-topic-branch.is-left .field-topic-node::after { right: -30px; }
+.field-topic-branch.is-left .field-topic-node::before { display: none; }
+.field-topic-branch.is-right .field-topic-node::before { left: -30px; }
+.field-topic-branch.is-right .field-topic-node::after { display: none; }
+
+/* The centre card already draws its own stubs with utilities; only the topic
+   nodes lost theirs, so this file styles nothing the markup already covers. */
+
+@media (max-width: 1100px) {
+  .field-topic-node::after,
+  .field-topic-node::before { display: none; }
+}
+
