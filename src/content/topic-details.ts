@@ -834,6 +834,23 @@ export function getTopicDetails(fieldId: string, topicName: string): TopicDetail
     });
   }
 
+  /**
+   * The generated subtopic lists are templates, and one of the generic entries
+   * is literally "Quantitative verification metrics & benchmarks" — so a topic
+   * of that name listed itself as its own first-level subtopic, and read as a
+   * broken loop on both the canvas and the drawer. Drop any entry that just
+   * restates the topic, and any duplicate the branches produced.
+   */
+  const normalise = (value: string) => value.trim().toLowerCase().replace(/\s+/g, " ");
+  const topicKey = normalise(topicName);
+  const seen = new Set<string>();
+  subtopics = subtopics.filter((item) => {
+    const key = normalise(item);
+    if (key === topicKey || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
   return {
     fieldId,
     topic: topicName,
