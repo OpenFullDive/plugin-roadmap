@@ -4,6 +4,53 @@
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
+   0. Motion & focus tokens
+   The plugin owns these rather than reading host tokens, because the host's
+   Tailwind build does not scan `node_modules` — any utility or variable the
+   host does not itself use is silently absent here. Local `--rm-*` names keep
+   the canvas self-contained; host colour tokens are still read with fallbacks.
+   -------------------------------------------------------------------------- */
+.roadmap-explorer-root,
+.roadmap-flow-wrapper,
+.roadmap-resource-drawer,
+.roadmap-inspector-backdrop,
+.rm-node-tooltip {
+  /* Stronger than the built-in curves: entry/exit reads as intentional. */
+  --rm-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --rm-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  /* Ionic's drawer curve — the one iOS sheets use. */
+  --rm-ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --rm-dur-press: 110ms;   /* button press feedback */
+  --rm-dur-hover: 150ms;   /* hover / colour change */
+  --rm-dur-drawer: 260ms;  /* slide-over enter */
+}
+
+/* Focus is visible on every interactive surface in the canvas. Before this the
+   stylesheet defined no focus styles at all, so keyboard users navigating the
+   absolutely-positioned nodes had no indication of position (WCAG 2.4.7). */
+.roadmap-flow-wrapper :focus-visible,
+.roadmap-resource-drawer :focus-visible,
+.rm-header-card :focus-visible {
+  outline: 2px solid var(--focus-ring, #eef1f3);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* The nodes carry a dark border on a light fill; a light ring alone disappears
+   against the yellow. Pair the ring with a dark halo so it reads on both. */
+.rm-milestone-main:focus-visible,
+.rm-milestone-sub:focus-visible,
+.rm-concept-pill:focus-visible,
+.rm-discipline-node:focus-visible,
+.rm-gate-node:focus-visible {
+  outline: 2px solid var(--accent, #3f8cff) !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 5px rgba(63, 140, 255, 0.28), 0 4px 14px rgba(0, 0, 0, 0.5) !important;
+  z-index: 8 !important;
+}
+
+/* --------------------------------------------------------------------------
    1. Diagram Container & Flow Surface (roadmap.sh fixed layout)
    -------------------------------------------------------------------------- */
 .roadmap-flow-wrapper {
@@ -12,7 +59,7 @@
   overflow-x: auto;
   overflow-y: visible;
   display: flex;
-  justify-content: center;
+  justify-content: safe center;
   background-color: transparent;
   background-image: radial-gradient(circle, rgba(137, 153, 166, 0.16) 1.2px, transparent 1.2px);
   background-size: 20px 20px;
@@ -23,11 +70,20 @@
   box-sizing: border-box;
 }
 
+@media (max-width: 1060px) {
+  .roadmap-flow-wrapper {
+    justify-content: flex-start;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
 .roadmap-diagram-canvas {
   position: relative;
   flex-shrink: 0;
   user-select: none;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 /* --------------------------------------------------------------------------
@@ -108,7 +164,7 @@
   user-select: none !important;
   cursor: pointer !important;
   box-sizing: border-box !important;
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition: background-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s cubic-bezier(0.16, 1, 0.3, 1) !important;
   overflow: visible !important;
 }
 
@@ -137,7 +193,7 @@
   user-select: none !important;
   cursor: pointer !important;
   box-sizing: border-box !important;
-  transition: all 0.15s ease !important;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease !important;
   overflow: visible !important;
 }
 
@@ -166,7 +222,7 @@
   user-select: none !important;
   cursor: pointer !important;
   box-sizing: border-box !important;
-  transition: all 0.15s ease !important;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease !important;
   white-space: normal !important;
   overflow: visible !important;
 }
@@ -178,6 +234,112 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
 }
 
+/* Discipline Node (Authentic Master Curriculum Nodes) */
+.rm-discipline-node {
+  position: absolute !important;
+  z-index: 3 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 6px 12px !important;
+  border-radius: 6px !important;
+  background: #ffe599 !important;
+  border: 2px solid #000000 !important;
+  color: #0e1113 !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em !important;
+  line-height: 1.25 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+  user-select: none !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+  transition: background-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s cubic-bezier(0.16, 1, 0.3, 1), transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  overflow: visible !important;
+  text-decoration: none !important;
+}
+
+.rm-discipline-node:hover {
+  background: #ffd166 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 14px rgba(255, 209, 102, 0.45) !important;
+}
+
+/* The label region is the card's button (the arrow link sits beside it, not
+   inside it), so it must stretch and stay transparent rather than inherit the
+   host's global button chrome. */
+.rm-discipline-node-content {
+  display: flex;
+  align-items: center;
+  gap: 8px !important;
+  flex: 1;
+  min-width: 0;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: inherit !important;
+  font: inherit !important;
+  font-weight: inherit !important;
+  text-align: start;
+  cursor: pointer;
+}
+
+.rm-discipline-node-content:focus-visible {
+  outline: 2px solid #0e1113 !important;
+  outline-offset: 2px !important;
+  border-radius: 4px !important;
+}
+
+.rm-discipline-node-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.12);
+  color: #0e1113;
+  margin-left: 6px;
+  flex-shrink: 0;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  text-decoration: none;
+}
+
+.rm-discipline-node-link:hover {
+  background: #000000;
+  color: #ffd166;
+}
+
+/* Verification Gate Node */
+.rm-gate-node {
+  position: absolute !important;
+  z-index: 4 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 8px 18px !important;
+  border-radius: 9999px !important;
+  background: rgba(16, 185, 129, 0.12) !important;
+  border: 1.5px solid rgba(16, 185, 129, 0.5) !important;
+  color: #34d399 !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em !important;
+  cursor: pointer !important;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+  box-sizing: border-box !important;
+  user-select: none !important;
+}
+
+.rm-gate-node:hover {
+  background: rgba(16, 185, 129, 0.22) !important;
+  border-color: #10b981 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35) !important;
+}
+
 /* Corner Recommendation / Status Badges (Purple / Green / Gray) - pinned cleanly to top-right corner */
 .rm-badge-corner {
   position: absolute !important;
@@ -186,8 +348,10 @@
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  width: 14px !important;
-  height: 14px !important;
+  /* 14px left no room for a glyph inside the ring; 16px carries a 9px mark
+     without touching the border. */
+  width: 16px !important;
+  height: 16px !important;
   border-radius: 50% !important;
   flex-shrink: 0 !important;
   margin: 0 !important;
@@ -282,9 +446,12 @@
 }
 
 .rm-legend-item .rm-badge-corner {
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
   margin-left: 0;
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
 }
 
 /* Dark action button directly below legend card matching roadmap.sh */
@@ -302,7 +469,7 @@
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
   text-align: center;
   box-sizing: border-box;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
@@ -352,7 +519,7 @@
   font-weight: 700;
   font-family: monospace;
   text-decoration: none;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
 }
 
 .rm-curriculum-card .curriculum-btn:hover {
@@ -398,7 +565,7 @@
   font-size: 10.5px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.12s ease;
+  transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease, transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
   text-decoration: none;
 }
 
@@ -462,51 +629,6 @@
   font-weight: 800;
   user-select: none;
   box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25);
-}
-
-/* --------------------------------------------------------------------------
-   5. Master System Map Disciplines
-   -------------------------------------------------------------------------- */
-.rm-master-discipline {
-  position: absolute;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: 1.5px solid var(--border, #2a3236);
-  background: var(--surface, #151a1d);
-  text-decoration: none;
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
-  box-sizing: border-box;
-}
-
-.rm-master-discipline:hover {
-  background: var(--surface-2, #1b2125);
-  border-color: var(--accent, #3f8cff);
-  box-shadow: 0 4px 14px rgba(63, 140, 255, 0.25);
-  transform: translateY(-1px);
-}
-
-.rm-master-discipline .disc-title {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text, #eef1f3);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.rm-master-discipline .disc-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 4px;
-  margin-top: 3px;
-  font-size: 10px;
-  color: var(--dim, #8999a6);
 }
 
 /* --------------------------------------------------------------------------
@@ -575,7 +697,7 @@
   border: 1px solid var(--border, #2a3236) !important;
   background: var(--surface, #151a1d) !important;
   color: var(--dim, #7a8890) !important;
-  transition: all 0.15s ease !important;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease !important;
 }
 
 .rm-drawer-status-btn:hover {
@@ -583,11 +705,41 @@
   color: var(--text, #eef1f3) !important;
 }
 
+/*
+ * The chosen status was painted accent blue whichever status it was, while the
+ * canvas paints done green and learning amber. Same state, two colour systems:
+ * the drawer said "Done" in blue over a diagram full of green done nodes.
+ * Each state now carries its canvas colour, so the mapping is learned once.
+ */
 .rm-drawer-status-btn.is-active {
-  border-color: var(--accent, #3f8cff) !important;
-  background: var(--accent, #3f8cff) !important;
-  color: #ffffff !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Todo is the absence of progress, so it is marked, not celebrated — a filled
+ * accent block gave the emptiest state the loudest voice on the panel. */
+.rm-drawer-status-btn.is-active.status-todo {
+  border-color: var(--border-strong, #465258) !important;
+  background: var(--surface-3, #2a3236) !important;
+  color: var(--text, #eef1f3) !important;
+}
+
+.rm-drawer-status-btn.is-active.status-learning {
+  border-color: #ffd166 !important;
+  background: rgba(255, 209, 102, 0.18) !important;
+  color: #ffd166 !important;
+}
+
+.rm-drawer-status-btn.is-active.status-done {
+  border-color: #10b981 !important;
+  background: rgba(16, 185, 129, 0.2) !important;
+  color: #34d399 !important;
+}
+
+.rm-drawer-status-btn.is-active.status-skipped {
+  border-color: #465258 !important;
+  border-style: dashed !important;
+  background: rgba(27, 33, 37, 0.85) !important;
+  color: var(--dim, #829198) !important;
 }
 
 /* Resource chips */
@@ -650,6 +802,38 @@
   margin: 0 !important;
   gap: 0 !important;
   box-sizing: border-box !important;
+}
+
+/* The reset above is an element+class selector (0-1-1), so it outranked the
+   plain class rules of the two pill-shaped buttons and silently flattened both:
+   the verification gates rendered as 6px rectangles with their icon jammed
+   against the label. Restore shape and gap at matching specificity rather than
+   weakening the reset, which still isolates every other button from the host's
+   global `button` styles. */
+.roadmap-flow-wrapper button.rm-gate-node,
+.roadmap-diagram-canvas button.rm-gate-node {
+  border-radius: 9999px !important;
+  gap: 8px !important;
+}
+
+/* Same cause: the icon/label rows of the in-canvas cards lost their gap, so
+   `Beginner Project Ideas` rendered as one run-on string against its icon. */
+.roadmap-flow-wrapper button.project-btn,
+.roadmap-diagram-canvas button.project-btn,
+.roadmap-flow-wrapper button.curriculum-btn,
+.roadmap-diagram-canvas button.curriculum-btn,
+.roadmap-flow-wrapper button.rm-legend-action-btn,
+.roadmap-diagram-canvas button.rm-legend-action-btn {
+  gap: 6px !important;
+}
+
+/* The discipline card's label is a button now, so it falls under the reset
+   too — and under the host's global `button` rule, which centres content.
+   Restore the icon gap and the leading alignment the card reads with. */
+.roadmap-flow-wrapper button.rm-discipline-node-content,
+.roadmap-diagram-canvas button.rm-discipline-node-content {
+  gap: 8px !important;
+  justify-content: flex-start !important;
 }
 
 .roadmap-diagram-canvas button > span:first-child {
@@ -745,7 +929,7 @@
   background-color: var(--surface-2, #1d2529) !important;
   color: var(--muted, #c2c9cc) !important;
   cursor: pointer !important;
-  transition: all 0.15s ease !important;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease !important;
 }
 
 .rm-btn-action:hover {
@@ -776,7 +960,7 @@
   letter-spacing: -0.01em !important;
   cursor: pointer !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
-  transition: all 0.15s ease !important;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease !important;
 }
 
 .rm-btn-download:hover {
@@ -803,7 +987,7 @@
   color: #0e1113 !important;
   cursor: pointer !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
-  transition: all 0.15s ease !important;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease !important;
 }
 
 .rm-btn-share:hover {
@@ -814,25 +998,6 @@
 
 .rm-btn-share:active {
   transform: translateY(0) !important;
-}
-
-/* Discipline Select Dropdown in Top Bar */
-.rm-select-discipline {
-  height: 36px;
-  border-radius: 8px;
-  border: 1px solid var(--border-strong, #465258);
-  background-color: var(--surface-2, #1d2529);
-  color: var(--text, #eef1f3);
-  font-size: 12px;
-  font-weight: 600;
-  padding: 0 10px;
-  outline: none;
-  cursor: pointer;
-  transition: border-color 0.15s ease;
-}
-
-.rm-select-discipline:focus {
-  border-color: var(--accent, #3f8cff);
 }
 
 /* Large Hero Title (Signature roadmap.sh) */
@@ -897,7 +1062,7 @@
   color: var(--dim, #829198) !important;
   cursor: pointer !important;
   margin-bottom: -1px !important;
-  transition: all 0.15s ease !important;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease !important;
 }
 
 .rm-tab-btn:hover {
@@ -983,7 +1148,7 @@
   border: 1px solid var(--border, #2a3236);
   background-color: var(--surface-2, #1d2529);
   overflow: hidden;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
 }
 
 .rm-accordion-header {
@@ -1026,7 +1191,7 @@
   padding: 4px 10px;
   font-size: 12px;
   color: var(--dim, #829198);
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
 }
 
 .rm-search-input-wrap:focus-within {
@@ -1104,7 +1269,7 @@
   font-size: 13px !important;
   font-weight: 700 !important;
   text-decoration: none !important;
-  transition: all 0.15s ease !important;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease !important;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35) !important;
 }
 
@@ -1115,41 +1280,1292 @@
   transform: translateX(-2px) !important;
 }
 
-/* Floating AI Tutor Pill at Bottom (roadmap.sh signature) */
-.rm-floating-ai-tutor {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 35;
-  display: flex;
+/* Confirmation has to be visible on the button itself: the rail sits in the
+   page margin, far from anywhere a toast would appear. It has to outrank the
+   hover rule above too — the pointer is still on the button that was clicked,
+   and at equal specificity source order decides. */
+.rm-floating-social-btn.is-copied,
+.rm-floating-social-btn.is-copied:hover {
+  color: #34d399 !important;
+  border-color: #10b981 !important;
+  background: rgba(16, 185, 129, 0.14) !important;
+}
+
+/* ==========================================================================
+   8. Interaction layer — press feedback, pointer gating, canvas panning,
+      connection highlighting, node tooltips, reduced motion
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   8.1 Press feedback
+   Every node is a button; none of them acknowledged a press. A subtle scale
+   confirms the interface heard the click before the drawer has finished
+   opening. Kept between 0.97 and 0.98 so it reads as pressure, not movement.
+   -------------------------------------------------------------------------- */
+.rm-milestone-main:active,
+.rm-milestone-sub:active,
+.rm-concept-pill:active,
+.rm-discipline-node:active,
+.rm-gate-node:active {
+  transform: scale(0.975) !important;
+  transition-duration: var(--rm-dur-press, 110ms) !important;
+}
+
+.rm-drawer-status-btn:active,
+.rm-drawer-tab:active,
+.rm-floating-social-btn:active,
+.rm-legend-action-btn:active,
+.rm-project-card .project-btn:active,
+.rm-curriculum-card .curriculum-btn:active {
+  transform: scale(0.97) !important;
+}
+
+/* --------------------------------------------------------------------------
+   8.2 Pointer gating
+   A touch tap fires :hover and leaves it stuck until the next tap elsewhere,
+   so a tapped node stayed lifted and glowing. Confine the lift to real cursors
+   and leave touch devices with the press feedback above.
+   -------------------------------------------------------------------------- */
+@media (hover: none), (pointer: coarse) {
+  .rm-milestone-main:hover,
+  .rm-milestone-sub:hover,
+  .rm-concept-pill:hover,
+  .rm-discipline-node:hover,
+  .rm-gate-node:hover,
+  .rm-floating-social-btn:hover {
+    transform: none !important;
+  }
+
+}
+
+/* --------------------------------------------------------------------------
+   8.3 Canvas panning
+   The canvas is a fixed 1000px topology inside a horizontally scrolling
+   wrapper. At a 390px viewport, 674px of it sits off-screen.
+   -------------------------------------------------------------------------- */
+.roadmap-flow-wrapper {
+  /* Let the browser own both axes on the compositor, but stop a horizontal
+     swipe from chaining into the history back-gesture once the canvas hits
+     its edge — the most disorienting thing that can happen mid-pan. */
+  touch-action: pan-x pan-y;
+  overscroll-behavior-x: contain;
+  scroll-behavior: smooth;
+}
+
+/*
+ * There was an edge fade here — a mask that dissolved the canvas over 44px at
+ * whichever edge it continued past. It was the wrong tool for this content: a
+ * mask acts on the pixels, so mid-pan it ate the node labels themselves and
+ * left half-words trailing into nothing, which reads as a rendering fault
+ * rather than as "there is more over here". Panned content now clips cleanly
+ * at the container edge, the way any horizontally scrolled region does, and
+ * the affordance is carried by the cue below and by the scrollbar.
+ */
+
+/* A scroll container the keyboard cannot reach is a scroll container some
+   people cannot read (WCAG 2.1.1). The component makes the wrapper focusable
+   only while it actually overflows, so no dead tab stop appears on desktop. */
+.roadmap-flow-wrapper:focus-visible {
+  outline: 2px solid var(--accent, #3f8cff);
+  outline-offset: -2px;
+  border-radius: 10px;
+}
+
+/* Frame that owns the cue. The scroller cannot host it: a flex child of a
+   scroll container contributes its own width to scrollWidth. */
+.rm-flow-frame {
+  position: relative;
+}
+
+/* In flow at the head of the diagram, not floating over its foot. Absolute
+   positioning put it at the bottom of a 3000px frame — displayed but never on
+   screen — and sticky is scoped by an ancestor's `overflow: clip`, so it never
+   left its static position either. The head is where it belongs regardless:
+   reading order runs top to bottom, and a cue that explains the diagram should
+   be met before the diagram, not after it. */
+.rm-pan-hint {
+  margin: 0 0 12px 16px;
+  display: none;
   align-items: center;
-  gap: 8px;
-  padding: 9px 20px;
+  gap: 6px;
+  width: max-content;
+  padding: 5px 12px;
   border-radius: 9999px;
   border: 1px solid var(--border-strong, #3f4a50);
-  background: #111518;
+  background: rgba(17, 21, 24, 0.92);
+  color: var(--muted, #c2c9cc);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  max-width: calc(100% - 32px);
+}
+
+.rm-flow-frame[data-pannable="true"] .rm-pan-hint {
+  display: inline-flex;
+}
+
+/* The cue carries a way out of the clipped view, not just an instruction, so
+   it stays for as long as the diagram does not fit. */
+.rm-pan-hint-text {
+  color: var(--muted, #c2c9cc);
+}
+
+.rm-pan-hint-action {
+  padding: 3px 10px;
+  border-radius: 9999px;
+  border: 1px solid var(--border-strong, #465258);
+  background: var(--surface-2, #1d2529);
   color: var(--text, #eef1f3);
-  font-size: 13px;
-  font-weight: 500;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.65);
+  font-size: 11px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: border-color var(--rm-dur-hover, 150ms) ease, background-color var(--rm-dur-hover, 150ms) ease;
 }
 
-.rm-floating-ai-tutor:hover {
-  background: #182024;
-  border-color: #ffd166;
-  transform: translateX(-50%) translateY(-2px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.85);
+.rm-pan-hint-action:hover {
+  border-color: var(--accent, #3f8cff);
+  background: var(--surface-3, #2a3236);
 }
 
-.rm-floating-ai-tutor .ai-tag {
+/* --------------------------------------------------------------------------
+   8.4 Connection highlighting
+   Hovering or focusing a node lifts the edges of its cluster and recedes the
+   rest, so the path a topic sits on is legible without reading every label.
+   Continuity: the eye follows the lit line rather than hunting the grid.
+   -------------------------------------------------------------------------- */
+.rm-svg-overlay path {
+  transition: stroke var(--rm-dur-hover, 150ms) ease,
+    stroke-opacity var(--rm-dur-hover, 150ms) ease,
+    stroke-width var(--rm-dur-hover, 150ms) ease;
+}
+
+.roadmap-diagram-canvas[data-linked="true"] .rm-svg-overlay path {
+  stroke-opacity: 0.25;
+}
+
+.roadmap-diagram-canvas[data-linked="true"] .rm-svg-overlay path.is-linked {
+  stroke-opacity: 1;
+  stroke: #ffd166;
+  filter: drop-shadow(0 0 5px rgba(255, 209, 102, 0.55));
+}
+
+.roadmap-diagram-canvas[data-linked="true"] .rm-svg-overlay path.rm-edge-spine.is-linked {
+  stroke-width: 3px;
+}
+
+.roadmap-diagram-canvas[data-linked="true"] .rm-svg-overlay path.rm-edge-branch.is-linked {
+  stroke-width: 2.2px;
+}
+
+.roadmap-diagram-canvas[data-linked="true"] .rm-section-box {
+  stroke-opacity: 0.4;
+}
+
+/* --------------------------------------------------------------------------
+   8.5 Node tooltip
+   Previews the topic's mechanism on hover and on keyboard focus. Positioned by
+   the component from the node's own rect, so one element serves every node.
+   -------------------------------------------------------------------------- */
+.rm-node-tooltip {
+  position: fixed;
+  z-index: 60;
+  max-width: 300px;
+  padding: 9px 11px;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong, #3f4a50);
+  background: #10161a;
+  color: var(--muted, #c2c9cc);
+  font-size: 11.5px;
+  line-height: 1.45;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+  opacity: 1;
+  /* The component supplies only the placement shift; the scale is composed
+     here so the two do not fight over the `transform` property. */
+  transform: var(--rm-tooltip-shift, translate(-50%, -100%)) scale(1);
+  transform-origin: 50% 100%;
+  transition: opacity 125ms var(--rm-ease-out, ease-out), transform 125ms var(--rm-ease-out, ease-out);
+
+  /* The element mounts already open, so its entry needs @starting-style
+     rather than a class flip. Nothing in the real world appears from nothing:
+     it grows from 0.97, never from zero. */
+  @starting-style {
+    opacity: 0;
+    transform: var(--rm-tooltip-shift, translate(-50%, -100%)) scale(0.97);
+  }
+}
+
+/* Once one tooltip is open, the next opens instantly. The delay exists to stop
+   accidental activation, and that job is already done. */
+.rm-node-tooltip[data-instant="true"] {
+  transition-duration: 0ms;
+}
+
+.rm-node-tooltip-title {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--text, #eef1f3);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.rm-node-tooltip-status {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  color: #ffd166;
+  margin-top: 6px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(63, 140, 255, 0.16);
+  color: var(--accent-bright, #5c9fff);
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.rm-node-tooltip-hint {
+  display: block;
+  margin-top: 6px;
+  color: var(--dim, #829198);
+  font-size: 10.5px;
+}
+
+/* --------------------------------------------------------------------------
+   8.6 Reduced motion
+   Reduced motion means fewer and gentler animations, not none: colour and
+   opacity still carry meaning, so only movement and scaling are removed.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .roadmap-flow-wrapper,
+  .roadmap-flow-wrapper *,
+  .roadmap-resource-drawer,
+  .roadmap-resource-drawer *,
+  .roadmap-inspector-backdrop,
+  .rm-node-tooltip {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-property: opacity, background-color, border-color, color, stroke, stroke-opacity !important;
+    transition-duration: 120ms !important;
+  }
+
+  .roadmap-flow-wrapper {
+    scroll-behavior: auto;
+  }
+
+  .rm-milestone-main:hover,
+  .rm-milestone-sub:hover,
+  .rm-concept-pill:hover,
+  .rm-discipline-node:hover,
+  .rm-gate-node:hover,
+  .rm-floating-social-btn:hover,
+  .rm-milestone-main:active,
+  .rm-milestone-sub:active,
+  .rm-concept-pill:active,
+  .rm-discipline-node:active,
+  .rm-gate-node:active {
+    transform: none !important;
+  }
+
+  .rm-node-tooltip {
+    transform: var(--rm-tooltip-shift, translate(-50%, -100%)) !important;
+  }
+
+  .roadmap-resource-drawer {
+    animation: none !important;
+  }
+}
+
+/* ==========================================================================
+   9. Slide-over drawer — plugin-owned layout
+   The host's Tailwind build scans its own `src/`, not `node_modules`, so any
+   utility class this plugin uses that the host app does not also use is never
+   generated. `p-5`, `px-5`, `text-lg`, `text-xs` and `flex-shrink-0` all
+   resolved to nothing here, which is why the drawer rendered edge-to-edge with
+   its title at body size. Layout that matters is owned by this stylesheet
+   instead of borrowed from the host's build.
+   ========================================================================== */
+
+.roadmap-resource-drawer {
+  /* Respect a device's bottom inset so the footer actions clear home bars. */
+  padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+  animation: slideDrawer var(--rm-dur-drawer, 260ms) var(--rm-ease-drawer, cubic-bezier(0.32, 0.72, 0, 1)) forwards;
+}
+
+/* The canvas isolates its buttons from the host's global `button` rules; the
+   drawer needs the same guard, or its controls inherit nowrap text, a radius
+   and a min-height that were written for the host's own chrome. */
+.roadmap-resource-drawer button {
+  box-sizing: border-box;
+  white-space: normal;
+  text-transform: none;
+  font-family: inherit;
+  min-height: 0;
+  margin: 0;
+}
+
+.rm-drawer-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border, #2a3236);
+}
+
+.rm-drawer-eyebrow {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-bright, #5c9fff);
+}
+
+.rm-drawer-title {
+  margin: 4px 0 0 0;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--text, #eef1f3);
+  /* Long topic names must wrap rather than push the close button off-screen. */
+  overflow-wrap: anywhere;
+}
+
+.rm-drawer-close {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  border: 1px solid var(--border, #2a3236);
+  background: var(--surface-2, #1d2529);
+  color: var(--muted, #c2c9cc);
+  cursor: pointer;
+  transition: background-color var(--rm-dur-hover, 150ms) ease, color var(--rm-dur-hover, 150ms) ease,
+    border-color var(--rm-dur-hover, 150ms) ease, transform var(--rm-dur-press, 110ms) ease;
+}
+
+.rm-drawer-close:hover {
+  color: var(--text, #eef1f3);
+  border-color: var(--border-strong, #465258);
+}
+
+.rm-drawer-close:active {
+  transform: scale(0.94);
+}
+
+.rm-drawer-status {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border, #2a3236);
+  background: var(--surface-2, #1d2529);
+}
+
+.rm-drawer-status-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim, #829198);
+}
+
+/* Fitts's Law: these are the drawer's most-used controls and were 8px-tall
+   text stacks. A 44px row is the smallest comfortable touch target. */
+.rm-drawer-status-btn {
+  min-height: 44px !important;
+}
+
+.rm-drawer-tabbar {
+  display: flex;
+  padding-inline: 20px;
+  border-bottom: 1px solid var(--border, #2a3236);
+}
+
+.rm-drawer-tab {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 12px 4px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  /* The host's global button radius bent the 2px underline into a smile.
+     A tab indicator is a straight rule. */
+  border-radius: 0;
+  background: transparent;
+  color: var(--dim, #829198);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color var(--rm-dur-hover, 150ms) ease, border-color var(--rm-dur-hover, 150ms) ease;
+}
+
+.rm-drawer-tab:hover {
+  color: var(--muted, #c2c9cc);
+}
+
+.rm-drawer-tab[aria-selected="true"] {
+  border-bottom-color: var(--accent-bright, #5c9fff);
+  color: var(--text, #eef1f3);
+}
+
+.rm-drawer-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 20px;
+  /* Clear the sticky footer so the last checklist item is never half-hidden
+     behind the Next button. */
+  padding-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.rm-drawer-body:focus-visible {
+  outline: 2px solid var(--accent, #3f8cff);
+  outline-offset: -3px;
+}
+
+.rm-drawer-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.rm-drawer-section-title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim, #829198);
+}
+
+.rm-drawer-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--border, #2a3236);
+  background: var(--surface-2, #1d2529);
+}
+
+/* Checklist rows were <li onClick> — no keyboard access and no announced
+   state. They are buttons with checkbox semantics now; this styles them back
+   to the same row without inheriting the host's global button rules. */
+.rm-drawer-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border, #2a3236);
+  background: var(--surface-2, #1d2529);
+  color: var(--muted, #c2c9cc);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.55;
+  text-align: start;
+  cursor: pointer;
+  transition: border-color var(--rm-dur-hover, 150ms) ease, background-color var(--rm-dur-hover, 150ms) ease,
+    transform var(--rm-dur-press, 110ms) ease;
+}
+
+.rm-drawer-check:hover {
+  border-color: var(--accent, #3f8cff);
+}
+
+.rm-drawer-check:active {
+  transform: scale(0.99);
+}
+
+.rm-drawer-check[aria-checked="true"] .rm-drawer-check-text {
+  color: var(--dim, #829198);
+  text-decoration: line-through;
+}
+
+.rm-drawer-check-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* A flex item will not shrink below its max-content width unless told to, so
+   the competency text ran past the row's own border instead of wrapping. */
+.rm-drawer-check-text {
+  flex: 1;
+  min-width: 0;
+  white-space: normal;
+}
+
+.rm-drawer-check-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* At narrow widths the drawer is effectively the whole screen; give it a full
+   height sheet with the same insets rather than a 94vw column. */
+@media (max-width: 720px) {
+  .roadmap-resource-drawer {
+    width: 100% !important;
+    max-width: none !important;
+    border-left: 0 !important;
+  }
+
+  .rm-drawer-tabbar {
+    padding-inline: 12px;
+  }
+
+  .rm-drawer-header,
+  .rm-drawer-status,
+  .rm-drawer-body {
+    padding-inline: 16px;
+  }
+}
+
+/* The AI tutor pill is fixed to the viewport bottom, where a mobile app frame
+   usually puts its own tab bar. Lift it clear of both that and the home bar. */
+@media (max-width: 768px) {
+}
+
+/* ==========================================================================
+   10. Refined regions — track picker, tab bar, contribute steps, linear guide,
+       project tiles, and scrollbar chrome
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   10.1 Track picker
+   The popup a native <select> opens is drawn by the OS: a white sheet with a
+   blue highlight, unreachable by CSS. This is that control rebuilt so the
+   popup stays in the product's palette.
+   -------------------------------------------------------------------------- */
+.rm-track-picker {
+  position: relative;
+}
+
+.rm-track-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 240px;
+  min-height: 36px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong, #465258);
+  background: var(--surface-2, #1d2529);
+  color: var(--text, #eef1f3);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: start;
+  cursor: pointer;
+  transition: border-color var(--rm-dur-hover, 150ms) ease, background-color var(--rm-dur-hover, 150ms) ease;
+}
+
+.rm-track-trigger:hover {
+  border-color: var(--accent, #3f8cff);
+}
+
+.rm-track-trigger[aria-expanded="true"] {
+  border-color: var(--accent, #3f8cff);
+  background: var(--surface-3, #2a3236);
+}
+
+.rm-track-trigger-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rm-track-chevron {
+  flex-shrink: 0;
+  color: var(--dim, #829198);
+  transition: transform var(--rm-dur-hover, 150ms) ease;
+}
+
+.rm-track-trigger[aria-expanded="true"] .rm-track-chevron {
+  transform: rotate(180deg);
+}
+
+.rm-track-list {
+  position: absolute;
+  z-index: 70;
+  inset-inline-start: 0;
+  top: calc(100% + 6px);
+  width: max(100%, 300px);
+  max-height: min(60vh, 420px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 6px;
+  border-radius: 10px;
+  border: 1px solid var(--border-strong, #465258);
+  background: var(--surface, #151a1d);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.7);
+  /* Scales from the trigger it belongs to, not from its own centre. */
+  transform-origin: top center;
+  animation: rmPickerIn 140ms var(--rm-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+@keyframes rmPickerIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(-4px);
+  }
+}
+
+.rm-track-list:focus-visible {
+  outline: none;
+}
+
+.rm-track-group {
+  padding: 10px 10px 5px;
+  color: var(--dim, #829198);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.rm-track-option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 38px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  color: var(--muted, #c2c9cc);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* One highlight, driven by the roving active index, so the pointer and the
+   arrow keys can never disagree about which row is current. */
+.rm-track-option[data-active="true"] {
+  background: var(--surface-3, #2a3236);
+  color: var(--text, #eef1f3);
+}
+
+.rm-track-option[aria-selected="true"] {
+  color: var(--text, #eef1f3);
   font-weight: 700;
 }
 
+.rm-track-option-icon {
+  flex-shrink: 0;
+  color: var(--accent-bright, #5c9fff);
+}
 
+.rm-track-option-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rm-track-option-hint {
+  flex-shrink: 0;
+  color: var(--dim, #829198);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+.rm-track-option-check {
+  flex-shrink: 0;
+  color: var(--accent-bright, #5c9fff);
+}
+
+@media (max-width: 640px) {
+  /* The picker is a positioned wrapper, so it — not the button inside it — is
+     the flex item. Without a basis it shrank to its content and the trigger was
+     squeezed out of the action row; it takes its own line, as the select did. */
+  .rm-track-picker {
+    flex: 1 0 100%;
+  }
+
+  .rm-track-trigger {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .rm-track-list {
+    width: min(320px, calc(100vw - 32px));
+  }
+}
+
+/* --------------------------------------------------------------------------
+   10.2 Tab bar
+   -------------------------------------------------------------------------- */
+.rm-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 17px;
+  padding: 0 6px;
+  border-radius: 9999px;
+  background: var(--surface-3, #2a3236);
+  color: var(--muted, #c2c9cc);
+  font-size: 10px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.rm-tab-btn.is-active .rm-tab-count {
+  background: rgba(63, 140, 255, 0.2);
+  color: var(--accent-bright, #5c9fff);
+}
+
+.rm-progress-pct {
+  color: var(--text, #eef1f3);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.rm-banner-chevron {
+  flex-shrink: 0;
+  transition: transform var(--rm-dur-hover, 150ms) ease;
+}
+
+.rm-banner-chevron.is-open {
+  transform: rotate(180deg);
+}
+
+/* --------------------------------------------------------------------------
+   10.3 Contribute — an ordered sequence, not a stack of boxes
+   -------------------------------------------------------------------------- */
+.rm-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: rm-step;
+}
+
+.rm-step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  gap: 14px;
+  padding: 12px 0 14px;
+}
+
+/* The rail is one continuous line behind the markers, which is what makes the
+   five items read as a route rather than five unrelated cards. */
+.rm-step::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 12.5px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  /* --border on --surface is close to invisible at 1px; the rail only does its
+     job — saying "these run in order" — if it can actually be seen. */
+  background: var(--border-strong, #465258);
+}
+
+.rm-step:first-child::before {
+  top: 18px;
+}
+
+.rm-step:last-child::before {
+  bottom: auto;
+  height: 18px;
+}
+
+.rm-step-marker {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong, #465258);
+  background: var(--surface-2, #1d2529);
+  color: var(--accent-bright, #5c9fff);
+  font-size: 11px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.rm-step-body {
+  min-width: 0;
+  padding-top: 3px;
+}
+
+.rm-step-title {
+  margin: 0;
+  color: var(--text, #eef1f3);
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.rm-step-text {
+  margin: 4px 0 0;
+  color: var(--muted, #c2c9cc);
+  font-size: 12.5px;
+  line-height: 1.6;
+  max-width: 62ch;
+}
+
+.rm-contribute-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border, #2a3236);
+}
+
+/* --------------------------------------------------------------------------
+   10.4 Linear guide
+   -------------------------------------------------------------------------- */
+/* The section list sat directly under the discipline header's rule with a
+   3px gap, so the heading read as part of the header rather than as the label
+   of the rows below it. Owned here rather than left to a host utility class
+   that the host's Tailwind build may never have generated. */
+.rm-linear-sections {
+  margin-top: 18px;
+}
+
+.rm-linear-section + .rm-linear-section {
+  /* Between-group space must beat within-group space or the grouping reads as
+     noise; rows sit flush, so sections get a clear margin. */
+  margin-top: 22px;
+}
+
+.rm-linear-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.rm-linear-section-title {
+  color: var(--muted, #c2c9cc);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.rm-linear-section-count {
+  color: var(--dim, #829198);
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.rm-linear-rows {
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid var(--border, #2a3236);
+  background: var(--surface, #151a1d);
+}
+
+.rm-linear-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  text-align: start;
+  cursor: pointer;
+  transition: background-color var(--rm-dur-hover, 150ms) ease;
+}
+
+/* A hairline between rows, not a box around each: the section is the region. */
+.rm-linear-row + .rm-linear-row {
+  border-top: 1px solid var(--border, #2a3236);
+}
+
+.rm-linear-row:hover {
+  background: var(--surface-2, #1d2529);
+}
+
+.rm-linear-row.is-done {
+  background: rgba(16, 185, 129, 0.06);
+}
+
+.rm-linear-row.is-learning {
+  background: rgba(255, 209, 102, 0.06);
+}
+
+/* The arrow is an affordance, not a label: it appears for the row being
+   considered rather than being printed on all 168 of them at once. */
+.rm-linear-arrow {
+  flex-shrink: 0;
+  color: var(--accent-bright, #5c9fff);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity var(--rm-dur-hover, 150ms) ease, transform var(--rm-dur-hover, 150ms) ease;
+}
+
+.rm-linear-row:hover .rm-linear-arrow,
+.rm-linear-row:focus-visible .rm-linear-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Touch has no hover, so the affordance has to be permanently visible there. */
+@media (hover: none), (pointer: coarse) {
+  .rm-linear-arrow {
+    opacity: 0.55;
+    transform: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   10.5 Project tiles
+   -------------------------------------------------------------------------- */
+.rm-project-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 15px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border, #2a3236);
+  background: var(--surface-2, #1d2529);
+  text-decoration: none;
+  transition: border-color var(--rm-dur-hover, 150ms) ease, background-color var(--rm-dur-hover, 150ms) ease,
+    transform var(--rm-dur-press, 110ms) ease;
+}
+
+.rm-project-tile:hover {
+  border-color: var(--accent, #3f8cff);
+  background: var(--surface-3, #2a3236);
+}
+
+.rm-project-tile:active {
+  transform: scale(0.995);
+}
+
+.rm-project-eyebrow {
+  color: var(--dim, #829198);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.rm-project-title {
+  margin: 0;
+  color: var(--text, #eef1f3);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+
+.rm-project-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 2px;
+}
+
+.rm-project-arrow {
+  flex-shrink: 0;
+  color: var(--dim, #829198);
+  transition: transform var(--rm-dur-hover, 150ms) ease, color var(--rm-dur-hover, 150ms) ease;
+}
+
+.rm-project-tile:hover .rm-project-arrow {
+  color: var(--accent-bright, #5c9fff);
+  transform: translateX(3px);
+}
+
+/* --------------------------------------------------------------------------
+   10.6 Scrollbar chrome
+   The drawer and the canvas scroll against a near-black surface; the platform
+   default draws a light track straight through it.
+   -------------------------------------------------------------------------- */
+.rm-drawer-body,
+.rm-track-list {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong, #465258) transparent;
+}
+
+.rm-drawer-body::-webkit-scrollbar,
+.rm-track-list::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.rm-drawer-body::-webkit-scrollbar-track,
+.rm-track-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.rm-drawer-body::-webkit-scrollbar-thumb,
+.rm-track-list::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 9999px;
+  background-clip: content-box;
+  background-color: var(--border-strong, #465258);
+}
+
+.rm-drawer-body::-webkit-scrollbar-thumb:hover,
+.rm-track-list::-webkit-scrollbar-thumb:hover {
+  background-color: var(--dim, #829198);
+}
+
+/* Declaring any ::-webkit-scrollbar rule switches Chrome to its custom
+   scrollbar renderer, which then draws stepper arrows at both ends of the
+   track unless they are explicitly removed. That is the pair of little arrow
+   buttons flanking the canvas scrollbar. */
+.rm-drawer-body::-webkit-scrollbar-button,
+.rm-track-list::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.rm-drawer-body::-webkit-scrollbar-corner,
+.rm-track-list::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/*
+ * The canvas scrolls without a scrollbar.
+ *
+ * A full-width bar under the diagram — with stepper arrows on the platforms
+ * that draw them — competed with the diagram for attention and read as page
+ * chrome rather than as part of it. Panning stays fully available by swipe,
+ * drag, and the arrow keys, and the cue above the canvas states plainly that
+ * the diagram is wider than the screen and offers the list view, so hiding the
+ * bar costs no affordance that was not already spelled out in words.
+ */
+.roadmap-flow-wrapper {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.roadmap-flow-wrapper::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+/* Drawer footer: the Previous control sat at muted-on-surface, close enough to
+   the disabled look that it read as unavailable. */
+.rm-drawer-footer button {
+  min-height: 36px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rm-track-list {
+    animation: none;
+  }
+
+  .rm-linear-arrow,
+  .rm-project-arrow {
+    transition-property: opacity, color;
+    transform: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   10.7 Track footer — prerequisites and connecting disciplines
+   -------------------------------------------------------------------------- */
+.rm-footer-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  margin-top: 24px;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid var(--border, #2a3236);
+  background: var(--surface, #151a1d);
+}
+
+.rm-footer-label {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--dim, #829198);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.rm-prereq-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.rm-prereq-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border-radius: 9999px;
+  border: 1px solid var(--border-strong, #465258);
+  background: var(--surface-2, #1d2529);
+  color: var(--muted, #c2c9cc);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.rm-prereq-chip svg {
+  color: #34d399;
+  flex-shrink: 0;
+}
+
+.rm-prereq-none {
+  margin: 0;
+  color: var(--muted, #c2c9cc);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.rm-related-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 10px;
+}
+
+.rm-related-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--border, #2a3236);
+  background: var(--surface-2, #1d2529);
+  text-decoration: none;
+  transition: border-color var(--rm-dur-hover, 150ms) ease, background-color var(--rm-dur-hover, 150ms) ease;
+}
+
+.rm-related-card:hover {
+  border-color: var(--accent, #3f8cff);
+  background: var(--surface-3, #2a3236);
+}
+
+.rm-related-icon {
+  flex-shrink: 0;
+  color: var(--accent-bright, #5c9fff);
+}
+
+.rm-related-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+/* The category used to sit inline in parentheses after the title, so a long
+   pair wrapped mid-phrase. Stacked, it reads as the metadata it is. */
+.rm-related-title {
+  color: var(--text, #eef1f3);
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.rm-related-cat {
+  color: var(--dim, #829198);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+.rm-related-arrow {
+  flex-shrink: 0;
+  color: var(--dim, #829198);
+  transition: transform var(--rm-dur-hover, 150ms) ease, color var(--rm-dur-hover, 150ms) ease;
+}
+
+.rm-related-card:hover .rm-related-arrow {
+  color: var(--accent-bright, #5c9fff);
+  transform: translateX(3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rm-related-arrow {
+    transition-property: color;
+    transform: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   10.8 Fit-to-width
+   The topology is authored at a fixed 1000px. Any viewport narrower than about
+   1084px used to cut it, and panning only chose which column to lose.
+   -------------------------------------------------------------------------- */
+.rm-canvas-sizer {
+  position: relative;
+  flex-shrink: 0;
+  /* The scale is derived from a measurement taken a frame earlier, so it can
+     lag the container by a few px after a resize. This guarantees the scaled
+     footprint can never exceed the viewport regardless of that lag. */
+  max-width: 100%;
+}
+
+.rm-canvas-sizer > .roadmap-diagram-canvas {
+  /* Scaled from the top-left so the sizer's box and the painted canvas share
+     an origin; the sizer carries the scaled footprint. */
+  transform-origin: top left;
+}
+
+.rm-zoom-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 9999px;
+  border: 1px solid var(--border-strong, #465258);
+  background: var(--surface-2, #1d2529);
+}
+
+.rm-zoom-btn {
+  padding: 3px 10px;
+  border: 0;
+  border-radius: 9999px;
+  background: transparent;
+  color: var(--dim, #829198);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color var(--rm-dur-hover, 150ms) ease, color var(--rm-dur-hover, 150ms) ease;
+}
+
+.rm-zoom-btn:hover {
+  color: var(--text, #eef1f3);
+}
+
+.rm-zoom-btn[aria-pressed="true"] {
+  background: var(--surface-3, #2a3236);
+  color: var(--text, #eef1f3);
+}
