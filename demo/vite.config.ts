@@ -1,4 +1,4 @@
-﻿import { defineConfig } from "vite";
+import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "node:path";
@@ -15,7 +15,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "next/link": path.resolve(__dirname, "demo/next-link-shim.tsx"),
+      "next/link": path.resolve(__dirname, "next-link-shim.tsx"),
     },
   },
   server: {
