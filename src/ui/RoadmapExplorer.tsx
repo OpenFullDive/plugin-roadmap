@@ -248,6 +248,28 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
    * opens instantly — the toolbar feels faster without losing the protection.
    */
   const tooltipWarm = useRef(false);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Focus search input with '/' key and clear with Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const targetTag = (e.target as HTMLElement)?.tagName;
+      const isEditable = (e.target as HTMLElement)?.isContentEditable;
+      if (
+        e.key === "/" &&
+        !["INPUT", "TEXTAREA", "SELECT"].includes(targetTag) &&
+        !isEditable
+      ) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      } else if (e.key === "Escape" && document.activeElement === searchInputRef.current) {
+        setSearchQuery("");
+        searchInputRef.current?.blur();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   // Sync state between storage bridge and localStorage
   useEffect(() => {
@@ -2356,25 +2378,38 @@ export default function RoadmapExplorer({ slug, isSignedIn = false, storage }: R
           </nav>
 
           {/* Search & Progress Info on Right */}
-          <div className="flex items-center gap-3">
-            <div className="rm-search-input-wrap">
-              <Search size={13} />
+          <div className="rm-tabs-actions">
+            <div
+              className="rm-search-input-wrap"
+              onClick={() => searchInputRef.current?.focus()}
+              role="search"
+            >
+              <Search size={13} className="shrink-0 text-[var(--dim)]" aria-hidden="true" />
               <input
+                ref={searchInputRef}
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Find topic..."
                 className="rm-search-input"
+                aria-label="Find topic in roadmap"
               />
-              {searchQuery && (
+              {searchQuery ? (
                 <button
                   type="button"
-                  onClick={() => setSearchQuery("")}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSearchQuery("");
+                    searchInputRef.current?.focus();
+                  }}
                   className="rm-search-clear"
                   title="Clear search"
+                  aria-label="Clear search"
                 >
                   <X size={12} />
                 </button>
+              ) : (
+                <kbd className="rm-search-kbd" title="Press / to search">/</kbd>
               )}
             </div>
 

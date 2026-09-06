@@ -1180,23 +1180,40 @@
   line-height: 1.6;
 }
 
-/* Search Input inside Tabs Bar or Header */
+/* Actions cluster on the right of the tabs bar (Search & Progress) */
+.rm-tabs-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 6px;
+}
+
+/* Search Input inside Tabs Bar */
 .rm-search-input-wrap {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
+  height: 30px;
+  box-sizing: border-box;
   background: var(--surface-2, #1b2125);
   border: 1px solid var(--border, #2a3236);
-  border-radius: 20px;
-  padding: 4px 10px;
+  border-radius: 9999px;
+  padding: 0 10px;
   font-size: 12px;
   color: var(--dim, #829198);
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  cursor: text;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.rm-search-input-wrap:hover {
+  border-color: #3e484e;
+  background: #1f262b;
 }
 
 .rm-search-input-wrap:focus-within {
   border-color: var(--accent, #3f8cff);
   background: var(--surface-3, #222a2f);
+  box-shadow: 0 0 0 3px rgba(63, 140, 255, 0.15);
 }
 
 .rm-search-input {
@@ -1204,28 +1221,65 @@
   background: transparent !important;
   outline: none !important;
   font-size: 12px !important;
+  font-family: inherit !important;
+  font-weight: 500 !important;
   color: var(--text, #eef1f3) !important;
-  width: 120px;
+  width: 110px;
+  height: 28px !important;
+  line-height: 28px !important;
   padding: 0 !important;
+  margin: 0 !important;
   box-shadow: none !important;
+  transition: width 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.rm-search-input-wrap:focus-within .rm-search-input {
+  width: 160px;
 }
 
 .rm-search-input::placeholder {
   color: var(--dim, #829198);
+  font-weight: 400;
+}
+
+.rm-search-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--dim, #829198);
+  background: var(--surface-3, #222a2f);
+  border: 1px solid var(--border, #2a3236);
+  border-radius: 4px;
+  padding: 2px 5px;
+  pointer-events: none;
+  opacity: 0.75;
+  user-select: none;
+}
+
+.rm-search-input-wrap:focus-within .rm-search-kbd {
+  display: none;
 }
 
 .rm-search-clear {
   border: none !important;
   background: transparent !important;
-  padding: 0 !important;
+  padding: 2px !important;
+  border-radius: 50% !important;
   color: var(--dim, #829198) !important;
   cursor: pointer !important;
   display: flex !important;
   align-items: center !important;
+  justify-content: center !important;
+  transition: color 0.15s ease, background-color 0.15s ease !important;
 }
 
 .rm-search-clear:hover {
   color: var(--text, #eef1f3) !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 /* Floating Share Rail on Left Side (roadmap.sh signature) */
