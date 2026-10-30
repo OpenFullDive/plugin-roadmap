@@ -1,6 +1,7 @@
 /* ==========================================================================
-   roadmap.sh Authentic Flowchart Styles for OpenFullDive
-   Pixel-perfect roadmap.sh layout with OpenFullDive dark design tokens & typography
+   Roadmap flowchart styles for OpenFullDive
+   Colours come from the host's theme tokens (light and dark); the fallbacks are
+   the dark values, so the standalone demo still renders without the host.
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -37,8 +38,8 @@
   border-radius: 6px;
 }
 
-/* The nodes carry a dark border on a light fill; a light ring alone disappears
-   against the yellow. Pair the ring with a dark halo so it reads on both. */
+/* Nodes sit on several surfaces (phase panels, the dotted canvas); pair the
+   ring with an accent halo so focus reads on all of them, in both themes. */
 .rm-milestone-main:focus-visible,
 .rm-milestone-sub:focus-visible,
 .rm-concept-pill:focus-visible,
@@ -46,12 +47,12 @@
 .rm-gate-node:focus-visible {
   outline: 2px solid var(--accent, #3f8cff) !important;
   outline-offset: 3px !important;
-  box-shadow: 0 0 0 5px rgba(63, 140, 255, 0.28), 0 4px 14px rgba(0, 0, 0, 0.5) !important;
+  box-shadow: 0 0 0 5px var(--accent-a25, rgba(63, 140, 255, 0.28)) !important;
   z-index: 8 !important;
 }
 
 /* --------------------------------------------------------------------------
-   1. Diagram Container & Flow Surface (roadmap.sh fixed layout)
+   1. Diagram Container & Flow Surface (fixed layout)
    -------------------------------------------------------------------------- */
 .roadmap-flow-wrapper {
   position: relative;
@@ -61,7 +62,7 @@
   display: flex;
   justify-content: safe center;
   background-color: transparent;
-  background-image: radial-gradient(circle, rgba(137, 153, 166, 0.16) 1.2px, transparent 1.2px);
+  background-image: radial-gradient(circle, var(--tint-4, rgba(137, 153, 166, 0.16)) 1.2px, transparent 1.2px);
   background-size: 20px 20px;
   border-radius: 0;
   border: none;
@@ -99,7 +100,7 @@
 }
 
 .rm-section-box {
-  fill: rgba(21, 26, 29, 0.45);
+  fill: var(--tint-1, rgba(21, 26, 29, 0.45));
   stroke: var(--border-strong, #3f4a50);
   stroke-dasharray: 5 5;
   stroke-width: 1.5px;
@@ -114,11 +115,11 @@
 }
 
 .rm-edge-spine.is-done {
-  stroke: #10b981;
+  stroke: var(--success, #10b981);
 }
 
 .rm-edge-spine.is-learning {
-  stroke: #ffd166;
+  stroke: var(--warning, #ffd166);
 }
 
 .rm-edge-branch {
@@ -140,10 +141,10 @@
 }
 
 /* --------------------------------------------------------------------------
-   4. Node Styling (Authentic roadmap.sh Nodes)
+   4. Node Styling
    -------------------------------------------------------------------------- */
 
-/* Main Milestone Topic Node (Yellow / Gold with dark text) */
+/* Main Milestone Topic Node: raised surface, text-coloured outline */
 .rm-milestone-main {
   position: absolute !important;
   z-index: 3 !important;
@@ -153,14 +154,14 @@
   text-align: center !important;
   padding: 6px 12px !important;
   border-radius: 6px !important;
-  background: #ffe599 !important;
-  border: 2px solid #000000 !important;
-  color: #0e1113 !important;
+  background: var(--surface-2, #1b2125) !important;
+  border: 1.5px solid var(--text, #eef1f3) !important;
+  color: var(--text, #eef1f3) !important;
   font-size: 13px !important;
   font-weight: 700 !important;
   letter-spacing: -0.01em !important;
   line-height: 1.25 !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+  box-shadow: var(--shadow-card, 0 2px 8px rgba(0, 0, 0, 0.35)) !important;
   user-select: none !important;
   cursor: pointer !important;
   box-sizing: border-box !important;
@@ -169,9 +170,9 @@
 }
 
 .rm-milestone-main:hover {
-  background: #ffd166 !important;
+  background: var(--accent-a12, rgba(63, 140, 255, 0.12)) !important;
   transform: translateY(-1px) !important;
-  box-shadow: 0 4px 14px rgba(255, 209, 102, 0.45) !important;
+  box-shadow: 0 0 0 3px var(--accent-a25, rgba(63, 140, 255, 0.25)) !important;
 }
 
 /* Secondary Milestone Node */
@@ -184,9 +185,9 @@
   text-align: center !important;
   padding: 5px 10px !important;
   border-radius: 5px !important;
-  background: #fff2cc !important;
-  border: 1.5px solid #000000 !important;
-  color: #0e1113 !important;
+  background: var(--surface, #151a1d) !important;
+  border: 1.5px solid var(--border-strong, #3f4a50) !important;
+  color: var(--text, #eef1f3) !important;
   font-size: 12px !important;
   font-weight: 600 !important;
   line-height: 1.25 !important;
@@ -198,9 +199,9 @@
 }
 
 .rm-milestone-sub:hover {
-  background: #ffe599 !important;
+  background: var(--accent-a08, rgba(63, 140, 255, 0.08)) !important;
   transform: translateY(-1px) !important;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: var(--shadow-card, 0 2px 8px rgba(0, 0, 0, 0.35)) !important;
 }
 
 /* Concept / Subtopic Pill (Radiating right column & tool grids) */
@@ -213,9 +214,9 @@
   text-align: center !important;
   padding: 4px 8px !important;
   border-radius: 5px !important;
-  background: #fff2cc !important;
-  border: 1.5px solid #000000 !important;
-  color: #0e1113 !important;
+  background: var(--surface, #151a1d) !important;
+  border: 1.5px solid var(--border-strong, #3f4a50) !important;
+  color: var(--text, #eef1f3) !important;
   font-size: 11.5px !important;
   font-weight: 600 !important;
   line-height: 1.2 !important;
@@ -228,13 +229,13 @@
 }
 
 .rm-concept-pill:hover {
-  background: #ffe599 !important;
+  background: var(--accent-a08, rgba(63, 140, 255, 0.08)) !important;
   border-color: var(--accent, #3f8cff) !important;
   transform: translateY(-1px) !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: var(--shadow-card, 0 2px 8px rgba(0, 0, 0, 0.35)) !important;
 }
 
-/* Discipline Node (Authentic Master Curriculum Nodes) */
+/* Discipline Node (master curriculum) */
 .rm-discipline-node {
   position: absolute !important;
   z-index: 3 !important;
@@ -243,14 +244,14 @@
   justify-content: space-between !important;
   padding: 6px 12px !important;
   border-radius: 6px !important;
-  background: #ffe599 !important;
-  border: 2px solid #000000 !important;
-  color: #0e1113 !important;
+  background: var(--surface-2, #1b2125) !important;
+  border: 1.5px solid var(--text, #eef1f3) !important;
+  color: var(--text, #eef1f3) !important;
   font-size: 12.5px !important;
   font-weight: 700 !important;
   letter-spacing: -0.01em !important;
   line-height: 1.25 !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+  box-shadow: var(--shadow-card, 0 2px 8px rgba(0, 0, 0, 0.35)) !important;
   user-select: none !important;
   cursor: pointer !important;
   box-sizing: border-box !important;
@@ -260,9 +261,9 @@
 }
 
 .rm-discipline-node:hover {
-  background: #ffd166 !important;
+  background: var(--accent-a12, rgba(63, 140, 255, 0.12)) !important;
   transform: translateY(-1px) !important;
-  box-shadow: 0 4px 14px rgba(255, 209, 102, 0.45) !important;
+  box-shadow: 0 0 0 3px var(--accent-a25, rgba(63, 140, 255, 0.25)) !important;
 }
 
 /* The label region is the card's button (the arrow link sits beside it, not
@@ -285,7 +286,7 @@
 }
 
 .rm-discipline-node-content:focus-visible {
-  outline: 2px solid #0e1113 !important;
+  outline: 2px solid var(--focus-ring, #eef1f3) !important;
   outline-offset: 2px !important;
   border-radius: 4px !important;
 }
@@ -297,8 +298,8 @@
   width: 22px;
   height: 22px;
   border-radius: 4px;
-  background: rgba(0, 0, 0, 0.12);
-  color: #0e1113;
+  background: var(--tint-2, rgba(255, 255, 255, 0.06));
+  color: var(--muted, #c2c9cc);
   margin-left: 6px;
   flex-shrink: 0;
   transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
@@ -306,8 +307,8 @@
 }
 
 .rm-discipline-node-link:hover {
-  background: #000000;
-  color: #ffd166;
+  background: var(--primary-fill, #eef1f3);
+  color: var(--on-primary, #0e1113);
 }
 
 /* Verification Gate Node */
@@ -320,27 +321,27 @@
   gap: 8px !important;
   padding: 8px 18px !important;
   border-radius: 9999px !important;
-  background: rgba(16, 185, 129, 0.12) !important;
-  border: 1.5px solid rgba(16, 185, 129, 0.5) !important;
-  color: #34d399 !important;
+  background: var(--surface, #151a1d) !important;
+  border: 1.5px dashed var(--success, #10b981) !important;
+  color: var(--text, #eef1f3) !important;
   font-size: 12px !important;
   font-weight: 700 !important;
   letter-spacing: -0.01em !important;
   cursor: pointer !important;
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+  box-shadow: var(--shadow-card, 0 2px 8px rgba(0, 0, 0, 0.35)) !important;
   box-sizing: border-box !important;
   user-select: none !important;
 }
 
 .rm-gate-node:hover {
-  background: rgba(16, 185, 129, 0.22) !important;
-  border-color: #10b981 !important;
+  background: var(--success-a12, rgba(16, 185, 129, 0.12)) !important;
+  border-color: var(--success, #10b981) !important;
   transform: translateY(-1px) !important;
-  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35) !important;
+  box-shadow: 0 0 0 3px var(--success-a25, rgba(16, 185, 129, 0.25)) !important;
 }
 
-/* Corner Recommendation / Status Badges (Purple / Green / Gray) - pinned cleanly to top-right corner */
+/* Corner Recommendation / Status Badges (accent / success / dim), pinned to the top-right corner */
 .rm-badge-corner {
   position: absolute !important;
   top: -5px !important;
@@ -358,47 +359,47 @@
   padding: 0 !important;
   z-index: 10 !important;
   border: 1.5px solid var(--bg, #0e1113) !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+  box-shadow: none !important;
 }
 
 .rm-badge-corner.is-recommended {
-  background: #a855f7 !important;
+  background: var(--accent, #3f8cff) !important;
   color: #ffffff !important;
 }
 
 .rm-badge-corner.is-alternative {
-  background: #10b981 !important;
+  background: var(--success, #10b981) !important;
   color: #ffffff !important;
 }
 
 .rm-badge-corner.is-elective {
-  background: #6b7280 !important;
+  background: var(--dim, #829198) !important;
   color: #ffffff !important;
 }
 
 /* Done Node State */
 .rm-node-done {
-  background: rgba(16, 185, 129, 0.18) !important;
-  border-color: #10b981 !important;
-  color: #34d399 !important;
+  background: var(--success-a12, rgba(16, 185, 129, 0.12)) !important;
+  border-color: var(--success, #10b981) !important;
+  color: var(--text, #eef1f3) !important;
 }
 
 .rm-node-done:hover {
-  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35) !important;
+  box-shadow: 0 0 0 3px var(--success-a25, rgba(16, 185, 129, 0.25)) !important;
 }
 
 /* Learning Node State */
 .rm-node-learning {
-  background: rgba(255, 209, 102, 0.22) !important;
-  border-color: #ffd166 !important;
-  color: #ffd166 !important;
-  box-shadow: 0 0 10px rgba(255, 209, 102, 0.35);
+  background: var(--warning-a12, rgba(255, 209, 102, 0.12)) !important;
+  border-color: var(--warning, #ffd166) !important;
+  color: var(--text, #eef1f3) !important;
+  box-shadow: none;
 }
 
 /* Skipped Node State */
 .rm-node-skipped {
-  background: rgba(27, 33, 37, 0.6) !important;
-  border-color: #465258 !important;
+  background: transparent !important;
+  border-color: var(--border-strong, #465258) !important;
   border-style: dashed !important;
   color: var(--dim, #8999a6) !important;
   text-decoration: line-through;
@@ -407,12 +408,12 @@
 
 /* Search Query Highlight */
 .rm-search-matched {
-  border-color: #ffd166 !important;
-  box-shadow: 0 0 16px rgba(255, 209, 102, 0.9) !important;
+  border-color: var(--accent, #3f8cff) !important;
+  box-shadow: 0 0 0 3px var(--accent-a35, rgba(63, 140, 255, 0.35)) !important;
   transform: scale(1.03);
 }
 
-/* Legend Card on Top Left (roadmap.sh signature element) */
+/* Legend Card on Top Left */
 .rm-legend-card {
   position: absolute;
   z-index: 5;
@@ -423,7 +424,7 @@
   border-radius: 8px;
   border: 1.5px solid var(--border-strong, #3f4a50);
   background: var(--surface, #151a1d);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--shadow-card, 0 2px 8px rgba(0, 0, 0, 0.35));
   box-sizing: border-box;
 }
 
@@ -454,7 +455,7 @@
   height: 16px;
 }
 
-/* Dark action button directly below legend card matching roadmap.sh */
+/* Action button directly below the legend card */
 .rm-legend-action-btn {
   position: absolute;
   z-index: 5;
@@ -472,12 +473,12 @@
   transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
   text-align: center;
   box-sizing: border-box;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-card, 0 2px 8px rgba(0, 0, 0, 0.35));
 }
 
 .rm-legend-action-btn:hover {
   background: var(--surface-3, #222a2f);
-  color: #ffffff;
+  color: var(--text, #ffffff);
   border-color: var(--accent, #3f8cff);
 }
 
@@ -491,9 +492,9 @@
   padding: 12px 14px;
   border-radius: 8px;
   border: 1px solid var(--border-strong, #3f4a50);
-  background: rgba(21, 26, 29, 0.94);
+  background: var(--bg-elev, rgba(21, 26, 29, 0.94));
   backdrop-filter: blur(8px);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-pop, 0 8px 26px rgba(0, 0, 0, 0.6));
   box-sizing: border-box;
 }
 
@@ -538,9 +539,9 @@
   padding: 10px 12px;
   border-radius: 8px;
   border: 1px solid var(--border-strong, #3f4a50);
-  background: rgba(21, 26, 29, 0.92);
+  background: var(--bg-elev, rgba(21, 26, 29, 0.92));
   backdrop-filter: blur(6px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-card, 0 2px 8px rgba(0, 0, 0, 0.35));
   box-sizing: border-box;
 }
 
@@ -604,13 +605,13 @@
   padding: 6px 16px;
   border-radius: 6px;
   border: 2px solid var(--accent, #3f8cff);
-  background: rgba(63, 140, 255, 0.12);
-  color: #ffffff;
+  background: var(--accent-a12, rgba(63, 140, 255, 0.12));
+  color: var(--text, #ffffff);
   font-size: 14px;
   font-weight: 800;
   letter-spacing: 0.02em;
   user-select: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  box-shadow: none;
 }
 
 .rm-capstone-finish-badge {
@@ -622,13 +623,13 @@
   gap: 8px;
   padding: 8px 18px;
   border-radius: 8px;
-  border: 2px solid #10b981;
-  background: rgba(16, 185, 129, 0.16);
-  color: #34d399;
+  border: 1.5px solid var(--success, #10b981);
+  background: var(--success-a12, rgba(16, 185, 129, 0.16));
+  color: var(--text, #34d399);
   font-size: 13px;
   font-weight: 800;
   user-select: none;
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25);
+  box-shadow: none;
 }
 
 /* --------------------------------------------------------------------------
@@ -646,7 +647,7 @@
   flex-direction: column !important;
   border-left: 1px solid var(--border, #2a3236) !important;
   background: var(--surface, #151a1d) !important;
-  box-shadow: -12px 0 40px rgba(0, 0, 0, 0.7) !important;
+  box-shadow: var(--shadow-pop, 0 8px 26px rgba(0, 0, 0, 0.6)) !important;
   animation: slideDrawer 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
@@ -663,7 +664,7 @@
   position: fixed !important;
   inset: 0 !important;
   z-index: 90 !important;
-  background: rgba(0, 0, 0, 0.65) !important;
+  background: var(--shade-4, rgba(0, 0, 0, 0.65)) !important;
   backdrop-filter: blur(4px) !important;
   animation: fadeIn 0.15s ease forwards;
 }
@@ -712,7 +713,7 @@
  * Each state now carries its canvas colour, so the mapping is learned once.
  */
 .rm-drawer-status-btn.is-active {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: none !important;
 }
 
 /* Todo is the absence of progress, so it is marked, not celebrated — a filled
@@ -724,21 +725,21 @@
 }
 
 .rm-drawer-status-btn.is-active.status-learning {
-  border-color: #ffd166 !important;
-  background: rgba(255, 209, 102, 0.18) !important;
-  color: #ffd166 !important;
+  border-color: var(--warning, #ffd166) !important;
+  background: var(--warning-a12, rgba(255, 209, 102, 0.18)) !important;
+  color: var(--text, #ffd166) !important;
 }
 
 .rm-drawer-status-btn.is-active.status-done {
-  border-color: #10b981 !important;
-  background: rgba(16, 185, 129, 0.2) !important;
-  color: #34d399 !important;
+  border-color: var(--success, #10b981) !important;
+  background: var(--success-a12, rgba(16, 185, 129, 0.2)) !important;
+  color: var(--text, #34d399) !important;
 }
 
 .rm-drawer-status-btn.is-active.status-skipped {
-  border-color: #465258 !important;
+  border-color: var(--border-strong, #465258) !important;
   border-style: dashed !important;
-  background: rgba(27, 33, 37, 0.85) !important;
+  background: var(--surface-2, rgba(27, 33, 37, 0.85)) !important;
   color: var(--dim, #829198) !important;
 }
 
@@ -755,37 +756,37 @@
 }
 
 .resource-chip-badge.type-paper {
-  background: rgba(147, 51, 234, 0.18);
-  color: #c084fc;
-  border: 1px solid rgba(147, 51, 234, 0.35);
+  background: var(--tint-2, rgba(137, 153, 166, 0.18));
+  color: var(--muted, #c2c9cc);
+  border: 1px solid var(--border, #2a3236);
 }
 
 .resource-chip-badge.type-book {
-  background: rgba(59, 130, 246, 0.18);
-  color: #60a5fa;
-  border: 1px solid rgba(59, 130, 246, 0.35);
+  background: var(--tint-2, rgba(137, 153, 166, 0.18));
+  color: var(--muted, #c2c9cc);
+  border: 1px solid var(--border, #2a3236);
 }
 
 .resource-chip-badge.type-spec {
-  background: rgba(234, 179, 8, 0.18);
-  color: #fde047;
-  border: 1px solid rgba(234, 179, 8, 0.35);
+  background: var(--tint-2, rgba(137, 153, 166, 0.18));
+  color: var(--muted, #c2c9cc);
+  border: 1px solid var(--border, #2a3236);
 }
 
 .resource-chip-badge.type-evidence {
-  background: rgba(16, 185, 129, 0.18);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.35);
+  background: var(--success-a12, rgba(16, 185, 129, 0.18));
+  color: var(--text, #34d399);
+  border: 1px solid var(--success-a35, rgba(16, 185, 129, 0.35));
 }
 
 .resource-chip-badge.type-tool {
-  background: rgba(236, 72, 153, 0.18);
-  color: #f472b6;
-  border: 1px solid rgba(236, 72, 153, 0.35);
+  background: var(--tint-2, rgba(137, 153, 166, 0.18));
+  color: var(--muted, #c2c9cc);
+  border: 1px solid var(--border, #2a3236);
 }
 
 .resource-chip-badge.type-docs {
-  background: rgba(137, 153, 166, 0.18);
+  background: var(--tint-2, rgba(137, 153, 166, 0.18));
   color: var(--muted, #c2c9cc);
   border: 1px solid var(--border-strong, #3f4a50);
 }
@@ -845,8 +846,8 @@
 }
 
 /* ==========================================================================
-   roadmap.sh Authentic Top Header Styles
-   Pixel-accurate match with roadmap.sh layout & OpenFullDive dark tokens
+   Top header styles
+   Spacing and type follow the host; colours come from its theme tokens
    ========================================================================== */
 
 .roadmap-explorer-root {
@@ -859,13 +860,13 @@
   position: relative;
 }
 
-/* Header Card: Spacious rounded surface matching roadmap.sh */
+/* Header Card: spacious rounded surface */
 .rm-header-card {
   background-color: var(--surface, #151a1d);
   border: 1px solid var(--border, #2a3236);
   border-radius: 12px;
   padding: 24px 28px 20px 28px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  box-shadow: none;
   margin-bottom: 24px;
   box-sizing: border-box;
 }
@@ -941,10 +942,10 @@
 .rm-btn-action.is-active {
   border-color: var(--accent-bright, #5c9fff) !important;
   color: var(--accent-bright, #5c9fff) !important;
-  background-color: rgba(63, 140, 255, 0.12) !important;
+  background-color: var(--accent-a12, rgba(63, 140, 255, 0.12)) !important;
 }
 
-/* Iconic Yellow Download Button (Signature roadmap.sh) */
+/* Download button (secondary) */
 .rm-btn-download {
   display: inline-flex !important;
   align-items: center !important;
@@ -952,28 +953,28 @@
   height: 36px !important;
   padding: 0 14px !important;
   border-radius: 8px !important;
-  border: none !important;
-  background-color: #ffd166 !important;
-  color: #0e1113 !important;
+  border: 1px solid var(--border-strong, #3f4a50) !important;
+  background-color: transparent !important;
+  color: var(--text, #eef1f3) !important;
   font-size: 13px !important;
   font-weight: 700 !important;
   letter-spacing: -0.01em !important;
   cursor: pointer !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+  box-shadow: none !important;
   transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease !important;
 }
 
 .rm-btn-download:hover {
-  background-color: #ffc043 !important;
+  background-color: var(--surface-2, #1b2125) !important;
   transform: translateY(-1px) !important;
-  box-shadow: 0 3px 10px rgba(255, 209, 102, 0.4) !important;
+  box-shadow: none !important;
 }
 
 .rm-btn-download:active {
   transform: translateY(0) !important;
 }
 
-/* Iconic Yellow Share Button (Signature roadmap.sh) */
+/* Share button (secondary) */
 .rm-btn-share {
   display: inline-flex !important;
   align-items: center !important;
@@ -982,25 +983,25 @@
   height: 36px !important;
   padding: 0 !important;
   border-radius: 8px !important;
-  border: none !important;
-  background-color: #ffd166 !important;
-  color: #0e1113 !important;
+  border: 1px solid var(--border-strong, #3f4a50) !important;
+  background-color: transparent !important;
+  color: var(--text, #eef1f3) !important;
   cursor: pointer !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+  box-shadow: none !important;
   transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease !important;
 }
 
 .rm-btn-share:hover {
-  background-color: #ffc043 !important;
+  background-color: var(--surface-2, #1b2125) !important;
   transform: translateY(-1px) !important;
-  box-shadow: 0 3px 10px rgba(255, 209, 102, 0.4) !important;
+  box-shadow: none !important;
 }
 
 .rm-btn-share:active {
   transform: translateY(0) !important;
 }
 
-/* Large Hero Title (Signature roadmap.sh) */
+/* Large hero title */
 .rm-hero-title {
   font-size: 36px;
   font-weight: 800;
@@ -1108,11 +1109,11 @@
   flex-wrap: wrap;
   gap: 12px;
   border-radius: 8px;
-  background-color: rgba(255, 209, 102, 0.1);
-  border: 1px solid rgba(255, 209, 102, 0.25);
+  background-color: var(--tint-1, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border, #2a3236);
   padding: 10px 16px;
   font-size: 12.5px;
-  color: #ffd166;
+  color: var(--muted, #c2c9cc);
 }
 
 .rm-tracking-banner-left {
@@ -1128,7 +1129,7 @@
   gap: 6px !important;
   font-size: 12px !important;
   font-weight: 700 !important;
-  color: #ffd166 !important;
+  color: var(--accent-bright, #60a5fa) !important;
   background: transparent !important;
   border: none !important;
   padding: 0 !important;
@@ -1206,14 +1207,14 @@
 }
 
 .rm-search-input-wrap:hover {
-  border-color: #3e484e;
-  background: #1f262b;
+  border-color: var(--border-strong, #3e484e);
+  background: var(--surface-2, #1f262b);
 }
 
 .rm-search-input-wrap:focus-within {
   border-color: var(--accent, #3f8cff);
   background: var(--surface-3, #222a2f);
-  box-shadow: 0 0 0 3px rgba(63, 140, 255, 0.15);
+  box-shadow: 0 0 0 3px var(--accent-a20, rgba(63, 140, 255, 0.15));
 }
 
 .rm-search-input {
@@ -1279,70 +1280,7 @@
 
 .rm-search-clear:hover {
   color: var(--text, #eef1f3) !important;
-  background-color: rgba(255, 255, 255, 0.08) !important;
-}
-
-/* Floating Share Rail on Left Side (roadmap.sh signature) */
-.rm-floating-social-rail {
-  position: absolute;
-  left: -48px;
-  top: 320px;
-  bottom: 80px;
-  width: 40px;
-  pointer-events: none;
-  z-index: 20;
-}
-
-@media (max-width: 1260px) {
-  .rm-floating-social-rail {
-    display: none;
-  }
-}
-
-.rm-floating-social {
-  position: sticky;
-  top: 90px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  pointer-events: auto;
-}
-
-.rm-floating-social-btn {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 34px !important;
-  height: 34px !important;
-  padding: 0 !important;
-  border-radius: 6px !important;
-  border: 1px solid var(--border, #2a3236) !important;
-  background: var(--surface, #151a1d) !important;
-  color: var(--muted, #c2c9cc) !important;
-  cursor: pointer !important;
-  font-size: 13px !important;
-  font-weight: 700 !important;
-  text-decoration: none !important;
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease !important;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35) !important;
-}
-
-.rm-floating-social-btn:hover {
-  color: var(--text, #eef1f3) !important;
-  background: var(--surface-2, #1b2125) !important;
-  border-color: var(--accent, #3f8cff) !important;
-  transform: translateX(-2px) !important;
-}
-
-/* Confirmation has to be visible on the button itself: the rail sits in the
-   page margin, far from anywhere a toast would appear. It has to outrank the
-   hover rule above too — the pointer is still on the button that was clicked,
-   and at equal specificity source order decides. */
-.rm-floating-social-btn.is-copied,
-.rm-floating-social-btn.is-copied:hover {
-  color: #34d399 !important;
-  border-color: #10b981 !important;
-  background: rgba(16, 185, 129, 0.14) !important;
+  background-color: var(--tint-3, rgba(255, 255, 255, 0.08)) !important;
 }
 
 /* ==========================================================================
@@ -1367,7 +1305,6 @@
 
 .rm-drawer-status-btn:active,
 .rm-drawer-tab:active,
-.rm-floating-social-btn:active,
 .rm-legend-action-btn:active,
 .rm-project-card .project-btn:active,
 .rm-curriculum-card .curriculum-btn:active {
@@ -1385,8 +1322,7 @@
   .rm-milestone-sub:hover,
   .rm-concept-pill:hover,
   .rm-discipline-node:hover,
-  .rm-gate-node:hover,
-  .rm-floating-social-btn:hover {
+  .rm-gate-node:hover {
     transform: none !important;
   }
 
@@ -1446,7 +1382,7 @@
   padding: 5px 12px;
   border-radius: 9999px;
   border: 1px solid var(--border-strong, #3f4a50);
-  background: rgba(17, 21, 24, 0.92);
+  background: var(--bg-elev, rgba(17, 21, 24, 0.92));
   color: var(--muted, #c2c9cc);
   font-size: 11px;
   font-weight: 600;
@@ -1499,8 +1435,8 @@
 
 .roadmap-diagram-canvas[data-linked="true"] .rm-svg-overlay path.is-linked {
   stroke-opacity: 1;
-  stroke: #ffd166;
-  filter: drop-shadow(0 0 5px rgba(255, 209, 102, 0.55));
+  stroke: var(--accent, #3f8cff);
+  filter: drop-shadow(0 0 4px var(--accent-a35, rgba(63, 140, 255, 0.35)));
 }
 
 .roadmap-diagram-canvas[data-linked="true"] .rm-svg-overlay path.rm-edge-spine.is-linked {
@@ -1527,11 +1463,11 @@
   padding: 9px 11px;
   border-radius: 8px;
   border: 1px solid var(--border-strong, #3f4a50);
-  background: #10161a;
+  background: var(--bg-elev, #10161a);
   color: var(--muted, #c2c9cc);
   font-size: 11.5px;
   line-height: 1.45;
-  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.7);
+  box-shadow: var(--shadow-pop, 0 8px 26px rgba(0, 0, 0, 0.6));
   pointer-events: none;
   opacity: 1;
   /* The component supplies only the placement shift; the scale is composed
@@ -1570,7 +1506,7 @@
   margin-top: 6px;
   padding: 1px 6px;
   border-radius: 4px;
-  background: rgba(63, 140, 255, 0.16);
+  background: var(--accent-a12, rgba(63, 140, 255, 0.16));
   color: var(--accent-bright, #5c9fff);
   font-size: 9.5px;
   font-weight: 800;
@@ -1612,7 +1548,6 @@
   .rm-concept-pill:hover,
   .rm-discipline-node:hover,
   .rm-gate-node:hover,
-  .rm-floating-social-btn:hover,
   .rm-milestone-main:active,
   .rm-milestone-sub:active,
   .rm-concept-pill:active,
@@ -1970,7 +1905,7 @@
   border-radius: 10px;
   border: 1px solid var(--border-strong, #465258);
   background: var(--surface, #151a1d);
-  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.7);
+  box-shadow: var(--shadow-pop, 0 8px 26px rgba(0, 0, 0, 0.6));
   /* Scales from the trigger it belongs to, not from its own centre. */
   transform-origin: top center;
   animation: rmPickerIn 140ms var(--rm-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
@@ -2084,7 +2019,7 @@
 }
 
 .rm-tab-btn.is-active .rm-tab-count {
-  background: rgba(63, 140, 255, 0.2);
+  background: var(--accent-a20, rgba(63, 140, 255, 0.2));
   color: var(--accent-bright, #5c9fff);
 }
 
@@ -2267,11 +2202,11 @@
 }
 
 .rm-linear-row.is-done {
-  background: rgba(16, 185, 129, 0.06);
+  background: var(--success-a08, rgba(16, 185, 129, 0.06));
 }
 
 .rm-linear-row.is-learning {
-  background: rgba(255, 209, 102, 0.06);
+  background: var(--warning-a08, rgba(255, 209, 102, 0.06));
 }
 
 /* The arrow is an affordance, not a label: it appears for the row being
@@ -2493,7 +2428,7 @@
 }
 
 .rm-prereq-chip svg {
-  color: #34d399;
+  color: var(--success, #34d399);
   flex-shrink: 0;
 }
 

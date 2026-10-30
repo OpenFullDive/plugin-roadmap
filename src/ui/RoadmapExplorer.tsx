@@ -18,7 +18,6 @@ import { generateDisciplineTopology, generateMasterTopology } from "./canvas/lay
 import { FlowchartCanvas } from "./canvas/FlowchartCanvas";
 import { NodeTooltipOverlay } from "./canvas/NodeTooltipOverlay";
 import { RoadmapHeader } from "./header/RoadmapHeader";
-import { SocialRail } from "./floating/SocialRail";
 import { TopicDrawer } from "./drawer/TopicDrawer";
 import { ContributionView, LinearGuideView, ProjectsCatalogView } from "./views";
 
@@ -140,15 +139,11 @@ export default function RoadmapExplorer({
     tooltipWarm,
   } = useCanvasTooltip(slug, isMaster);
 
-  // Hook 7: Share URLs, Clipboard & Social Intents
+  // Hook 7: Share URL and clipboard. The header's Share button is the one share
+  // control; there is no second floating rail of outside-platform links.
   const {
-    shareLink,
-    shareText,
-    copyLink,
     copied,
-    railCopied,
     share,
-    openShareIntent,
   } = useShareActions({
     slug,
     isMaster,
@@ -160,16 +155,6 @@ export default function RoadmapExplorer({
 
   return (
     <div className="roadmap-explorer-root">
-      {/* Floating Social Share Stack */}
-      <SocialRail
-        shareLink={shareLink}
-        shareText={shareText}
-        title={title}
-        copied={railCopied}
-        onCopy={copyLink}
-        onOpenShareIntent={openShareIntent}
-      />
-
       {/* Top Header Card */}
       <RoadmapHeader
         slug={slug}

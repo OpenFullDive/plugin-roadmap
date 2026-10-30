@@ -272,7 +272,7 @@ export function RoadmapHeader({
         </div>
       </div>
 
-      {/* Row 5: Signature Yellow Tracking Banner */}
+      {/* Row 5: Tracking banner */}
       <div className="rm-tracking-banner">
         <div className="rm-tracking-banner-left">
           <Sparkles size={15} className="text-[#ffd166] flex-shrink-0" />

@@ -5,7 +5,6 @@ import { DisciplinePicker } from "./DisciplinePicker";
 import { SearchBar } from "./SearchBar";
 import { ProgressSummaryBar } from "./ProgressSummaryBar";
 import { RoadmapHeader } from "./RoadmapHeader";
-import { SocialRail } from "../floating/SocialRail";
 import { roadmapFields, roadmapFieldById } from "../../content/roadmap";
 import { TRACK_CATEGORY_ORDER } from "../types";
 
@@ -252,63 +251,6 @@ describe("Milestone 4: Header, Navigation & Floating Controls", () => {
       expect(html).toContain("Saved to favorites");
       expect(html).toContain("Exported!");
       expect(html).toContain("rm-btn-share");
-    });
-  });
-
-  describe("SocialRail Component", () => {
-    it("renders floating social rail with copy link, X share, and GitHub repo", () => {
-      const html = renderToString(
-        createElement(SocialRail, {
-          shareLink: "https://openfulldive.org/roadmap/bci",
-          shareText: "Check out the BCI roadmap on OpenFullDive",
-          title: "BCI Roadmap",
-          repoUrl: "https://github.com/openfulldive/openfulldive",
-        }),
-      );
-
-      expect(html).toContain("rm-floating-social-rail");
-      expect(html).toContain('aria-label="Share this roadmap"');
-      expect(html).toContain("Copy link to this roadmap");
-      expect(html).toContain("Share on X");
-      expect(html).toContain("View on GitHub");
-      expect(html).toContain("Share on Hacker News");
-      expect(html).toContain("Share on Reddit");
-      expect(html).toContain("Share on Facebook");
-    });
-
-    it("displays checkmark feedback when copied is true", () => {
-      const html = renderToString(
-        createElement(SocialRail, {
-          shareLink: "https://openfulldive.org/roadmap",
-          copied: true,
-        }),
-      );
-
-      expect(html).toContain("Link copied");
-      expect(html).toContain("is-copied");
-    });
-
-    it("invokes share intent opener when intent button is triggered", () => {
-      const onOpenShareIntent = vi.fn();
-      const rail = createElement(SocialRail, {
-        shareLink: "https://openfulldive.org/roadmap/bci",
-        shareText: "Explore BCI",
-        onOpenShareIntent,
-      });
-
-      expect(rail.props.onOpenShareIntent).toBe(onOpenShareIntent);
-    });
-
-    it("renders optional modal trigger button when onOpenShareModal is provided", () => {
-      const onOpenShareModal = vi.fn();
-      const html = renderToString(
-        createElement(SocialRail, {
-          shareLink: "https://openfulldive.org/roadmap",
-          onOpenShareModal,
-        }),
-      );
-
-      expect(html).toContain('aria-label="Share options"');
     });
   });
 });
