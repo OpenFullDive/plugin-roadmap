@@ -1047,6 +1047,20 @@
   display: flex;
   align-items: center;
   gap: 24px;
+  /* On a phone the four tabs are wider than the card; scroll the row instead of
+     clipping the last tab out of reach. */
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.rm-tabs-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.rm-tabs-nav > .rm-tab-btn {
+  flex-shrink: 0;
 }
 
 .rm-tab-btn {
